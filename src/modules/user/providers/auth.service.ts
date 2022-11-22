@@ -18,18 +18,38 @@ export class AuthService {
     ) {
     }
 
+    async validateCode(code: string): Promise<any> {
+        const user = await UserModel.findOne({
+            where: {
+                emailCode: code
+            }
+        });
+
+        if (!user) {
+            return null;
+        } else {
+            return user;
+        }
+    }
+
+    async login(user: UserModel) {
+        return {
+            token: this.jwt.signAdmin(user),
+        };
+    }
+
     genCode(user: UserModel): Promise<UserModel> {
         return new Promise<UserModel>((resolve, reject) => {
-            const code = mainConf.emailCode.min - 0.5 + Math.random() * (mainConf.emailCode.max - mainConf.emailCode.min + 1)
+            const code = Math.round(mainConf.emailCode.min - 0.5 + Math.random() * (mainConf.emailCode.max - mainConf.emailCode.min + 1))
             user.emailCode = code.toString();
             user.save().then(res => resolve(res)).catch(err => reject(err));
         });
     }
 
-    async firstStep(login: string, password: string): Promise<FirstStepOutput> {
+    async firstStep(email: string, password: string): Promise<FirstStepOutput> {
         let user = await UserModel.findOne({
             where: {
-                login: login
+                email
             }
         })
 
@@ -43,7 +63,7 @@ export class AuthService {
 
         const passwordCompare = await this.bcrypt.compare(password, user.hash).then(el => el).catch(() => false);
 
-        if (!passwordCompare)
+        if (passwordCompare)
             return {
                 status: false,
                 data: {
@@ -51,7 +71,8 @@ export class AuthService {
                 }
             }
 
-        await this.genCode(user);
+        this.mailer.sendUserConfirmation((await this.genCode(user)));
+
 
         return {
             status: true,
@@ -70,7 +91,7 @@ export class AuthService {
             return false;
         else
             return {
-                token: this.jwt.sign(user)
+                token: this.jwt.signAdmin(user)
             };
     }
 }

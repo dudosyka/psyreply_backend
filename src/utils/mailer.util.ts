@@ -1,30 +1,19 @@
-import {createTransport, Transporter} from "nodemailer";
-import mailerConf from "../confs/mailer.conf";
-import SMTPTransport from "nodemailer/lib/smtp-transport";
 import {Injectable} from "@nestjs/common";
+import { MailerService } from "@nestjs-modules/mailer";
+import { UserModel } from "../modules/user/models/user.model";
 
 @Injectable()
 export class MailerUtil {
-    private transporter: Transporter
+    constructor(
+      private mailerService: MailerService
+    ) {
+    }
 
-    constructor() {
-        const transport = new SMTPTransport({
-            ...mailerConf.transporterOptions
+    async sendUserConfirmation(user: UserModel) {
+        await this.mailerService.sendMail({
+            to: user.email,
+            subject: 'Welcome to Nice App! Confirm your Email',
+            text: `Confirmation code ${user.emailCode}`
         });
-        this.transporter = createTransport(transport)
-    }
-
-    sendText(to: string, subject: string, text: string): Promise<boolean> {
-        return this.transporter.sendMail({
-            ...mailerConf.sendOptions,
-            to, subject, text
-        }).then(() => true).catch(() => false)
-    }
-
-    sendHtml(to: string, subject: string, html: string): Promise<boolean> {
-        return this.transporter.sendMail({
-            ...mailerConf.sendOptions,
-            to, subject, html
-        }).then(() => true).catch(() => false)
     }
 }
