@@ -4,9 +4,7 @@ import { TestModel } from "../models/test.model";
 import { TestCreateDto } from "../dtos/test-create.dto";
 import { QuestionProvider } from "../../question/providers/question.provider";
 import { Sequelize } from "sequelize-typescript";
-import sequelize from "sequelize";
 import { TestUpdateDto } from "../dtos/test-update.dto";
-import { BlockModel } from "../../block/models/block.model";
 import { BlockProvider } from "../../block/providers/block.provider";
 
 @Injectable()
@@ -80,5 +78,50 @@ export class TestProvider {
         return testModel;
       }).catch(err => reject(err))
     }))
+  }
+
+  async move(testId: number, blockId: number, exclude: boolean = false): Promise<boolean> {
+    return await (new Promise<boolean>(async (resolve, reject) => {
+      await this.sequelize.transaction(async t => {
+        const host = { transaction: t }
+        const testModel = await TestModel.findOne({
+          where: {
+            id: testId
+          }
+        });
+        if (exclude)
+          await this.blockProvider.excludeTest(blockId, testId, host);
+        await this.blockProvider.appendTests(blockId, [ testModel.id ], host).then(() => resolve(true)).catch(err => {
+          host.transaction.rollback()
+          reject(err)
+        });
+      }).catch(err => reject(err))
+    }))
+  }
+
+  async removeFromBlock(testId: number, blockId: number, confirmIfLast: boolean): Promise<boolean> {
+    return await (new Promise<boolean>(async (resolve, reject) => {
+      await this.sequelize.transaction(async t => {
+        const host = { transaction: t }
+        const leftBlocksCount = await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).catch(err => reject(err))
+        if (leftBlocksCount <= 1 && confirmIfLast) {
+          await this.questionProvider.removeByTest(testId);
+          await TestModel.destroy({
+            where: {
+              id: testId
+            },
+            transaction: host.transaction
+          }).then(() => resolve(true))
+        }
+      });
+    }));
+  }
+
+  async getAll(): Promise<TestModel[]> {
+    return TestModel.findAll();
+  }
+
+  async getOne(testId: number): Promise<TestModel> {
+    return TestModel.findOne({where:{id: testId}})
   }
 }

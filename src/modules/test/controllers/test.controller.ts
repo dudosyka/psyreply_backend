@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { TestProvider } from "../providers/test.provider";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
@@ -14,6 +14,16 @@ export class TestController {
   ) {
   }
 
+  @Get()
+  public async getAll(): Promise<TestModel[]> {
+    return await this.testProvider.getAll();
+  }
+
+  @Get(":testId")
+  public async getOne(@Param('testId') testId: number): Promise<TestModel> {
+    return await this.testProvider.getOne(testId);
+  }
+
   @Post()
   public async create(@Req() req, @Body() test: TestCreateDto): Promise<TestModel>  {
     return await this.testProvider.create(test, req.user.id);
@@ -23,5 +33,20 @@ export class TestController {
   public async update(@Param('testId') testId: number, @Body() testUpdate: TestUpdateDto): Promise<TestModel> {
     testUpdate.id = testId;
     return await this.testProvider.update(testUpdate);
+  }
+
+  @Post(':testId/move/:blockId')
+  public async move(@Param('testId') testId: number, @Param('blockId') blockId: number): Promise<boolean> {
+    return await this.testProvider.move(testId, blockId, true);
+  }
+
+  @Post(':testId/copy/:blockId')
+  public async copy(@Param('testId') testId: number, @Param('blockId') blockId: number): Promise<boolean> {
+    return await this.testProvider.move(testId, blockId);
+  }
+
+  @Post(':testId/remove/:blockId')
+  public async removeFromBlock(@Param('testId') testId: number, @Param('blockId') blockId: number, @Body('removeIfNoBlocks') confirmIfLast: boolean): Promise<boolean> {
+    return await this.testProvider.removeFromBlock(testId, blockId, confirmIfLast);
   }
 }

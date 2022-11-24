@@ -72,7 +72,7 @@ export class AuthService {
                 }
             }
 
-        this.mailer.sendUserConfirmation((await this.genCode(user)));
+        await this.mailer.sendUserConfirmation((await this.genCode(user)));
 
 
         return {

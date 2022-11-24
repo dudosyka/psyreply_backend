@@ -33,25 +33,11 @@ export class BlockProvider {
     }))
   }
 
-  // async appendTests(blockId: number, tests: number[], host: { transaction: Transaction }): Promise<boolean> {
-  //   return await (new Promise(async (resolve, reject) => {
-  //     const block = await BlockModel.findOne({
-  //       where: {
-  //         id: blockId
-  //       }
-  //     });
-  //     return await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests), host).then(() => true).catch(err => {
-  //       reject(err)
-  //     });
-  //   }))
-  // }
+  async excludeTest(testId: number, blockId: number, host: { transaction: Transaction }, confirmLast: boolean = false): Promise<number> {
+   return await this.testBlockProvider.exclude(testId, blockId, host, confirmLast);
+  }
 
   async appendTests(blockId: number, tests: number[], host: { transaction: Transaction }): Promise<boolean> {
-    const block = await BlockModel.findOne({
-      where: {
-        id: blockId
-      }
-    });
     return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests), host));
   }
 }

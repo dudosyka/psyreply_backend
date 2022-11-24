@@ -31,7 +31,7 @@ export class QuestionProvider {
   }
 
   async removeByTest(testId: number): Promise<void> {
-    QuestionModel.destroy({
+    await QuestionModel.destroy({
       where: {
         test_id: testId
       }
