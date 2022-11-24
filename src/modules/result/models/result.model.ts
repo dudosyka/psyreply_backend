@@ -1,4 +1,4 @@
-import {BelongsTo, Column, Model, PrimaryKey, Table} from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 import {UserModel} from "../../user/models/user.model";
 import {BlockModel} from "../../block/models/block.model";
 import {DataTypes} from "sequelize";
@@ -6,6 +6,7 @@ import {DataTypes} from "sequelize";
 @Table
 export class ResultModel extends Model {
     @PrimaryKey
+    @AutoIncrement
     @Column
     id: number
 

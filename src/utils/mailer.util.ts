@@ -12,7 +12,7 @@ export class MailerUtil {
     async sendUserConfirmation(user: UserModel) {
         await this.mailerService.sendMail({
             to: user.email,
-            subject: 'Welcome to Nice App! Confirm your Email',
+            subject: 'New authorization',
             text: `Confirmation code ${user.emailCode}`
         });
     }

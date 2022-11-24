@@ -11,7 +11,9 @@ export class LoggerProvider {
   }
 
   log(error: ErrorCreateDto): void {
-    LoggerModel.create(error);
+    LoggerModel.create(error).catch(err => {
+      console.log(err);
+    });
   }
 
   getAll(): Promise<LoggerModel[]> {

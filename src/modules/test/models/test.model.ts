@@ -1,4 +1,4 @@
-import {BelongsTo, Column, Model, PrimaryKey, Table} from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 import {UserModel} from "../../user/models/user.model";
 import {QuestionTypeModel} from "../../question-type/models/question-type.model";
 import {MetricModel} from "../../metric/models/metric.model";
@@ -6,6 +6,7 @@ import {MetricModel} from "../../metric/models/metric.model";
 @Table
 export class TestModel extends Model {
     @PrimaryKey
+    @AutoIncrement
     @Column
     id: number
 
@@ -14,6 +15,9 @@ export class TestModel extends Model {
 
     @BelongsTo(() => UserModel, "author_id")
     author: UserModel
+
+    @Column
+    type_id: number
 
     @BelongsTo(() => QuestionTypeModel, "type_id")
     type: QuestionTypeModel

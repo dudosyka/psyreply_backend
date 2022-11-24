@@ -2,10 +2,10 @@ import {Inject, Injectable} from "@nestjs/common";
 import {InjectModel} from "@nestjs/sequelize";
 import {UserModel} from "../models/user.model";
 import {BcryptUtil} from "../../../utils/bcrypt.util";
-import {FirstStepOutput} from "../dtos/auth/first.step.output";
+import {AuthOutputDto} from "../dtos/auth/auth-output.dto";
 import {MailerUtil} from "../../../utils/mailer.util";
 import mainConf from "../../../confs/main.conf";
-import {TokenOutput} from "../dtos/auth/token.output";
+import {TokenOutputDto} from "../dtos/auth/token-output.dto";
 import {JwtUtil} from "../../../utils/jwt.util";
 
 @Injectable()
@@ -46,7 +46,7 @@ export class AuthService {
         });
     }
 
-    async firstStep(email: string, password: string): Promise<FirstStepOutput> {
+    async firstStep(email: string, password: string): Promise<AuthOutputDto> {
         let user = await UserModel.findOne({
             where: {
                 email
@@ -63,6 +63,7 @@ export class AuthService {
 
         const passwordCompare = await this.bcrypt.compare(password, user.hash).then(el => el).catch(() => false);
 
+        //TODO: Make negative
         if (passwordCompare)
             return {
                 status: false,
@@ -80,7 +81,7 @@ export class AuthService {
         };
     }
 
-    async secondStep(code: string): Promise<TokenOutput | boolean> {
+    async secondStep(code: string): Promise<TokenOutputDto | boolean> {
         const user = await UserModel.findOne({
             where: {
                 emailCode: code

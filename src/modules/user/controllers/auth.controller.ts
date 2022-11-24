@@ -1,7 +1,8 @@
 import { Body, Controller, Inject, Post, Request, UseGuards } from "@nestjs/common";
 import { LocalAuthGuard } from "../../../guards/local-auth.guard";
 import { AuthService } from "../providers/auth.service";
-import { FirstStepOutput } from "../dtos/auth/first.step.output";
+import { AuthOutputDto } from "../dtos/auth/auth-output.dto";
+import { AuthInputDto } from "../dtos/auth/auth-input.dto";
 
 @Controller('auth')
 export class AuthController {
@@ -10,8 +11,8 @@ export class AuthController {
     ) {}
 
     @Post('/')
-    async firstStep(@Body('email') email: string, @Body('password') pass: string): Promise<FirstStepOutput> {
-        return this.authService.firstStep(email, pass);
+    async firstStep(@Body() credentials: AuthInputDto): Promise<AuthOutputDto> {
+        return this.authService.firstStep(credentials.email, credentials.password);
     }
 
     @UseGuards(LocalAuthGuard)

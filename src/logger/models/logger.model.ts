@@ -1,8 +1,9 @@
-import { Column, DataType, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, Column, DataType, Model, PrimaryKey, Table } from "sequelize-typescript";
 
 @Table
 export class LoggerModel extends Model {
   @PrimaryKey
+  @AutoIncrement
   @Column
   id: number
 

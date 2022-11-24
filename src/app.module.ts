@@ -11,7 +11,6 @@ import { QuestionModule } from './modules/question/question.module';
 import { MetricModule } from './modules/metric/metric.module';
 import { BlockModule } from './modules/block/block.module';
 import { QuestionTypeModule } from './modules/question-type/question-type.module';
-import { TestQuestionModule } from './modules/test-question/test-question.module';
 import { TestBlockModule } from './modules/test-block/test-block.module';
 import { CompanyModule } from './modules/company/company.module';
 import { CompanyBlockModule } from './modules/company-block/company-block.module';
@@ -37,7 +36,6 @@ const db_conf = main.isDev ? db.dev : db.prod;
     MetricModule,
     BlockModule,
     QuestionTypeModule,
-    TestQuestionModule,
     TestBlockModule,
     CompanyModule,
     CompanyBlockModule,
