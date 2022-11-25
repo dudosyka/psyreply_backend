@@ -13,12 +13,9 @@ import { BlockModule } from './modules/block/block.module';
 import { QuestionTypeModule } from './modules/question-type/question-type.module';
 import { TestBlockModule } from './modules/test-block/test-block.module';
 import { CompanyModule } from './modules/company/company.module';
-import { CompanyBlockModule } from './modules/company-block/company-block.module';
-import { CompanyUserModule } from './modules/company-user/company-user.module';
 import { LoggerModule } from './logger/logger.module';
 import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global.exception.filter";
-import { CompanyResultModule } from './modules/company-result/company-result.module';
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -39,10 +36,7 @@ const db_conf = main.isDev ? db.dev : db.prod;
     QuestionTypeModule,
     TestBlockModule,
     CompanyModule,
-    CompanyBlockModule,
-    CompanyUserModule,
     LoggerModule,
-    CompanyResultModule,
   ],
   controllers: [AppController],
   providers: [
