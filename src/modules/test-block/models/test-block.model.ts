@@ -9,6 +9,9 @@ export class TestBlockModel extends Model {
     @Column
     id: number
 
+    @Column
+    test_id: number
+
     @BelongsTo(() => TestModel, "test_id")
     test: TestModel
 

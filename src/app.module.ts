@@ -18,6 +18,7 @@ import { CompanyUserModule } from './modules/company-user/company-user.module';
 import { LoggerModule } from './logger/logger.module';
 import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global.exception.filter";
+import { CompanyResultModule } from './modules/company-result/company-result.module';
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -41,6 +42,7 @@ const db_conf = main.isDev ? db.dev : db.prod;
     CompanyBlockModule,
     CompanyUserModule,
     LoggerModule,
+    CompanyResultModule,
   ],
   controllers: [AppController],
   providers: [

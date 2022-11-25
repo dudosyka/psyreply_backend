@@ -38,4 +38,12 @@ export class TestBlockProvider {
       }
     })).map(el => el.block_id)
   }
+
+  public async getTests(blockId: number): Promise<number[]> {
+    return (await TestBlockModel.findAll({
+      where: {
+        test_id: blockId
+      }
+    })).map(el => el.test_id)
+  }
 }

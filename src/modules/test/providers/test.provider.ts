@@ -30,16 +30,7 @@ export class TestProvider {
         }, host);
         await this.questionProvider.add(test.questions, testModel, host).catch(err => reject(err));
 
-        if (!test.block_id) {
-          const createBlockDto = {
-            name: `Блок без имени для ${test.title}`,
-            tests: [testModel.id]
-          };
-          await this.blockProvider.create(createBlockDto, host).then(() => resolve(testModel)).catch(err => {
-            host.transaction.rollback()
-            reject(err);
-          });
-        } else {
+        if (test.block_id) {
           await this.blockProvider.appendTests(test.block_id, [ testModel.id ], host).then(() => resolve(testModel)).catch(err => {
             host.transaction.rollback()
             reject(err)
@@ -103,16 +94,17 @@ export class TestProvider {
     return await (new Promise<boolean>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
         const host = { transaction: t }
-        const leftBlocksCount = await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).catch(err => reject(err))
-        if (leftBlocksCount <= 1 && confirmIfLast) {
-          await this.questionProvider.removeByTest(testId);
-          await TestModel.destroy({
-            where: {
-              id: testId
-            },
-            transaction: host.transaction
-          }).then(() => resolve(true))
-        }
+        await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).then(() => resolve(true)).catch(err => reject(err))
+        // Now tests can live without blocks
+        // if (leftBlocksCount <= 1 && confirmIfLast) {
+        //   await this.questionProvider.removeByTest(testId);
+        //   await TestModel.destroy({
+        //     where: {
+        //       id: testId
+        //     },
+        //     transaction: host.transaction
+        //   }).then(() => resolve(true))
+        // }
       });
     }));
   }

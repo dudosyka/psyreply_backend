@@ -1,4 +1,5 @@
-import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Table
 export class UserModel extends Model {
@@ -27,4 +28,8 @@ export class UserModel extends Model {
 
     @Column
     coins: number
+
+    @BelongsTo(() => CompanyModel, "company_id")
+    company: CompanyModel
+
 }

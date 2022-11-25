@@ -1,7 +1,7 @@
 import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 import {UserModel} from "../../user/models/user.model";
 import {BlockModel} from "../../block/models/block.model";
-import {DataTypes} from "sequelize";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Table
 export class ResultModel extends Model {
@@ -19,6 +19,6 @@ export class ResultModel extends Model {
     @BelongsTo(() => BlockModel, "block_id")
     block: BlockModel
 
-    @Column({type: DataTypes.BIGINT})
-    timestamp: DataTypes.BigIntDataType
+    @BelongsTo(() => CompanyModel, "company_id")
+    company: CompanyModel
 }

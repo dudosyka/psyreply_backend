@@ -1,4 +1,5 @@
-import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Table
 export class BlockModel extends Model {
@@ -9,4 +10,10 @@ export class BlockModel extends Model {
 
     @Column
     name: string
+
+    @Column
+    company_id: number
+
+    @BelongsTo(() => CompanyModel, "company_id")
+    company: CompanyModel
 }
