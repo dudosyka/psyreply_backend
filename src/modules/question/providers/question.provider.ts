@@ -4,7 +4,7 @@ import { QuestionModel } from "../models/question.model";
 import { Transaction } from "sequelize";
 import { QuestionDto } from "../dtos/question.dto";
 import { TestModel } from "../../test/models/test.model";
-import { GlobalExceptionFilter } from "../../../filters/global.exception.filter";
+import { GlobalExceptionFilter } from "../../../filters/global-exception.filter";
 
 @Injectable()
 @UseFilters(GlobalExceptionFilter)
