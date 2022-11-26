@@ -7,10 +7,10 @@ export default {
         database: 'psyreply'
     },
     prod: {
-        host: 'localhost',
+        host: '127.0.0.1',
         port: 3306,
-        username: '',
-        password: '',
-        database: ''
+        username: 'psyreply_psyreply',
+        password: '236911danteA',
+        database: 'psyreply_beta'
     }
 }
