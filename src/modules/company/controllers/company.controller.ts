@@ -7,15 +7,15 @@ import { CompanyCreateDto } from "../dtos/company-create.dto";
 import { CompanyUpdateDto } from "../dtos/company-update.dto";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller('test')
+@Controller('company')
 export class CompanyController {
   constructor(
     @Inject(CompanyProvider) private companyProvider: CompanyProvider
   ) {}
 
   @Post()
-  public create(@Body('company') createDto: CompanyCreateDto, @Body('inputTests') inputTests: number[]): Promise<CompanyModel> {
-    return this.companyProvider.create(createDto, inputTests);
+  public create(@Body('company') createDto: CompanyCreateDto, @Body('inputBlocks') inputBlocks: number[]): Promise<CompanyModel> {
+    return this.companyProvider.create(createDto, inputBlocks);
   }
 
   @Get()

@@ -4,6 +4,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { BlockProvider } from "../../block/providers/block.provider";
 import { CompanyCreateDto } from "../dtos/company-create.dto";
 import { CompanyUpdateDto } from "../dtos/company-update.dto";
+import { BlockModel } from "../../block/models/block.model";
 
 @Injectable()
 export class CompanyProvider {
@@ -37,7 +38,9 @@ export class CompanyProvider {
   }
 
   public getAll(): Promise<CompanyModel[]> {
-    return CompanyModel.findAll()
+    return CompanyModel.findAll({
+      include: [BlockModel]
+    })
   }
 
   public async update(id: number, updateDto: CompanyUpdateDto): Promise<boolean> {
@@ -50,7 +53,7 @@ export class CompanyProvider {
     }));
   }
 
-  public async remove(id: number, removeBlocks: boolean = false): Promise<boolean> {
+  public async remove(id: number, removeBlocks: boolean = true): Promise<boolean> {
     await this.blockProvider.onCompanyRemove(id, removeBlocks)
     return (await CompanyModel.destroy({
       where: {

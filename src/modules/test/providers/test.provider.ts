@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { TestModel } from "../models/test.model";
 import { TestCreateDto } from "../dtos/test-create.dto";
@@ -7,6 +7,8 @@ import { Sequelize } from "sequelize-typescript";
 import { TestUpdateDto } from "../dtos/test-update.dto";
 import { BlockProvider } from "../../block/providers/block.provider";
 import { TestFilterDto } from "../dtos/test-filter.dto";
+import { QuestionTypeModel } from "../../question-type/models/question-type.model";
+import { MetricModel } from "../../metric/models/metric.model";
 
 @Injectable()
 export class TestProvider {
@@ -32,24 +34,26 @@ export class TestProvider {
         await this.questionProvider.add(test.questions, testModel, host).catch(err => reject(err));
 
         if (test.block_id) {
-          await this.blockProvider.appendTests(test.block_id, [ testModel.id ], host).then(() => resolve(testModel)).catch(err => {
+          await this.blockProvider.appendTests(test.block_id, [ testModel.id ], host).catch(err => {
             host.transaction.rollback()
             reject(err)
           });
         }
+        resolve(testModel)
       }).catch(err => {
         reject(err)
       })
     }));
   }
 
-  async remove(testId: number): Promise<number> {
+  async remove(testId: number): Promise<boolean> {
     await this.questionProvider.removeByTest(testId);
-    return TestModel.destroy({
+    await this.blockProvider.excludeTestFromAll(testId);
+    return (await TestModel.destroy({
       where: {
         id: testId
       }
-    });
+    })) > 0;
   }
 
   async update(testUpdate: TestUpdateDto): Promise<TestModel> {
@@ -61,6 +65,8 @@ export class TestProvider {
             id: testUpdate.id
           }
         });
+        if (!testModel)
+          reject(new HttpException("Test not found", 404));
         const { questions, ...onUpdate } = testUpdate;
         await testModel.update({
           ...onUpdate
@@ -81,6 +87,7 @@ export class TestProvider {
             id: testId
           }
         });
+        // TODO: Remove...
         if (exclude)
           await this.blockProvider.excludeTest(blockId, testId, host);
         await this.blockProvider.appendTests(blockId, [ testModel.id ], host).then(() => resolve(true)).catch(err => {
@@ -110,15 +117,22 @@ export class TestProvider {
     }));
   }
 
-  async getAll(filter: TestFilterDto): Promise<TestModel[]> {
+  async getAll(filters: TestFilterDto): Promise<TestModel[]> {
+    if (filters.block_id)
+      return await this.blockProvider.includes(filters.block_id);
+    const { block_id, ...filter } = filters;
     return TestModel.findAll({
       where: {
         ...filter
-      }
+      },
+      include: [QuestionTypeModel, MetricModel]
     });
   }
 
   async getOne(testId: number): Promise<TestModel> {
-    return TestModel.findOne({where:{id: testId}})
+    const model = await TestModel.findOne({where:{id: testId}, include: [QuestionTypeModel, MetricModel]})
+    if (model)
+      return model;
+    throw new NotFoundException("Test not found");
   }
 }

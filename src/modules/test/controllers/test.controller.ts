@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { TestProvider } from "../providers/test.provider";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
@@ -15,8 +15,8 @@ export class TestController {
   ) {
   }
 
-  @Get()
-  public async getAll(@Body('filter') filter: TestFilterDto): Promise<TestModel[]> {
+  @Post('all')
+  public async getAll(@Body('filters') filter: TestFilterDto): Promise<TestModel[]> {
     return await this.testProvider.getAll(filter);
   }
 
@@ -36,9 +36,14 @@ export class TestController {
     return await this.testProvider.update(testUpdate);
   }
 
+  @Delete(':testId')
+  public async remove(@Param('testId') testId: number): Promise<boolean> {
+    return await this.testProvider.remove(testId);
+  }
+
   @Post(':testId/move/:blockId')
   public async move(@Param('testId') testId: number, @Param('blockId') blockId: number): Promise<boolean> {
-    return await this.testProvider.move(testId, blockId, true);
+    return await this.testProvider.move(testId, blockId);
   }
 
   @Post(':testId/copy/:blockId')

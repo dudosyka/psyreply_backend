@@ -17,18 +17,31 @@ export class TestBlockProvider {
     return await TestBlockModel.bulkCreate(records, host);
   }
 
-  public async exclude(testId: number, blockId: number, host: { transaction: Transaction }, confirmLast: boolean): Promise<number> {
+  public async exclude(testId: number, blockId: number, host: { transaction: Transaction }, confirmLast: boolean): Promise<boolean> {
     const blocks = await this.getBlocks(testId);
     if (!confirmLast && blocks.length <= 1) {
-      throw new Error("Failed remove, there are no blocks");
+      // throw new Error("Failed remove, there are no blocks");
     }
-    return await TestBlockModel.destroy({
+    return (await TestBlockModel.destroy({
       where: {
         block_id: blockId,
         test_id: testId
       },
       ...host
-    }).then(() => blocks.length);
+    })) > 0;
+  }
+
+  public async removeAllRelations(testId: number = 0, blockId: number = 0): Promise<boolean> {
+    let whereClause = {}
+    if (testId != 0) {
+      whereClause['test_id'] = testId;
+    }
+    if (blockId != 0) {
+      whereClause['block_id'] = blockId;
+    }
+    return (await TestBlockModel.destroy({
+      where: whereClause
+    })) > 0;
   }
 
   public async getBlocks(testId: number): Promise<number[]> {
@@ -42,7 +55,7 @@ export class TestBlockProvider {
   public async getTests(blockId: number): Promise<number[]> {
     return (await TestBlockModel.findAll({
       where: {
-        test_id: blockId
+        block_id: blockId
       }
     })).map(el => el.test_id)
   }
