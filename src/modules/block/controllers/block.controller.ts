@@ -15,7 +15,7 @@ export class BlockController {
   ) {}
 
   @Get()
-  async getAll(@Body('filters') filter: BlockFilterDto): Promise<BlockModel[]> {
+  async getAll(@Body('filter') filter: BlockFilterDto): Promise<BlockModel[]> {
     return this.blockProvider.getAll(filter)
   }
 

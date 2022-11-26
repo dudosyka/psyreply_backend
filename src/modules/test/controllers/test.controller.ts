@@ -5,6 +5,7 @@ import { AdminGuard } from "../../../guards/admin.guard";
 import { TestCreateDto } from "../dtos/test-create.dto";
 import { TestModel } from "../models/test.model";
 import { TestUpdateDto } from "../dtos/test-update.dto";
+import { TestFilterDto } from "../dtos/test-filter.dto";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('test')
@@ -15,8 +16,8 @@ export class TestController {
   }
 
   @Get()
-  public async getAll(): Promise<TestModel[]> {
-    return await this.testProvider.getAll();
+  public async getAll(@Body('filter') filter: TestFilterDto): Promise<TestModel[]> {
+    return await this.testProvider.getAll(filter);
   }
 
   @Get(":testId")

@@ -1,3 +1,3 @@
 export class BlockFilterDto {
-  company?: number
+  company_id?: number
 }

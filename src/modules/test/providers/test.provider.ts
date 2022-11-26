@@ -6,6 +6,7 @@ import { QuestionProvider } from "../../question/providers/question.provider";
 import { Sequelize } from "sequelize-typescript";
 import { TestUpdateDto } from "../dtos/test-update.dto";
 import { BlockProvider } from "../../block/providers/block.provider";
+import { TestFilterDto } from "../dtos/test-filter.dto";
 
 @Injectable()
 export class TestProvider {
@@ -109,8 +110,12 @@ export class TestProvider {
     }));
   }
 
-  async getAll(): Promise<TestModel[]> {
-    return TestModel.findAll();
+  async getAll(filter: TestFilterDto): Promise<TestModel[]> {
+    return TestModel.findAll({
+      where: {
+        ...filter
+      }
+    });
   }
 
   async getOne(testId: number): Promise<TestModel> {
