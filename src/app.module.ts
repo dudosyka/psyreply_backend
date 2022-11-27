@@ -13,7 +13,7 @@ import { BlockModule } from './modules/block/block.module';
 import { QuestionTypeModule } from './modules/question-type/question-type.module';
 import { TestBlockModule } from './modules/test-block/test-block.module';
 import { CompanyModule } from './modules/company/company.module';
-import { LoggerModule } from './logger/logger.module';
+import { LoggerModule } from './modules/logger/logger.module';
 import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 import { HttpExceptionFilter } from "./filters/http-exception.filter";
