@@ -5,28 +5,40 @@ import { BlockProvider } from "../../block/providers/block.provider";
 import { CompanyCreateDto } from "../dtos/company-create.dto";
 import { CompanyUpdateDto } from "../dtos/company-update.dto";
 import { BlockModel } from "../../block/models/block.model";
+import { Sequelize } from "sequelize-typescript";
+import { Transaction } from "sequelize";
 
 @Injectable()
 export class CompanyProvider {
   constructor(
     @InjectModel(CompanyModel) private companyModel: CompanyModel,
-    @Inject(BlockProvider) private blockProvider: BlockProvider
+    @Inject(BlockProvider) private blockProvider: BlockProvider,
+    private sequelize: Sequelize
   ) {}
 
-  private async addBlocks(id: number, blocks: number[]) {
+  private async addBlocks(id: number, blocks: number[], transaction: {transaction: Transaction} = {transaction: null}) {
     if (blocks.length > 0) {
       return !!(await Promise.all(blocks.map(async el => {
-        await this.blockProvider.copyToCompany(el, id);
+        await this.blockProvider.copyToCompany(el, id, transaction).catch(err => {
+          throw new Error(err)
+        });
       })));
     }
   }
 
   public async create(createDto: CompanyCreateDto, inputBlocks: number[] = []): Promise<CompanyModel> {
-    const company = await CompanyModel.create({
-      ...createDto
+    return new Promise<CompanyModel>((resolve, reject) => {
+      this.sequelize.transaction(async t => {
+        const host = { transaction: t }
+        const company = await CompanyModel.create({
+          ...createDto
+        }, host);
+        await this.addBlocks(company.id, inputBlocks, host).then(() => resolve(company)).catch(err => {
+          host.transaction.rollback()
+          reject(err);
+        });
+      }).catch(err => reject(err));
     })
-    await this.addBlocks(company.id, inputBlocks);
-    return company;
   }
 
   public getOne(id: number): Promise<CompanyModel> {

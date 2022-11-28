@@ -14,8 +14,8 @@ export class CompanyController {
   ) {}
 
   @Post()
-  public create(@Body('company') createDto: CompanyCreateDto, @Body('inputBlocks') inputBlocks: number[]): Promise<CompanyModel> {
-    return this.companyProvider.create(createDto, inputBlocks);
+  public create(@Body('company') createDto: CompanyCreateDto): Promise<CompanyModel> {
+    return this.companyProvider.create(createDto, createDto.inputBlocks);
   }
 
   @Get()

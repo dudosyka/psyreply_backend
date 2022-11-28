@@ -15,4 +15,7 @@ export class LoggerModel extends Model {
 
   @Column({ type: DataType.TEXT })
   stack: string
+
+  @Column
+  image: string;
 }

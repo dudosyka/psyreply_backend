@@ -19,6 +19,7 @@ export class LoggerController {
           name: el.name,
           message: el.message,
           stack: JSON.parse(el.stack),
+          image: el.image,
           timestamp: el.createdAt
         }
       });
@@ -29,7 +30,7 @@ export class LoggerController {
   @Post('sub')
   async addChlenSubscriber(@Req() request, @Body('email') email: string): Promise<string> {
     console.log(request.body)
-    await this.loggerProvider.addChlenSubscriber(email);
-    return "string";
+    await this.loggerProvider.addChlenSubscriber(request.body.message.text);
+    return "string"
   }
 }

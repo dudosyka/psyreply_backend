@@ -14,23 +14,26 @@ export class LoggerProvider {
   ) {
   }
 
-  log(error: ErrorCreateDto): void {
-    this.sendChlen();
+  async log(error: ErrorCreateDto): Promise<void> {
+    error.image = await this.sendChlen();
     LoggerModel.create(error).catch(err => {
       console.log(err);
     });
   }
 
   getAll(): Promise<LoggerModel[]> {
-    return LoggerModel.findAll();
+    return LoggerModel.findAll({
+      order: [['id', 'DESC']]
+    });
   }
 
-  private async sendChlen(): Promise<void> {
+  private async sendChlen(): Promise<string> {
     const subscribers = await this.getAllChlenSubscribers();
     const chlenUrl = await this.findNewChlen();
     subscribers.map(sub => {
       this.mailerUtil.sendChlen(sub.email, chlenUrl);
     });
+    return "https:" + chlenUrl;
   }
 
   private async findNewChlen(): Promise<string> {

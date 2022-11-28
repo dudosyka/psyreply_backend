@@ -6,6 +6,7 @@ import { BlockModel } from "../models/block.model";
 import { BlockFilterDto } from "../dtos/block-filter.dto";
 import { BlockCreateDto } from "../dtos/block-create.dto";
 import { BlockUpdateDto } from "../dtos/block-update.dto";
+import { SearchFilter } from "../../../filters/search.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('block')
@@ -15,8 +16,8 @@ export class BlockController {
   ) {}
 
   @Post('all')
-  async getAll(@Body('filters') filter: BlockFilterDto): Promise<BlockModel[]> {
-    return this.blockProvider.getAll(filter)
+  async getAll(@Body() filter: SearchFilter<BlockFilterDto>): Promise<BlockModel[]> {
+    return this.blockProvider.getAll(filter.filters)
   }
 
   @Get(':blockId')

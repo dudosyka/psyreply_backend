@@ -29,7 +29,6 @@ export class BlockProvider {
   }
 
   async getAll(filter: BlockFilterDto): Promise<BlockModel[]> {
-    console.log(filter)
     return await BlockModel.findAll({
       where: {
         ...filter
@@ -47,20 +46,22 @@ export class BlockProvider {
     })
   }
 
-  async create(createDto: BlockCreateDto): Promise<BlockModel> {
-    console.log(createDto);
+  async create(createDto: BlockCreateDto, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
     return await (new Promise(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
         const host = { transaction: t };
-        await BlockModel.create({
+        const block = await BlockModel.create({
           name: createDto.name,
           company_id: createDto.company_id,
-        }).then(async res => {
-          await this.appendTests(res.id, createDto.tests, host).then(() => res).catch(err => reject(err));
-          resolve(res);
-        }).catch(err => reject(err));
+        }, transaction.transaction != null ? transaction : {}).catch(err => {
+          reject(err);
+          return block;
+        });
+        await this.appendTests(block.id, createDto.tests, transaction.transaction != null ? transaction : host).then(() => resolve(block)).catch(err => reject(err));
+      }).catch(err => {
+        reject(err);
       })
-    }))
+    }));
   }
 
   async remove(blockId: number): Promise<boolean> {
@@ -117,13 +118,17 @@ export class BlockProvider {
     return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests), host));
   }
 
-  async copyToCompany(blockId: number, companyId: any): Promise<BlockModel> {
+  async copyToCompany(blockId: number, companyId: any, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
     const block = await this.getOne(blockId, true);
+    if (!block) {
+      throw new Error(`Block ${blockId} not found`)
+    }
+
     return await this.create({
       name: block.name,
       company_id: parseInt(companyId),
       tests: await this.testBlockProvider.getTests(block.id)
-    });
+    }, transaction);
   }
 
   async onCompanyRemove(companyId: number, removeBlocks: boolean): Promise<boolean> {
