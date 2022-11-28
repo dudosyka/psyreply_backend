@@ -5,6 +5,7 @@ import { ErrorCreateDto } from "../dtos/error.create.dto";
 import { ChlenSubscribersModel } from "../models/chlen-subscribers.model";
 import { MailerUtil } from "../../../utils/mailer.util";
 import { ChlenCollectionModel } from "../models/chlen-collection.model";
+import mainConf from "../../../confs/main.conf";
 
 @Injectable()
 export class LoggerProvider {
@@ -31,7 +32,8 @@ export class LoggerProvider {
     const subscribers = await this.getAllChlenSubscribers();
     const chlenUrl = await this.findNewChlen();
     subscribers.map(sub => {
-      this.mailerUtil.sendChlen(sub.email, chlenUrl);
+      if (!mainConf.isDev)
+        this.mailerUtil.sendChlen(sub.email, chlenUrl);
     });
     return "https:" + chlenUrl;
   }

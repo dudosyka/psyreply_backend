@@ -1,28 +1,14 @@
-import { ExceptionFilter, Catch, ArgumentsHost, Inject } from "@nestjs/common";
-import { Response } from 'express';
-import { LoggerProvider } from "../modules/logger/providers/logger.provider";
+import { ExceptionFilter, Catch, ArgumentsHost } from "@nestjs/common";
+import { BaseFilter } from "./base.filter";
 
 @Catch(Error)
-export class GlobalExceptionFilter implements ExceptionFilter {
-  constructor(
-    @Inject(LoggerProvider) private loggerProvider: LoggerProvider,
-  ) {
-  }
+export class GlobalExceptionFilter extends BaseFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
-    // const request = ctx.getRequest<Request>();
-    if (exception.message !== 'Cannot GET /favicon.ico') {
-      this.loggerProvider.log({
-        message: exception.message,
-        name: exception.name,
-        stack: JSON.stringify(exception.stack.split('at').map(el => el.slice(0,el.length - 5)))
-      })
-    }
-    response.setHeader("Status", 500);
-    response.send(JSON.stringify({
+    const response = this.log(exception, host);
+    this.sendResponse(response, 500, {
       'status': 500,
+      'type': 'unknown',
       'error': exception.message
-    }));
+    })
   }
 }

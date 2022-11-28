@@ -9,6 +9,7 @@ import { BlockUpdateDto } from "../dtos/block-update.dto";
 import { Sequelize } from "sequelize-typescript";
 import { Transaction } from "sequelize";
 import { TestModel } from "../../test/models/test.model";
+import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 
 @Injectable()
 export class BlockProvider {
@@ -38,11 +39,13 @@ export class BlockProvider {
   }
 
   async getOne(blockId: number, rawData: boolean = false): Promise<BlockModel> {
-    return BlockModel.findOne({
-      where: {
-        id: blockId,
-      },
-      include: rawData ? [] : [TestModel]
+    return new Promise<BlockModel>(async (resolve) => {
+      resolve(BlockModel.findOne({
+        where: {
+          id: blockId,
+        },
+        include: rawData ? [] : [TestModel]
+      }));
     })
   }
 
@@ -121,7 +124,7 @@ export class BlockProvider {
   async copyToCompany(blockId: number, companyId: any, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
     const block = await this.getOne(blockId, true);
     if (!block) {
-      throw new Error(`Block ${blockId} not found`)
+      throw new ModelNotFoundException(BlockModel, blockId);
     }
 
     return await this.create({

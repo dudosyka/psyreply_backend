@@ -17,6 +17,7 @@ import { LoggerModule } from './modules/logger/logger.module';
 import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 import { HttpExceptionFilter } from "./filters/http-exception.filter";
+import { DatabaseErrorFilter } from "./filters/database-error.filter";
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -49,6 +50,10 @@ const db_conf = main.isDev ? db.dev : db.prod;
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: DatabaseErrorFilter,
     },
   ],
 })
