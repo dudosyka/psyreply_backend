@@ -5,6 +5,9 @@ import { Sequelize } from "sequelize-typescript";
 import { ResultCreateDto } from "../dto/result-create.dto";
 import { ResultModel } from "../models/result.model";
 import { TestResultDto } from "../../test/dtos/test-result.dto";
+import { ResultFitlerDto } from "../dto/result-fitler.dto";
+import { ResultUpdateDto } from "../dto/result-update.dto";
+import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 
 @Injectable()
 export class ResultProvider {
@@ -32,6 +35,39 @@ export class ResultProvider {
           company_id: blockModel ? blockModel.company_id : null
         }, host));
       })
+    })
+  }
+
+  public async getResults(filterDto: ResultFitlerDto): Promise<ResultModel[]> {
+    const { createdAt, ...filter } = filterDto.filters;
+    const results = await ResultModel.findAll({
+      where: {
+        ...filter
+      }
+    });
+    if (createdAt) {
+      return results.filter(el => {
+        const date = `${el.createdAt.getFullYear()}-${(el.createdAt.getMonth() + 1)}-${el.createdAt.getDate()}`;
+        return date == createdAt;
+      })
+    } else
+      return results;
+  }
+
+  public async update(resultId: number, updateDto: ResultUpdateDto): Promise<ResultModel> {
+    return new Promise<ResultModel>(async (resolve, reject) => {
+      const resModel = await ResultModel.findOne({
+        where: {
+          id: resultId
+        }
+      });
+
+      if (!resModel)
+        reject(new ModelNotFoundException(ResultModel, resultId))
+
+      resModel.data = JSON.stringify(updateDto);
+      await resModel.save();
+      resolve(resModel);
     })
   }
 }
