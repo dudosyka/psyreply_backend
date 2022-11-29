@@ -1,5 +1,6 @@
 import { QuestionDto } from "../../question/dtos/question.dto";
 import { IsNotEmpty, IsNumber, Matches } from "class-validator";
+import { ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 
 export class TestCreateDto {
   @IsNotEmpty()
@@ -9,11 +10,11 @@ export class TestCreateDto {
   @IsNotEmpty()
   title: string
 
-  @IsNotEmpty()
+  @IsNumber()
   metric: number
 
   @IsNotEmpty()
-  @Matches('^(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+$')
+  @Matches(ShlyapaMarkupUtil.validate_pattern)
   formula: string
 
   block_id: number

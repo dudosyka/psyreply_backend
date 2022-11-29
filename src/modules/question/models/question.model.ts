@@ -21,6 +21,9 @@ export class QuestionModel extends Model {
     @Column
     test_id: number
 
+    @Column
+    relative_id: number
+
     @BelongsTo(() => TestModel, "test_id")
     test: TestModel
 

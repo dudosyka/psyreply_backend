@@ -10,14 +10,23 @@ export class ResultModel extends Model {
     @Column
     id: number
 
+    @Column
+    user_id: number
+
     @BelongsTo(() => UserModel, "user_id")
     user: UserModel
 
     @Column
     data: string
 
+    @Column
+    block_id: number
+
     @BelongsTo(() => BlockModel, "block_id")
     block: BlockModel
+
+    @Column
+    company_id: number | null
 
     @BelongsTo(() => CompanyModel, "company_id")
     company: CompanyModel

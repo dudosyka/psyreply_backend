@@ -9,6 +9,6 @@ import { TestBlockModule } from "../test-block/test-block.module";
     imports: [SequelizeModule.forFeature([BlockModel]), TestBlockModule],
     controllers: [BlockController],
     providers: [BlockProvider],
-    exports: [BlockProvider]
+    exports: [TestBlockModule, BlockProvider, SequelizeModule.forFeature([BlockModel])]
 })
 export class BlockModule {}

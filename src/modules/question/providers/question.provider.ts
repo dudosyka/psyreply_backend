@@ -23,7 +23,8 @@ export class QuestionProvider {
         picture: el.picture,
         coins: el.coins,
         type_id: testModel.type_id,
-        value: JSON.stringify(el.answers)
+        value: JSON.stringify(el.answers),
+        relative_id: el.relative_id,
       })
     })
     await QuestionModel.bulkCreate(records, host);
@@ -34,6 +35,22 @@ export class QuestionProvider {
     await QuestionModel.destroy({
       where: {
         test_id: testId
+      }
+    })
+  }
+
+  async getOne(id: number): Promise<QuestionModel> {
+    return await QuestionModel.findOne({
+      where: {
+        id
+      }
+    });
+  }
+
+  async getAll(ids: number[]): Promise<QuestionModel[]> {
+    return await QuestionModel.findAll({
+      where: {
+        id: ids
       }
     })
   }

@@ -49,7 +49,7 @@ export class BlockProvider {
     })
   }
 
-  async create(createDto: BlockCreateDto, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
+  async createModel(createDto: BlockCreateDto, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
     return await (new Promise(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
         const host = { transaction: t };
@@ -127,7 +127,7 @@ export class BlockProvider {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
-    return await this.create({
+    return await this.createModel({
       name: block.name,
       company_id: parseInt(companyId),
       tests: await this.testBlockProvider.getTests(block.id)

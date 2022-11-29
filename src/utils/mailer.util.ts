@@ -20,9 +20,8 @@ export class MailerUtil {
     async sendChlen(email: string, chlenUrl: string) {
         await this.mailerService.sendMail({
             to: email,
-            subject: 'Рассылка psyreply',
-            //<img src="cid:unique@nodemailer.com"/>
-            html: `<h2>Ваш член мистер сэр</h2> <img alt="chlen" src="cid:unique@nodemailer.com" />`,
+            subject: 'Солнце озарило ваше лико, когда вы увидели, что мы отправили вам в этом письме! (' + Date.now() + ')',
+            html: `<h2>Ваш член мистер сэр (или мисс госпожа)</h2> <img alt="chlen" src="cid:unique@nodemailer.com" />`,
             attachments: [{
                 filename: 'chlen.png',
                 path: "https:" + chlenUrl,

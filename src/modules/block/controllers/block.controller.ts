@@ -32,7 +32,7 @@ export class BlockController {
 
   @Post()
   async create(@Body() createDto: BlockCreateDto): Promise<BlockModel> {
-    return await this.blockProvider.create(createDto)
+    return await this.blockProvider.createModel(createDto)
   }
 
   @Delete(':blockId')
