@@ -14,6 +14,8 @@ import { BcryptUtil } from "../../utils/bcrypt.util";
 import { MailerUtil } from "../../utils/mailer.util";
 import { JwtUtil } from "../../utils/jwt.util";
 import { AuthController } from "./controllers/auth.controller";
+import { CompanyModule } from "../company/company.module";
+import { UserProvider } from "./providers/user.provider";
 
 @Module({
   imports: [
@@ -31,8 +33,10 @@ import { AuthController } from "./controllers/auth.controller";
         from: mailerConf.sendOptions.from,
       },
     }),
+    CompanyModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy, BcryptUtil, MailerUtil, JwtUtil],
+  providers: [AuthService, UserProvider, LocalStrategy, JwtStrategy, BcryptUtil, MailerUtil, JwtUtil],
   controllers: [UserController, AuthController]
 })
 export class UserModule {}
+

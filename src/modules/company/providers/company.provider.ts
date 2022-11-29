@@ -7,6 +7,8 @@ import { CompanyUpdateDto } from "../dtos/company-update.dto";
 import { BlockModel } from "../../block/models/block.model";
 import { Sequelize } from "sequelize-typescript";
 import { Transaction } from "sequelize";
+import { UserModel } from "../../user/models/user.model";
+import { CompanyUserModel } from "../models/company-user.model";
 
 @Injectable()
 export class CompanyProvider {
@@ -51,7 +53,7 @@ export class CompanyProvider {
 
   public getAll(): Promise<CompanyModel[]> {
     return CompanyModel.findAll({
-      include: [BlockModel]
+      include: [BlockModel, UserModel]
     })
   }
 
@@ -80,5 +82,15 @@ export class CompanyProvider {
       return await this.addBlocks(id, blocks);
     else
       return false;
+  }
+
+  public async appendUser(userId: number, companyId: number): Promise<boolean> {
+    return !!(await CompanyUserModel.update({
+      company_id: companyId
+    }, {
+      where: {
+        user_id: userId
+      }
+    }));
   }
 }
