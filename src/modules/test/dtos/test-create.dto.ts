@@ -1,5 +1,5 @@
 import { QuestionDto } from "../../question/dtos/question.dto";
-import { IsNotEmpty, IsNumber, Matches } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsNotEmpty, IsNumber, Matches } from "class-validator";
 import { ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 
 export class TestCreateDto {
@@ -20,5 +20,7 @@ export class TestCreateDto {
   block_id: number
 
   @IsNotEmpty()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(20)
   questions: QuestionDto[]
 }

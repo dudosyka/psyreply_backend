@@ -87,19 +87,23 @@ export class TestProvider {
     }))
   }
 
-  async move(testId: number, blockId: number, exclude: boolean = false): Promise<boolean> {
+  async move(tests: number[], blockId: number, exclude: boolean = false): Promise<boolean> {
     return await (new Promise<boolean>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
         const host = { transaction: t }
-        const testModel = await TestModel.findOne({
-          where: {
-            id: testId
-          }
-        });
-        // TODO: Remove...
-        if (exclude)
-          await this.blockProvider.excludeTest(blockId, testId, host);
-        await this.blockProvider.appendTests(blockId, [ testModel.id ], host).then(() => resolve(true)).catch(err => {
+        await Promise.all(tests.map(async testId => {
+          const testModel = await TestModel.findOne({
+            where: {
+              id: testId
+            }
+          });
+          // TODO: Remove...
+          if (exclude)
+            await this.blockProvider.excludeTest(blockId, testId, host);
+          await this.blockProvider.appendTests(blockId, [ testModel.id ], host).then(() => resolve(true)).catch(err => {
+            throw err;
+          });
+        })).catch(err => {
           host.transaction.rollback()
           reject(err)
         });
@@ -107,11 +111,18 @@ export class TestProvider {
     }))
   }
 
-  async removeFromBlock(testId: number, blockId: number, confirmIfLast: boolean): Promise<boolean> {
+  async removeFromBlock(tests: number[], blockId: number, confirmIfLast: boolean): Promise<boolean> {
     return await (new Promise<boolean>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
         const host = { transaction: t }
-        await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).then(() => resolve(true)).catch(err => reject(err))
+        await Promise.all(tests.map(async testId => {
+          await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).then(() => resolve(true)).catch(err => {
+            throw err
+          });
+        })).catch(err => {
+          host.transaction.rollback();
+          reject(err);
+        })
         // Now tests can live without blocks
         // if (leftBlocksCount <= 1 && confirmIfLast) {
         //   await this.questionProvider.removeByTest(testId);
@@ -126,10 +137,22 @@ export class TestProvider {
     }));
   }
 
+  private async getExceptBlock(blockId: number): Promise<TestModel[]> {
+    const tests: number[] = (await this.blockProvider.includes(blockId)).map(el => el.id);
+    const allTests = await this.getAll({});
+    return allTests.filter(test => {
+      return !(tests.includes(test.id));
+    })
+  }
+
   async getAll(filters: TestFilterDto): Promise<TestModel[]> {
+
     if (filters.block_id)
       return await this.blockProvider.includes(filters.block_id);
-    const { block_id, ...filter } = filters;
+    if (filters.except_block)
+      return await this.getExceptBlock(filters.except_block);
+
+    const { block_id, except_block, ...filter } = filters;
     return TestModel.findAll({
       where: {
         ...filter

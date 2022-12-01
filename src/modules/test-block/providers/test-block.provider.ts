@@ -31,13 +31,13 @@ export class TestBlockProvider {
     })) > 0;
   }
 
-  public async removeAllRelations(testId: number = 0, blockId: number = 0): Promise<boolean> {
+  public async removeAllRelations(testId: number = 0, blocks: number[] = null): Promise<boolean> {
     let whereClause = {}
     if (testId != 0) {
       whereClause['test_id'] = testId;
     }
-    if (blockId != 0) {
-      whereClause['block_id'] = blockId;
+    if (blocks) {
+      whereClause['block_id'] = blocks;
     }
     return (await TestBlockModel.destroy({
       where: whereClause

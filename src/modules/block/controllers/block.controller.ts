@@ -35,9 +35,9 @@ export class BlockController {
     return await this.blockProvider.createModel(createDto)
   }
 
-  @Delete(':blockId')
-  async remove(@Param('blockId') blockId: number): Promise<boolean> {
-    return await this.blockProvider.remove(blockId);
+  @Delete('')
+  async remove(@Body('blocks') blocks: number[]): Promise<boolean> {
+    return await this.blockProvider.remove(blocks);
   }
 
   @Patch(':blockId')
@@ -45,8 +45,8 @@ export class BlockController {
     return await this.blockProvider.update(blockId, updateDto);
   }
 
-  @Post(':blockId/copy/:companyId')
-  async copyToCompany(@Param('blockId') blockId: number, @Param('companyId') companyId: number): Promise<BlockModel> {
-    return await this.blockProvider.copyToCompany(blockId, companyId)
+  @Post('/copy/:companyId')
+  async copyToCompany(@Body('blocks') blocks: number[], @Param('companyId') companyId: number): Promise<BlockModel[] | void> {
+    return await this.blockProvider.copyToCompany(blocks, companyId)
   }
 }

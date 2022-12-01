@@ -20,11 +20,9 @@ export class CompanyProvider {
 
   private async addBlocks(id: number, blocks: number[], transaction: {transaction: Transaction} = {transaction: null}) {
     if (blocks.length > 0) {
-      return !!(await Promise.all(blocks.map(async el => {
-        await this.blockProvider.copyToCompany(el, id, transaction).catch(err => {
-          throw new Error(err)
-        });
-      })));
+      return !!(await this.blockProvider.copyToCompany(blocks, id, transaction).catch(err => {
+        throw new Error(err)
+      }));
     }
   }
 

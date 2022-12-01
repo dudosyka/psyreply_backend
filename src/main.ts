@@ -17,6 +17,6 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
-  await app.listen(mainConf.isDev ? 8080 : 8082);
+  await app.listen(mainConf.isDev ? mainConf.devPort : mainConf.prodPort);
 }
 bootstrap();

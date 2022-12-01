@@ -16,4 +16,6 @@ export default {
         max: 999999,
         min: 111111,
     },
+    devPort: 8080,
+    prodPort: 8082
 }

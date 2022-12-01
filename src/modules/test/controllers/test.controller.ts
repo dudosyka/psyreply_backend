@@ -42,18 +42,13 @@ export class TestController {
     return await this.testProvider.remove(testId);
   }
 
-  @Post(':testId/move/:blockId')
-  public async move(@Param('testId') testId: number, @Param('blockId') blockId: number): Promise<boolean> {
-    return await this.testProvider.move(testId, blockId);
+  @Post('/move/:blockId')
+  public async move(@Body('tests') tests: number[], @Param('blockId') blockId: number): Promise<boolean> {
+    return await this.testProvider.move(tests, blockId);
   }
 
-  @Post(':testId/copy/:blockId')
-  public async copy(@Param('testId') testId: number, @Param('blockId') blockId: number): Promise<boolean> {
-    return await this.testProvider.move(testId, blockId);
-  }
-
-  @Post(':testId/remove/:blockId')
-  public async removeFromBlock(@Param('testId') testId: number, @Param('blockId') blockId: number, @Body('removeIfNoBlocks') confirmIfLast: boolean): Promise<boolean> {
-    return await this.testProvider.removeFromBlock(testId, blockId, confirmIfLast);
+  @Post('/remove/:blockId')
+  public async removeFromBlock(@Body('tests') tests: number[], @Param('blockId') blockId: number, @Body('removeIfNoBlocks') confirmIfLast: boolean): Promise<boolean> {
+    return await this.testProvider.removeFromBlock(tests, blockId, confirmIfLast);
   }
 }

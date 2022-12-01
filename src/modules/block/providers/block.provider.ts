@@ -67,11 +67,11 @@ export class BlockProvider {
     }));
   }
 
-  async remove(blockId: number): Promise<boolean> {
-    await this.testBlockProvider.removeAllRelations(0, blockId);
+  async remove(blocks: number[]): Promise<boolean> {
+    await this.testBlockProvider.removeAllRelations(0, blocks);
     return (await BlockModel.destroy({
       where: {
-        id: blockId
+        id: blocks
       }
     })) > 0;
   }
@@ -121,17 +121,28 @@ export class BlockProvider {
     return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests), host));
   }
 
-  async copyToCompany(blockId: number, companyId: any, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel> {
-    const block = await this.getOne(blockId, true);
-    if (!block) {
-      throw new ModelNotFoundException(BlockModel, blockId);
-    }
-
-    return await this.createModel({
-      name: block.name,
-      company_id: parseInt(companyId),
-      tests: await this.testBlockProvider.getTests(block.id)
-    }, transaction);
+  async copyToCompany(blocks: number[], companyId: any, transaction: {transaction: Transaction} = {transaction: null}): Promise<BlockModel[]> | never {
+    return await (new Promise(async (resolve, reject) => {
+      await this.sequelize.transaction(async t => {
+        const host = transaction.transaction ? transaction : { transaction: t };
+        await Promise.all(blocks.map(async blockId => {
+          const block = await this.getOne(blockId, true);
+          if (!block) {
+            throw new ModelNotFoundException(BlockModel, blockId);
+          }
+          return await this.createModel({
+            name: block.name,
+            company_id: parseInt(companyId),
+            tests: await this.testBlockProvider.getTests(block.id)
+          }, host).catch(err => {
+            throw err;
+          }).then(block => block);
+        })).catch(err => {
+          host.transaction.rollback();
+          reject(err);
+        }).then(data => data ? resolve(data) : resolve(null));
+      }).catch(err => reject(err));
+    }));
   }
 
   async onCompanyRemove(companyId: number, removeBlocks: boolean): Promise<boolean> {
@@ -141,7 +152,7 @@ export class BlockProvider {
           company_id: companyId
         }
       })).map(async el => {
-        await this.remove(el.id);
+        await this.remove([el.id]);
       }));
       return true;
     } else {

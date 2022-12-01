@@ -19,7 +19,7 @@ export class LoggerController {
           name: el.name,
           message: el.message,
           stack: JSON.parse(el.stack),
-          image: el.image,
+          // image: el.image,
           timestamp: el.createdAt
         }
       });
