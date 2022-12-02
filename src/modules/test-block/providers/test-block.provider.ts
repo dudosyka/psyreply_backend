@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/sequelize";
 import { TestBlockModel } from "../models/test-block.model";
 import { TestBlockCreateDto } from "../dtos/test-block-create.dto";
 import { Transaction } from "sequelize";
+import { TransactionUtil } from "../../../utils/TransactionUtil";
 
 @Injectable()
 export class TestBlockProvider {
@@ -13,7 +14,7 @@ export class TestBlockProvider {
 
   public async create(createDto: TestBlockCreateDto[], host: { transaction: Transaction }): Promise<TestBlockModel[]> {
     const records = [];
-    createDto.map(el => records.push({ ...el }))
+    createDto.map(el => records.push({ ...el }));
     return await TestBlockModel.bulkCreate(records, host);
   }
 
@@ -32,12 +33,12 @@ export class TestBlockProvider {
   }
 
   public async removeAllRelations(testId: number = 0, blocks: number[] = null): Promise<boolean> {
-    let whereClause = {}
+    let whereClause = {};
     if (testId != 0) {
-      whereClause['test_id'] = testId;
+      whereClause["test_id"] = testId;
     }
     if (blocks) {
-      whereClause['block_id'] = blocks;
+      whereClause["block_id"] = blocks;
     }
     return (await TestBlockModel.destroy({
       where: whereClause
@@ -49,7 +50,7 @@ export class TestBlockProvider {
       where: {
         test_id: testId
       }
-    })).map(el => el.block_id)
+    })).map(el => el.block_id);
   }
 
   public async getTests(blockId: number): Promise<number[]> {
@@ -57,6 +58,18 @@ export class TestBlockProvider {
       where: {
         block_id: blockId
       }
-    })).map(el => el.test_id)
+    })).map(el => el.test_id);
+  }
+
+  async test() {
+    await TestBlockModel.update({
+      test_id: 1
+    }, {
+      where: {
+        id: 3891280391
+      },
+      ...TransactionUtil.getHost()
+    });
+    throw new Error("test error");
   }
 }

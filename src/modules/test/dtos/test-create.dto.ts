@@ -5,22 +5,22 @@ import { ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 export class TestCreateDto {
   @IsNotEmpty()
   @IsNumber()
-  type: number
+  type: number;
 
   @IsNotEmpty()
-  title: string
+  title: string;
 
   @IsNumber()
-  metric: number
+  metric: number;
 
   @IsNotEmpty()
   @Matches(ShlyapaMarkupUtil.validate_pattern)
-  formula: string
+  formula: string;
 
-  block_id: number
+  block_id: number;
 
   @IsNotEmpty()
   @ArrayMinSize(1)
   @ArrayMaxSize(20)
-  questions: QuestionDto[]
+  questions: QuestionDto[];
 }

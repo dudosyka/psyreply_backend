@@ -38,20 +38,20 @@ export class TestProvider {
         }, host);
         await this.questionProvider.add(test.questions, testModel, host).then(async () => {
           if (test.block_id) {
-            await this.blockProvider.appendTests(test.block_id, [ testModel.id ], host).catch(err => {
-              host.transaction.rollback()
-              reject(err)
+            await this.blockProvider.appendTests(test.block_id, [testModel.id], host).catch(err => {
+              host.transaction.rollback();
+              reject(err);
             });
           }
-          resolve(testModel)
+          resolve(testModel);
         }).catch(err => {
-          host.transaction.rollback()
-          reject(err)
+          host.transaction.rollback();
+          reject(err);
         });
 
       }).catch(err => {
-        reject(err)
-      })
+        reject(err);
+      });
     }));
   }
 
@@ -68,7 +68,7 @@ export class TestProvider {
   async update(testUpdate: TestUpdateDto): Promise<TestModel> {
     return await (new Promise<TestModel>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
-        const host = { transaction: t }
+        const host = { transaction: t };
         const testModel = await TestModel.findOne({
           where: {
             id: testUpdate.id
@@ -81,16 +81,16 @@ export class TestProvider {
           ...onUpdate
         });
         await this.questionProvider.removeByTest(testUpdate.id);
-        await this.questionProvider.add(questions, testModel, host).then(() => resolve(testModel)).catch(err => reject(err))
+        await this.questionProvider.add(questions, testModel, host).then(() => resolve(testModel)).catch(err => reject(err));
         return testModel;
-      }).catch(err => reject(err))
-    }))
+      }).catch(err => reject(err));
+    }));
   }
 
   async move(tests: number[], blockId: number, exclude: boolean = false): Promise<boolean> {
     return await (new Promise<boolean>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
-        const host = { transaction: t }
+        const host = { transaction: t };
         await Promise.all(tests.map(async testId => {
           const testModel = await TestModel.findOne({
             where: {
@@ -100,29 +100,29 @@ export class TestProvider {
           // TODO: Remove...
           if (exclude)
             await this.blockProvider.excludeTest(blockId, testId, host);
-          await this.blockProvider.appendTests(blockId, [ testModel.id ], host).then(() => resolve(true)).catch(err => {
+          await this.blockProvider.appendTests(blockId, [testModel.id], host).then(() => resolve(true)).catch(err => {
             throw err;
           });
         })).catch(err => {
-          host.transaction.rollback()
-          reject(err)
+          host.transaction.rollback();
+          reject(err);
         });
-      }).catch(err => reject(err))
-    }))
+      }).catch(err => reject(err));
+    }));
   }
 
   async removeFromBlock(tests: number[], blockId: number, confirmIfLast: boolean): Promise<boolean> {
     return await (new Promise<boolean>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
-        const host = { transaction: t }
+        const host = { transaction: t };
         await Promise.all(tests.map(async testId => {
           await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).then(() => resolve(true)).catch(err => {
-            throw err
+            throw err;
           });
         })).catch(err => {
           host.transaction.rollback();
           reject(err);
-        })
+        });
         // Now tests can live without blocks
         // if (leftBlocksCount <= 1 && confirmIfLast) {
         //   await this.questionProvider.removeByTest(testId);
@@ -135,14 +135,6 @@ export class TestProvider {
         // }
       });
     }));
-  }
-
-  private async getExceptBlock(blockId: number): Promise<TestModel[]> {
-    const tests: number[] = (await this.blockProvider.includes(blockId)).map(el => el.id);
-    const allTests = await this.getAll({});
-    return allTests.filter(test => {
-      return !(tests.includes(test.id));
-    })
   }
 
   async getAll(filters: TestFilterDto): Promise<TestModel[]> {
@@ -162,7 +154,10 @@ export class TestProvider {
   }
 
   async getOne(testId: number): Promise<TestModel> {
-    const model = await TestModel.findOne({where:{id: testId}, include: [QuestionTypeModel, MetricModel, QuestionModel]})
+    const model = await TestModel.findOne({
+      where: { id: testId },
+      include: [QuestionTypeModel, MetricModel, QuestionModel]
+    });
     if (model)
       return model;
     throw new NotFoundException("Test not found");
@@ -181,21 +176,21 @@ export class TestProvider {
         //We found question of formula which have relative_id that we need
         if (el.relative_id == relative_id) {
           //We get answer arrays from Dto
-          let passDtoQuestion = test.answers.filter(quest => quest.question_id == el.id)[0]
+          let passDtoQuestion = test.answers.filter(quest => quest.question_id == el.id)[0];
           //We get answer array from question
           const answers = JSON.parse(el.value);
           answers.map(el => {
             //if answer from dto contains some ids from question-answer we sum it
             if (passDtoQuestion.answer.includes(el.id))
               sum += parseInt(el.value);
-          })
+          });
         }
       });
       return sum;
-    }
+    };
     const testModel = await this.getOne(test.test_id);
     const formula: ShlyapaMarkup[] = this.markupUtil.parse(testModel.formula);
-    let testResult = 0
+    let testResult = 0;
     await Promise.all(formula.map(async el => {
       let itemValue = 0;
       let multiplier = 1;
@@ -218,15 +213,22 @@ export class TestProvider {
 
       if (el.item.type == OperandType.CONST) {
         itemValue += (el.item.value * el.item.sign) * multiplier;
-      }
-      else {
-        itemValue += (await getQuestionValue(el.item.value)) * el.item.sign * multiplier
+      } else {
+        itemValue += (await getQuestionValue(el.item.value)) * el.item.sign * multiplier;
       }
       testResult += itemValue;
     }));
     return {
       metric_id: testModel.metric.id,
       value: testResult
-    }
+    };
+  }
+
+  private async getExceptBlock(blockId: number): Promise<TestModel[]> {
+    const tests: number[] = (await this.blockProvider.includes(blockId)).map(el => el.id);
+    const allTests = await this.getAll({});
+    return allTests.filter(test => {
+      return !(tests.includes(test.id));
+    });
   }
 }

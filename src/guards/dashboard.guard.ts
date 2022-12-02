@@ -1,13 +1,13 @@
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
-import { Observable } from 'rxjs';
+import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { Observable } from "rxjs";
 import { TokenTypeEnum } from "../utils/token.type.enum";
 
 @Injectable()
 export class DashboardGuard implements CanActivate {
   canActivate(
-    context: ExecutionContext,
+    context: ExecutionContext
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    return request.user.tokenType == TokenTypeEnum.DASHBOARD
+    return request.user.tokenType == TokenTypeEnum.DASHBOARD;
   }
 }

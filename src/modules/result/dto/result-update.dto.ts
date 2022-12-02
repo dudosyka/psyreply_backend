@@ -4,5 +4,5 @@ type ResultDataType = {
 }
 
 export class ResultUpdateDto {
-  newData: ResultDataType[]
+  newData: ResultDataType[];
 }

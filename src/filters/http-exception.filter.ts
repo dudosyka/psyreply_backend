@@ -7,9 +7,9 @@ export class HttpExceptionFilter extends BaseFilter implements ExceptionFilter {
   catch(exception: HttpException, host: ArgumentsHost): any {
     const response = this.log(exception, host);
     this.sendResponse(response, exception.getStatus(), {
-      'status': exception.getStatus(),
-      'type': 'common',
-      'error': exception.message
-    })
+      "status": exception.getStatus(),
+      "type": "common",
+      "error": exception.message
+    });
   }
 }

@@ -2,10 +2,10 @@ import { IsNotEmpty } from "class-validator";
 
 export class BlockCreateDto {
   @IsNotEmpty()
-  name: string
+  name: string;
 
-  company_id?: number
+  company_id?: number;
 
   @IsNotEmpty()
-  tests: number[]
+  tests: number[];
 }

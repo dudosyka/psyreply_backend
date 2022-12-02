@@ -24,9 +24,9 @@ export class QuestionProvider {
         coins: el.coins,
         type_id: testModel.type_id,
         value: JSON.stringify(el.answers),
-        relative_id: el.relative_id,
-      })
-    })
+        relative_id: el.relative_id
+      });
+    });
     await QuestionModel.bulkCreate(records, host);
     return true;
   }
@@ -36,7 +36,7 @@ export class QuestionProvider {
       where: {
         test_id: testId
       }
-    })
+    });
   }
 
   async getOne(id: number): Promise<QuestionModel> {
@@ -52,6 +52,6 @@ export class QuestionProvider {
       where: {
         id: ids
       }
-    })
+    });
   }
 }

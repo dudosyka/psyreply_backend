@@ -3,25 +3,25 @@ import { Type } from "class-transformer";
 
 class AnswerPassDto {
   @IsNumber()
-  question_id: number
+  question_id: number;
 
-  @IsNumber({}, {each: true})
-  answer: number[]
+  @IsNumber({}, { each: true })
+  answer: number[];
 }
 
 export class TestPassDto {
   @IsNumber()
-  test_id: number
+  test_id: number;
 
   @IsArray()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => AnswerPassDto)
-  answers: AnswerPassDto[]
+  answers: AnswerPassDto[];
 }
 
 export class ResultCreateDto {
   @IsArray()
-  @ValidateNested({each: true})
+  @ValidateNested({ each: true })
   @Type(() => TestPassDto)
-  tests: TestPassDto[]
+  tests: TestPassDto[];
 }

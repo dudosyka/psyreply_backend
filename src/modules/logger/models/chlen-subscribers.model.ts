@@ -1,12 +1,12 @@
 import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 
 @Table
-export class ChlenSubscribersModel extends Model{
+export class ChlenSubscribersModel extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id: number
+  id: number;
 
   @Column
-  email: string
+  email: string;
 }

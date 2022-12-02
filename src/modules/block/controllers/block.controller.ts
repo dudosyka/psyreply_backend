@@ -10,20 +10,21 @@ import { SearchFilter } from "../../../filters/search.filter";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller('block')
+@Controller("block")
 export class BlockController {
   constructor(
     @Inject(BlockProvider) private blockProvider: BlockProvider
-  ) {}
-
-  @Post('all')
-  async getAll(@Body() filter: SearchFilter<BlockFilterDto>): Promise<BlockModel[]> {
-    return this.blockProvider.getAll(filter.filters)
+  ) {
   }
 
-  @Get(':blockId')
-  async getOne(@Param('blockId') blockId: number): Promise<BlockModel> | never {
-    const block = (await this.blockProvider.getOne(blockId))
+  @Post("all")
+  async getAll(@Body() filter: SearchFilter<BlockFilterDto>): Promise<BlockModel[]> {
+    return this.blockProvider.getAll(filter.filters);
+  }
+
+  @Get(":blockId")
+  async getOne(@Param("blockId") blockId: number): Promise<BlockModel> | never {
+    const block = (await this.blockProvider.getOne(blockId));
     if (block)
       return block;
     else
@@ -32,21 +33,26 @@ export class BlockController {
 
   @Post()
   async create(@Body() createDto: BlockCreateDto): Promise<BlockModel> {
-    return await this.blockProvider.createModel(createDto)
+    return await this.blockProvider.createModel(createDto);
   }
 
-  @Delete('')
-  async remove(@Body('blocks') blocks: number[]): Promise<boolean> {
+  @Delete("")
+  async remove(@Body("blocks") blocks: number[]): Promise<boolean> {
     return await this.blockProvider.remove(blocks);
   }
 
-  @Patch(':blockId')
-  async update(@Param('blockId') blockId: number, @Body() updateDto: BlockUpdateDto): Promise<BlockModel> {
+  @Patch(":blockId")
+  async update(@Param("blockId") blockId: number, @Body() updateDto: BlockUpdateDto): Promise<BlockModel> {
     return await this.blockProvider.update(blockId, updateDto);
   }
 
-  @Post('/copy/:companyId')
-  async copyToCompany(@Body('blocks') blocks: number[], @Param('companyId') companyId: number): Promise<BlockModel[] | void> {
-    return await this.blockProvider.copyToCompany(blocks, companyId)
+  @Post("/copy/:companyId")
+  async copyToCompany(@Body("blocks") blocks: number[], @Param("companyId") companyId: number): Promise<BlockModel[] | void> {
+    return await this.blockProvider.copyToCompany(blocks, companyId);
+  }
+
+  @Get("test/test")
+  async test() {
+    return await this.blockProvider.testTransactionHost();
   }
 }

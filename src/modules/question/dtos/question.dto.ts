@@ -5,5 +5,5 @@ export class QuestionDto {
   relative_id: number;
   coins: number;
   title: string;
-  picture: string
+  picture: string;
 }

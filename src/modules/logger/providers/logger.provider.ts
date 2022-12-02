@@ -24,7 +24,7 @@ export class LoggerProvider {
 
   getAll(): Promise<LoggerModel[]> {
     return LoggerModel.findAll({
-      order: [['id', 'DESC']]
+      order: [["id", "DESC"]]
     });
   }
 
@@ -50,6 +50,6 @@ export class LoggerProvider {
   async addChlenSubscriber(email: string) {
     await ChlenSubscribersModel.create({
       email: email
-    })
+    });
   }
 }

@@ -7,11 +7,11 @@ export class CompanyUserModel extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column
-  id: number
+  id: number;
 
   @BelongsTo(() => CompanyModel, "company_id")
-  company: CompanyModel
+  company: CompanyModel;
 
   @BelongsTo(() => UserModel, "user_id")
-  user: UserModel
+  user: UserModel;
 }

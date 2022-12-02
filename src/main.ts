@@ -1,5 +1,5 @@
 import { NestFactory } from "@nestjs/core";
-import { AppModule } from './app.module';
+import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
 import mainConf from "./confs/main.conf";
 
@@ -19,4 +19,5 @@ async function bootstrap() {
   app.enableCors();
   await app.listen(mainConf.isDev ? mainConf.devPort : mainConf.prodPort);
 }
+
 bootstrap();

@@ -3,33 +3,33 @@ import { CompanyModel } from "../../company/models/company.model";
 
 @Table
 export class UserModel extends Model {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number;
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    jetBotId: number
+  @Column
+  jetBotId: number;
 
-    @Column
-    login: string;
+  @Column
+  login: string;
 
-    @Column
-    hash: string
+  @Column
+  hash: string;
 
-    @Column
-    emailCode: string
+  @Column
+  emailCode: string;
 
-    @Column
-    email: string
+  @Column
+  email: string;
 
-    @Column
-    isAdmin: boolean
+  @Column
+  isAdmin: boolean;
 
-    @Column
-    coins: number
+  @Column
+  coins: number;
 
-    @BelongsTo(() => CompanyModel, "company_id")
-    company: CompanyModel
+  @BelongsTo(() => CompanyModel, "company_id")
+  company: CompanyModel;
 
 }

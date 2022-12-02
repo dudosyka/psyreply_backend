@@ -1,9 +1,9 @@
-import { Controller, Get, UseGuards, Request, Post, Param, Inject } from "@nestjs/common";
+import { Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { UserProvider } from "../providers/user.provider";
 
-@Controller('user')
+@Controller("user")
 export class UserController {
 
   constructor(
@@ -19,7 +19,7 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post(":userId/move/:companyId")
-  moveToCompany(@Param('userId') userId: number, @Param('companyId') companyId: number): Promise<boolean> {
+  moveToCompany(@Param("userId") userId: number, @Param("companyId") companyId: number): Promise<boolean> {
     return this.userProvider.moveToCompany(userId, companyId);
   }
 }

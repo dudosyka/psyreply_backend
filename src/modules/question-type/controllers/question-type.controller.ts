@@ -5,11 +5,12 @@ import { QuestionTypeProvider } from "../providers/question-type.provider";
 import { QuestionTypeModel } from "../models/question-type.model";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller('question-type')
+@Controller("question-type")
 export class QuestionTypeController {
   constructor(
     @Inject(QuestionTypeProvider) private questionTypeProvider: QuestionTypeProvider
-  ) {}
+  ) {
+  }
 
   @Get()
   public getAll(): Promise<QuestionTypeModel[]> {

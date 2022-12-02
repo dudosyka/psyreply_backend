@@ -5,16 +5,16 @@ export class LoggerModel extends Model {
   @PrimaryKey
   @AutoIncrement
   @Column
-  id: number
+  id: number;
 
   @Column
-  name: string
+  name: string;
 
   @Column
-  message: string
+  message: string;
 
   @Column({ type: DataType.TEXT })
-  stack: string
+  stack: string;
 
   // @Column
   // image: string;

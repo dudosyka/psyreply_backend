@@ -19,31 +19,18 @@ export type ShlyapaMarkup = {
 
 @Injectable()
 export class ShlyapaMarkupUtil {
-  static validate_pattern = '^(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+$'
-  static parse_pattern = '((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\)))'
-  private static parse_item = new RegExp('(\\d+)|(\\$\\d+)', 'gm')
-  private static parse_var_id = new RegExp('\\d+', 'gm')
-  private static parse_operation = new RegExp('[+*\-]', 'gm')
-
-  private getOperand(el: string, item: string): Operand {
-    let value = parseInt(item.match(ShlyapaMarkupUtil.parse_var_id)[0])
-    let sign = 1
-    let type = item[0] == "$" ? OperandType.VARIABLE : OperandType.CONST;
-    if (el[0] == '-')
-      sign = -1;
-    return {
-      value,
-      sign,
-      type
-    }
-  }
+  static validate_pattern = "^(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+$";
+  static parse_pattern = "((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\)))";
+  private static parse_item = new RegExp("(\\d+)|(\\$\\d+)", "gm");
+  private static parse_var_id = new RegExp("\\d+", "gm");
+  private static parse_operation = new RegExp("[+*\-]", "gm");
 
   public parse(markup: string): ShlyapaMarkup[] {
-    const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, "gm")
+    const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, "gm");
     return markup.match(regex).map(el => {
-      let res:ShlyapaMarkup = {item: null, sum: null, composition: null};
+      let res: ShlyapaMarkup = { item: null, sum: null, composition: null };
       //Cut ( ) if exists
-      if (el[0] == '(') {
+      if (el[0] == "(") {
         el = el.substring(1, el.length - 1);
       }
       const item = el.match(ShlyapaMarkupUtil.parse_item);
@@ -57,13 +44,13 @@ export class ShlyapaMarkupUtil {
       else {
         //If we have sign before both operands
         if (sign.length > 1)
-          res.item = this.getOperand(sign[0] + item[0], item[0])
+          res.item = this.getOperand(sign[0] + item[0], item[0]);
         else
-          res.item = this.getOperand(item[0], item[0])
+          res.item = this.getOperand(item[0], item[0]);
         //If we have two operands after we process first, we place main operator on first place
         if (sign.length > 1)
-          sign[0] = sign[1]
-        if (sign[0] == "-" || sign[0] == '+') {
+          sign[0] = sign[1];
+        if (sign[0] == "-" || sign[0] == "+") {
           res.sum = this.getOperand(sign[0] + item[1], item[1]);
         } else {
           res.composition = this.getOperand(item[1], item[1]);
@@ -71,5 +58,18 @@ export class ShlyapaMarkupUtil {
         return res;
       }
     });
+  }
+
+  private getOperand(el: string, item: string): Operand {
+    let value = parseInt(item.match(ShlyapaMarkupUtil.parse_var_id)[0]);
+    let sign = 1;
+    let type = item[0] == "$" ? OperandType.VARIABLE : OperandType.CONST;
+    if (el[0] == "-")
+      sign = -1;
+    return {
+      value,
+      sign,
+      type
+    };
   }
 }

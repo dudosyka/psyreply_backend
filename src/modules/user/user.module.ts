@@ -1,7 +1,7 @@
-import { Module } from '@nestjs/common';
-import { UserController } from './controllers/user.controller';
-import {SequelizeModule} from "@nestjs/sequelize";
-import {UserModel} from "./models/user.model";
+import { Module } from "@nestjs/common";
+import { UserController } from "./controllers/user.controller";
+import { SequelizeModule } from "@nestjs/sequelize";
+import { UserModel } from "./models/user.model";
 import { PassportModule } from "@nestjs/passport";
 import { LocalStrategy } from "../../strategies/local.strategy";
 import { JwtModule } from "@nestjs/jwt";
@@ -25,18 +25,19 @@ import { UserProvider } from "./providers/user.provider";
     PassportModule,
     JwtModule.register({
       secret: mainConf.jwtConstants.secret,
-      signOptions: { expiresIn: '60s' },
+      signOptions: { expiresIn: "60s" }
     }),
     MailerModule.forRoot({
       transport: mailerConf.transporterOptions,
       defaults: {
-        from: mailerConf.sendOptions.from,
-      },
+        from: mailerConf.sendOptions.from
+      }
     }),
     CompanyModule
   ],
   providers: [AuthService, UserProvider, LocalStrategy, JwtStrategy, BcryptUtil, MailerUtil, JwtUtil],
   controllers: [UserController, AuthController]
 })
-export class UserModule {}
+export class UserModule {
+}
 

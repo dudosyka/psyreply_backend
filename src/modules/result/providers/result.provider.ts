@@ -15,15 +15,16 @@ export class ResultProvider {
     @Inject(TestProvider) private testProvider: TestProvider,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
     private sequelize: Sequelize
-  ) {}
+  ) {
+  }
 
   public async pass(userId: number, blockId: number, passDto: ResultCreateDto): Promise<ResultModel> {
     return new Promise<ResultModel>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
-        const host = { transaction: t }
+        const host = { transaction: t };
         const data: TestResultDto[] = [];
         await Promise.all(passDto.tests.map(async test => {
-          const res = await this.testProvider.pass(test).catch(err => reject(err))
+          const res = await this.testProvider.pass(test).catch(err => reject(err));
           if (res)
             data.push(res);
         }));
@@ -34,8 +35,8 @@ export class ResultProvider {
           data: JSON.stringify(data),
           company_id: blockModel ? blockModel.company_id : null
         }, host));
-      })
-    })
+      });
+    });
   }
 
   public async getResults(filterDto: ResultFitlerDto): Promise<ResultModel[]> {
@@ -49,7 +50,7 @@ export class ResultProvider {
       return results.filter(el => {
         const date = `${el.createdAt.getFullYear()}-${(el.createdAt.getMonth() + 1)}-${el.createdAt.getDate()}`;
         return date == createdAt;
-      })
+      });
     } else
       return results;
   }
@@ -63,11 +64,11 @@ export class ResultProvider {
       });
 
       if (!resModel)
-        reject(new ModelNotFoundException(ResultModel, resultId))
+        reject(new ModelNotFoundException(ResultModel, resultId));
 
       resModel.data = JSON.stringify(updateDto);
       await resModel.save();
       resolve(resModel);
-    })
+    });
   }
 }

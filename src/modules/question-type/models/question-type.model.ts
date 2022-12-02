@@ -2,11 +2,11 @@ import { AutoIncrement, Column, Model, PrimaryKey, Table } from "sequelize-types
 
 @Table
 export class QuestionTypeModel extends Model {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    name: string
+  @Column
+  name: string;
 }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module } from "@nestjs/common";
 import { LoggerController } from "./controllers/logger.controller";
 import { SequelizeModule } from "@nestjs/sequelize";
 import { LoggerModel } from "./models/logger.model";
@@ -15,4 +15,5 @@ import { ChlenSubscribersModel } from "./models/chlen-subscribers.model";
   ],
   exports: [LoggerProvider]
 })
-export class LoggerModule {}
+export class LoggerModule {
+}

@@ -5,20 +5,20 @@ import { TestBlockModel } from "../../test-block/models/test-block.model";
 
 @Table
 export class BlockModel extends Model {
-    @PrimaryKey
-    @AutoIncrement
-    @Column
-    id: number;
+  @PrimaryKey
+  @AutoIncrement
+  @Column
+  id: number;
 
-    @Column
-    name: string
+  @Column
+  name: string;
 
-    @Column
-    company_id: number
+  @Column
+  company_id: number;
 
-    @BelongsTo(() => CompanyModel, "company_id")
-    company: CompanyModel
+  @BelongsTo(() => CompanyModel, "company_id")
+  company: CompanyModel;
 
-    @BelongsToMany(() => TestModel, () => TestBlockModel, "block_id", "test_id")
-    tests: TestModel[]
+  @BelongsToMany(() => TestModel, () => TestBlockModel, "block_id", "test_id")
+  tests: TestModel[];
 }

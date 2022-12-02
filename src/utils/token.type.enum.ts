@@ -1,5 +1,5 @@
 export enum TokenTypeEnum {
-    ADMIN,
-    BLOCK,
-    DASHBOARD
+  ADMIN,
+  BLOCK,
+  DASHBOARD
 }

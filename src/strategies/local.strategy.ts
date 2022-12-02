@@ -1,6 +1,6 @@
-import { Strategy } from 'passport-local';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Strategy } from "passport-local";
+import { PassportStrategy } from "@nestjs/passport";
+import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { AuthService } from "../modules/user/providers/auth.service";
 import { UserModel } from "../modules/user/models/user.model";
 
@@ -20,8 +20,8 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    user.emailCode = "";
-    await user.save();
+    // user.emailCode = "";
+    // await user.save();
     return user;
   }
 }

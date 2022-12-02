@@ -7,4 +7,5 @@ class Filter {
   user_id?: number;
 }
 
-export class ResultFitlerDto extends SearchFilter<Filter> {}
+export class ResultFitlerDto extends SearchFilter<Filter> {
+}

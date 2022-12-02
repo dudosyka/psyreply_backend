@@ -5,11 +5,12 @@ import { MetricProvider } from "../providers/metric.provider";
 import { MetricModel } from "../models/metric.model";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller('metric')
+@Controller("metric")
 export class MetricController {
   constructor(
     @Inject(MetricProvider) private metricProvider: MetricProvider
-  ) {}
+  ) {
+  }
 
   @Get()
   public getAll(): Promise<MetricModel[]> {

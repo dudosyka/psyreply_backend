@@ -6,7 +6,8 @@ import { MetricModel } from "../models/metric.model";
 export class MetricProvider {
   constructor(
     @InjectModel(MetricModel) private metricModel: MetricModel
-  ) {}
+  ) {
+  }
 
   getAll(): Promise<MetricModel[]> {
     return MetricModel.findAll();

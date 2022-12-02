@@ -1,19 +1,19 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import {SequelizeModule} from "@nestjs/sequelize";
-import {default as main} from './confs/main.conf';
-import {default as db} from "./confs/db.conf";
-import { UserModule } from './modules/user/user.module';
-import { TestModule } from './modules/test/test.module';
-import { ResultModule } from './modules/result/result.module';
-import { QuestionModule } from './modules/question/question.module';
-import { MetricModule } from './modules/metric/metric.module';
-import { BlockModule } from './modules/block/block.module';
-import { QuestionTypeModule } from './modules/question-type/question-type.module';
-import { TestBlockModule } from './modules/test-block/test-block.module';
-import { CompanyModule } from './modules/company/company.module';
-import { LoggerModule } from './modules/logger/logger.module';
+import { Module } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { SequelizeModule } from "@nestjs/sequelize";
+import { default as main } from "./confs/main.conf";
+import { default as db } from "./confs/db.conf";
+import { UserModule } from "./modules/user/user.module";
+import { TestModule } from "./modules/test/test.module";
+import { ResultModule } from "./modules/result/result.module";
+import { QuestionModule } from "./modules/question/question.module";
+import { MetricModule } from "./modules/metric/metric.module";
+import { BlockModule } from "./modules/block/block.module";
+import { QuestionTypeModule } from "./modules/question-type/question-type.module";
+import { TestBlockModule } from "./modules/test-block/test-block.module";
+import { CompanyModule } from "./modules/company/company.module";
+import { LoggerModule } from "./modules/logger/logger.module";
 import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 import { HttpExceptionFilter } from "./filters/http-exception.filter";
@@ -39,7 +39,7 @@ const db_conf = main.isDev ? db.dev : db.prod;
     QuestionTypeModule,
     TestBlockModule,
     CompanyModule,
-    LoggerModule,
+    LoggerModule
   ],
   controllers: [AppController],
   providers: [
@@ -47,16 +47,17 @@ const db_conf = main.isDev ? db.dev : db.prod;
     BcryptUtil,
     {
       provide: APP_FILTER,
-      useClass: GlobalExceptionFilter,
+      useClass: GlobalExceptionFilter
     },
     {
       provide: APP_FILTER,
-      useClass: HttpExceptionFilter,
+      useClass: HttpExceptionFilter
     },
     {
       provide: APP_FILTER,
-      useClass: DatabaseErrorFilter,
-    },
-  ],
+      useClass: DatabaseErrorFilter
+    }
+  ]
 })
-export class AppModule {}
+export class AppModule {
+}
