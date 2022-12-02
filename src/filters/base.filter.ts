@@ -22,6 +22,6 @@ export class BaseFilter {
   }
 
   sendResponse(response: Response, status: number, body: any) {
-    response.status(status).send(JSON.stringify(body));
+    response.status(status).contentType('json').send(JSON.stringify(body));
   }
 }

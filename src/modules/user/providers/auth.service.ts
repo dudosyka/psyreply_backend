@@ -7,6 +7,8 @@ import {MailerUtil} from "../../../utils/mailer.util";
 import mainConf from "../../../confs/main.conf";
 import {TokenOutputDto} from "../dtos/auth/token-output.dto";
 import {JwtUtil} from "../../../utils/jwt.util";
+import { FailedAuthorizationException } from "../../../exceptions/failed-authorization.exception";
+import { Op } from "sequelize";
 
 @Injectable()
 export class AuthService {
@@ -49,27 +51,17 @@ export class AuthService {
     async firstStep(email: string, password: string): Promise<AuthOutputDto> {
         let user = await UserModel.findOne({
             where: {
-                email
+                [Op.or]: [{ email }, { login: email } ]
             }
         })
 
         if (!user)
-            return {
-                status: false,
-                data: {
-                    email: false,
-                }
-            };
+            throw new FailedAuthorizationException(false, true);
 
         const passwordCompare = await this.bcrypt.compare(password, user.hash).then(el => el).catch(() => false);
 
         if (!passwordCompare)
-            return {
-                status: false,
-                data: {
-                    password: false
-                }
-            }
+            throw new FailedAuthorizationException(true, false)
 
         await this.mailer.sendUserConfirmation((await this.genCode(user)));
 

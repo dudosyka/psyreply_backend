@@ -2,7 +2,7 @@ import * as dbConf from './db.conf'
 import * as mailerConf from './mailer.conf'
 
 export default {
-    isDev: false,
+    isDev: true,
     jwtConstants: {
         secret: "SECRET_KEY"
     },
