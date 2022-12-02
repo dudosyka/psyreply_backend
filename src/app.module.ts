@@ -18,6 +18,7 @@ import { APP_FILTER } from "@nestjs/core";
 import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 import { HttpExceptionFilter } from "./filters/http-exception.filter";
 import { DatabaseErrorFilter } from "./filters/database-error.filter";
+import { BcryptUtil } from "./utils/bcrypt.util";
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -43,6 +44,7 @@ const db_conf = main.isDev ? db.dev : db.prod;
   controllers: [AppController],
   providers: [
     AppService,
+    BcryptUtil,
     {
       provide: APP_FILTER,
       useClass: GlobalExceptionFilter,

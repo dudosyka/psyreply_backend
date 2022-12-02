@@ -14,6 +14,7 @@ export class AuthController {
     async firstStep(@Body() credentials: AuthInputDto): Promise<AuthOutputDto> {
         return this.authService.firstStep(credentials.email, credentials.password);
     }
+    // $2b$10$yCg8bueBdAb5GUwpGNN3QOGKk2zIwEOSuV1zMVF.TaEEbVTK35eDm
 
     @UseGuards(LocalAuthGuard)
     @Post('/code')

@@ -22,7 +22,7 @@ export class BcryptUtil {
     public compare(str: string, hash: string): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
             bcrypt.compare(str, hash, (err, ok) => {
-                if (err !== null && err !== undefined)
+                if (!ok)
                     reject(err)
                 resolve(ok)
             })

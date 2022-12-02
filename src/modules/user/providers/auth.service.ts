@@ -63,8 +63,7 @@ export class AuthService {
 
         const passwordCompare = await this.bcrypt.compare(password, user.hash).then(el => el).catch(() => false);
 
-        //TODO: Make negative
-        if (passwordCompare)
+        if (!passwordCompare)
             return {
                 status: false,
                 data: {
