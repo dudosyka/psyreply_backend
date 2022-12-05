@@ -1,5 +1,5 @@
 export class BlockFilterDto {
-  id?: number;
+  id?: number | number[];
   company_id?: number | null;
   exclude_test?: number;
 }

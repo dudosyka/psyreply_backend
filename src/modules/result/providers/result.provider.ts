@@ -8,12 +8,16 @@ import { TestResultDto } from "../../test/dtos/test-result.dto";
 import { ResultFitlerDto } from "../dto/result-fitler.dto";
 import { ResultUpdateDto } from "../dto/result-update.dto";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
+import { CompanyProvider } from "../../company/providers/company.provider";
+import { BlockModel } from "../../block/models/block.model";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Injectable()
 export class ResultProvider {
   constructor(
     @Inject(TestProvider) private testProvider: TestProvider,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
+    @Inject(BlockProvider) private companyProvider: CompanyProvider,
     private sequelize: Sequelize
   ) {
   }
@@ -29,9 +33,19 @@ export class ResultProvider {
             data.push(res);
         }));
         const blockModel = await this.blockProvider.getOne(blockId, true).catch(err => reject(err));
+        let block_title = "";
+        let company_title = "";
+        if (blockModel) {
+          block_title = blockModel.name;
+          const companyModel = await this.companyProvider.getOne(blockModel.company_id);
+          if (companyModel)
+            company_title = companyModel.name;
+        }
         resolve(await ResultModel.create({
           user_id: userId,
           block_id: blockId,
+          block_title,
+          company_title,
           data: JSON.stringify(data),
           company_id: blockModel ? blockModel.company_id : null
         }, host));
@@ -44,7 +58,8 @@ export class ResultProvider {
     const results = await ResultModel.findAll({
       where: {
         ...filter
-      }
+      },
+      include: [BlockModel, CompanyModel]
     });
     if (createdAt) {
       return results.filter(el => {
@@ -56,19 +71,17 @@ export class ResultProvider {
   }
 
   public async update(resultId: number, updateDto: ResultUpdateDto): Promise<ResultModel> {
-    return new Promise<ResultModel>(async (resolve, reject) => {
-      const resModel = await ResultModel.findOne({
-        where: {
-          id: resultId
-        }
-      });
-
-      if (!resModel)
-        reject(new ModelNotFoundException(ResultModel, resultId));
-
-      resModel.data = JSON.stringify(updateDto);
-      await resModel.save();
-      resolve(resModel);
+    const resModel = await ResultModel.findOne({
+      where: {
+        id: resultId
+      }
     });
+
+    if (!resModel)
+      throw new ModelNotFoundException(ResultModel, resultId);
+
+    resModel.data = JSON.stringify(updateDto);
+    await resModel.save();
+    return resModel;
   }
 }

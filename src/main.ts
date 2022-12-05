@@ -20,4 +20,4 @@ async function bootstrap() {
   await app.listen(mainConf.isDev ? mainConf.devPort : mainConf.prodPort);
 }
 
-bootstrap();
+bootstrap().then(() => {});

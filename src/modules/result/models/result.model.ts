@@ -17,6 +17,12 @@ export class ResultModel extends Model {
   user: UserModel;
 
   @Column
+  block_title: string;
+
+  @Column
+  company_title: string;
+
+  @Column
   data: string;
 
   @Column

@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { TestModel } from "../models/test.model";
 import { TestCreateDto } from "../dtos/test-create.dto";
@@ -13,6 +13,8 @@ import { QuestionModel } from "../../question/models/question.model";
 import { TestPassDto } from "../../result/dto/result-create.dto";
 import { OperandType, ShlyapaMarkup, ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 import { TestResultDto } from "../dtos/test-result.dto";
+import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 
 @Injectable()
 export class TestProvider {
@@ -26,115 +28,154 @@ export class TestProvider {
   }
 
   async create(test: TestCreateDto, authorId: number): Promise<TestModel> {
-    return await (new Promise<TestModel>(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        const testModel = await TestModel.create({
-          title: test.title,
-          author_id: authorId,
-          type_id: test.type,
-          formula: test.formula,
-          metric_id: test.metric
-        }, host);
-        await this.questionProvider.add(test.questions, testModel, host).then(async () => {
-          if (test.block_id) {
-            await this.blockProvider.appendTests(test.block_id, [testModel.id], host).catch(err => {
-              host.transaction.rollback();
-              reject(err);
-            });
-          }
-          resolve(testModel);
-        }).catch(err => {
-          host.transaction.rollback();
-          reject(err);
-        });
 
-      }).catch(err => {
-        reject(err);
-      });
-    }));
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const testModel = await TestModel.create({
+      title: test.title,
+      author_id: authorId,
+      type_id: test.type,
+      formula: test.formula,
+      metric_id: test.metric
+    }, TransactionUtil.getHost());
+
+    await this.questionProvider.add(test.questions, testModel).then(async () => {
+      if (test.block_id) {
+        await this.blockProvider.appendTests(test.block_id, [testModel.id]).catch(err => {
+          throw err;
+        });
+      }
+    }).catch(err => {
+      TransactionUtil.rollback();
+      throw err;
+    });
+
+    if (!isPropagate)
+      await TransactionUtil.commit();
+
+    return testModel;
   }
 
   async remove(testId: number): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
     await this.questionProvider.removeByTest(testId);
     await this.blockProvider.excludeTestFromAll(testId);
+
     return (await TestModel.destroy({
       where: {
         id: testId
-      }
+      },
+      ...TransactionUtil.getHost()
+    }).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    }).then(res => {
+      if (!isPropagate)
+        TransactionUtil.commit()
+      if (res > 0)
+        return res;
+      else
+        throw new ModelNotFoundException(TestModel, testId)
     })) > 0;
   }
 
   async update(testUpdate: TestUpdateDto): Promise<TestModel> {
-    return await (new Promise<TestModel>(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const testModel = await TestModel.findOne({
+      where: {
+        id: testUpdate.id
+      }
+    });
+    if (!testModel)
+      throw new ModelNotFoundException(TestModel, testUpdate.id);
+
+    const { questions, ...onUpdate } = testUpdate;
+    await testModel.update({
+      ...onUpdate
+    });
+
+    await this.questionProvider.removeByTest(testUpdate.id);
+    await this.questionProvider.add(questions, testModel).catch(err => {
+      throw err;
+    });
+
+    if (!isPropagate)
+      await TransactionUtil.commit()
+
+    return testModel;
+  }
+
+  async move(tests: number[], blockId: number): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    return await Promise.all(
+      tests.map(async testId => {
         const testModel = await TestModel.findOne({
           where: {
-            id: testUpdate.id
+            id: testId
           }
         });
+
         if (!testModel)
-          reject(new HttpException("Test not found", 404));
-        const { questions, ...onUpdate } = testUpdate;
-        await testModel.update({
-          ...onUpdate
+          throw new ModelNotFoundException(TestModel, testId);
+
+        await this.blockProvider.appendTests(blockId, [testModel.id]).catch(err => {
+          throw err;
         });
-        await this.questionProvider.removeByTest(testUpdate.id);
-        await this.questionProvider.add(questions, testModel, host).then(() => resolve(testModel)).catch(err => reject(err));
-        return testModel;
-      }).catch(err => reject(err));
-    }));
+      }
+    ))
+    .catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    }).then(() => {
+      TransactionUtil.commit();
+      return true;
+    });
   }
 
-  async move(tests: number[], blockId: number, exclude: boolean = false): Promise<boolean> {
-    return await (new Promise<boolean>(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        await Promise.all(tests.map(async testId => {
-          const testModel = await TestModel.findOne({
-            where: {
-              id: testId
-            }
-          });
-          // TODO: Remove...
-          if (exclude)
-            await this.blockProvider.excludeTest(blockId, testId, host);
-          await this.blockProvider.appendTests(blockId, [testModel.id], host).then(() => resolve(true)).catch(err => {
-            throw err;
-          });
-        })).catch(err => {
-          host.transaction.rollback();
-          reject(err);
-        });
-      }).catch(err => reject(err));
-    }));
-  }
+  async removeFromBlock(tests: number[], blockId: number): Promise<boolean> {
 
-  async removeFromBlock(tests: number[], blockId: number, confirmIfLast: boolean): Promise<boolean> {
-    return await (new Promise<boolean>(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        await Promise.all(tests.map(async testId => {
-          await this.blockProvider.excludeTest(testId, blockId, host, confirmIfLast).then(() => resolve(true)).catch(err => {
-            throw err;
-          });
-        })).catch(err => {
-          host.transaction.rollback();
-          reject(err);
-        });
-        // Now tests can live without blocks
-        // if (leftBlocksCount <= 1 && confirmIfLast) {
-        //   await this.questionProvider.removeByTest(testId);
-        //   await TestModel.destroy({
-        //     where: {
-        //       id: testId
-        //     },
-        //     transaction: host.transaction
-        //   }).then(() => resolve(true))
-        // }
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    return await Promise.all(tests.map(async testId => {
+      await this.blockProvider.excludeTest(testId, blockId).catch(err => {
+        throw err;
       });
-    }));
+    })).catch(err => {
+      TransactionUtil.rollback();
+      throw err;
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit()
+      return true;
+    });
   }
 
   async getAll(filters: TestFilterDto): Promise<TestModel[]> {
@@ -158,9 +199,9 @@ export class TestProvider {
       where: { id: testId },
       include: [QuestionTypeModel, MetricModel, QuestionModel]
     });
-    if (model)
-      return model;
-    throw new NotFoundException("Test not found");
+    if (!model)
+      throw new ModelNotFoundException(TestModel, testId)
+    return model;
   }
 
   async pass(test: TestPassDto): Promise<TestResultDto> {
@@ -231,4 +272,5 @@ export class TestProvider {
       return !(tests.includes(test.id));
     });
   }
+
 }

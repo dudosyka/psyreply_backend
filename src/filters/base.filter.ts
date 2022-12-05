@@ -17,7 +17,7 @@ export class BaseFilter {
         message: exception.message,
         name: `${exception.name} ${request.url}`,
         stack: JSON.stringify(exception.stack.split("at").map(el => el.slice(0, el.length - 5)))
-      });
+      }).then(() => {});
     }
     return response;
   }

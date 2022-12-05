@@ -50,9 +50,4 @@ export class BlockController {
   async copyToCompany(@Body("blocks") blocks: number[], @Param("companyId") companyId: number): Promise<BlockModel[] | void> {
     return await this.blockProvider.copyToCompany(blocks, companyId);
   }
-
-  @Get("test/test")
-  async test() {
-    return await this.blockProvider.testTransactionHost();
-  }
 }

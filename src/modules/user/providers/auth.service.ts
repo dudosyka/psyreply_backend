@@ -5,7 +5,6 @@ import { BcryptUtil } from "../../../utils/bcrypt.util";
 import { AuthOutputDto } from "../dtos/auth/auth-output.dto";
 import { MailerUtil } from "../../../utils/mailer.util";
 import mainConf from "../../../confs/main.conf";
-import { TokenOutputDto } from "../dtos/auth/token-output.dto";
 import { JwtUtil } from "../../../utils/jwt.util";
 import { FailedAuthorizationException } from "../../../exceptions/failed-authorization.exception";
 import { Op } from "sequelize";
@@ -72,18 +71,18 @@ export class AuthService {
     };
   }
 
-  async secondStep(code: string): Promise<TokenOutputDto | boolean> {
-    const user = await UserModel.findOne({
-      where: {
-        emailCode: code
-      }
-    });
-
-    if (!user)
-      return false;
-    else
-      return {
-        token: this.jwt.signAdmin(user)
-      };
-  }
+  // async secondStep(code: string): Promise<TokenOutputDto | boolean> {
+  //   const user = await UserModel.findOne({
+  //     where: {
+  //       emailCode: code
+  //     }
+  //   });
+  //
+  //   if (!user)
+  //     return false;
+  //   else
+  //     return {
+  //       token: this.jwt.signAdmin(user)
+  //     };
+  // }
 }

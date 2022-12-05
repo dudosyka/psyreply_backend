@@ -7,11 +7,13 @@ import { TestModule } from "../test/test.module";
 import { BlockProvider } from "../block/providers/block.provider";
 import { TestProvider } from "../test/providers/test.provider";
 import { ResultProvider } from "./providers/result.provider";
+import { CompanyModule } from "../company/company.module";
+import { CompanyProvider } from "../company/providers/company.provider";
 
 @Module({
-  imports: [SequelizeModule.forFeature([ResultModel]), BlockModule, TestModule],
+  imports: [SequelizeModule.forFeature([ResultModel]), BlockModule, TestModule, CompanyModule],
   controllers: [ResultController],
-  providers: [ResultProvider, BlockProvider, TestProvider]
+  providers: [ResultProvider, BlockProvider, TestProvider, CompanyProvider]
 })
 export class ResultModule {
 }

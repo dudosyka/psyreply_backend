@@ -7,10 +7,11 @@ import { TestBlockCreateDto } from "../../test-block/dtos/test-block-create.dto"
 import { BlockFilterDto } from "../dtos/block-filter.dto";
 import { BlockUpdateDto } from "../dtos/block-update.dto";
 import { Sequelize } from "sequelize-typescript";
-import { Transaction } from "sequelize";
 import { TestModel } from "../../test/models/test.model";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { ResultModel } from "../../result/models/result.model";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Injectable()
 export class BlockProvider {
@@ -28,7 +29,7 @@ export class BlockProvider {
         where: {
           ...filters
         },
-        include: [TestModel]
+        include: [TestModel, CompanyModel]
       }).then(el => {
         return el.filter(block => {
           const tests = block.tests.map(el => el.id);
@@ -40,57 +41,132 @@ export class BlockProvider {
       where: {
         ...filters
       },
-      include: [TestModel]
+      include: [TestModel, CompanyModel]
     });
   }
 
   async getOne(blockId: number, rawData: boolean = false): Promise<BlockModel> {
-    return new Promise<BlockModel>(async (resolve) => {
-      resolve(BlockModel.findOne({
-        where: {
-          id: blockId
-        },
-        include: rawData ? [] : [TestModel]
-      }));
+    const block = await BlockModel.findOne({
+      where: {
+        id: blockId
+      },
+      include: rawData ? [] : [TestModel]
     });
+
+    if (!block)
+      throw new ModelNotFoundException(BlockModel, blockId);
+
+    return block;
   }
 
-  async createModel(createDto: BlockCreateDto, transaction: { transaction: Transaction } = { transaction: null }): Promise<BlockModel> {
-    return await (new Promise(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        const block = await BlockModel.create({
-          name: createDto.name,
-          company_id: createDto.company_id
-        }, transaction.transaction != null ? transaction : {}).catch(err => {
-          reject(err);
-          return block;
-        });
-        await this.appendTests(block.id, createDto.tests, transaction.transaction != null ? transaction : host).then(() => resolve(block)).catch(err => reject(err));
-      }).catch(err => {
-        reject(err);
-      });
-    }));
+  async createModel(createDto: BlockCreateDto): Promise<BlockModel> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const block = await BlockModel.create({
+      name: createDto.name,
+      company_id: createDto.company_id
+    }, TransactionUtil.getHost()).catch(err => {
+      throw err;
+    }).then(block => block);
+
+    await this.appendTests(block.id, createDto.tests).catch(err => {
+      throw err;
+    });
+
+    if (!isPropagate) {
+      await TransactionUtil.commit();
+    }
+
+    return block;
   }
 
   async remove(blocks: number[]): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
     await this.testBlockProvider.removeAllRelations(0, blocks);
-    return (await BlockModel.destroy({
-      where: {
-        id: blocks
-      }
-    })) > 0;
+
+
+    return await Promise.all(blocks.map(async id => {
+      const block = await BlockModel.findOne({
+        where: {
+          id
+        }
+      });
+      if (!block)
+        throw new ModelNotFoundException(BlockModel, id)
+
+      await ResultModel.update({
+        block_title: block.name
+      }, {
+        where: {
+          block_id: id
+        },
+        ...TransactionUtil.getHost()
+      });
+
+      await BlockModel.destroy({
+        where: {
+          id
+        },
+        ...TransactionUtil.getHost()
+      })
+    })).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
+      return true;
+    }).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    })
   }
 
   async update(blockId: number, updateDto: BlockUpdateDto): Promise<BlockModel> {
-    await BlockModel.update({
-      ...updateDto
-    }, {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const block = await BlockModel.findOne({
       where: {
-        id: blockId
+        id: blockId,
       }
     });
-    return await BlockModel.findOne({ where: { id: blockId } });
+    if (!block) {
+      if (!isPropagate)
+        await TransactionUtil.rollback();
+      throw new ModelNotFoundException(BlockModel, blockId);
+    }
+
+    await block.update({
+      ...updateDto
+    })
+
+    await ResultModel.update({
+      block_title: block.name
+    },{
+      where: {
+        block_id: blockId
+      },
+      ...TransactionUtil.getHost()
+    });
+
+    if (!isPropagate)
+      await TransactionUtil.commit();
+
+    return block;
   }
 
   async excludeTestFromAll(testId: number): Promise<boolean> {
@@ -112,11 +188,11 @@ export class BlockProvider {
     return tests;
   }
 
-  async excludeTest(testId: number, blockId: number, host: { transaction: Transaction }, confirmLast: boolean = false): Promise<boolean> {
-    return await this.testBlockProvider.exclude(testId, blockId, host, confirmLast);
+  async excludeTest(testId: number, blockId: number): Promise<boolean> {
+    return await this.testBlockProvider.exclude(testId, blockId);
   }
 
-  async appendTests(blockId: number, tests: number[], host: { transaction: Transaction }): Promise<boolean> {
+  async appendTests(blockId: number, tests: number[]): Promise<boolean> {
     const relation = (await this.testBlockProvider.getTests(blockId));
     tests = tests.filter(el => {
       if (relation.includes(el))
@@ -124,96 +200,43 @@ export class BlockProvider {
       else
         return true;
     });
-    return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests), host));
+    return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests)));
   }
 
-  async copyToCompany(blocks: number[], companyId: any, transaction: { transaction: Transaction } = { transaction: null }): Promise<BlockModel[]> | never {
+  async copyToCompany(blocks: number[], companyId: any): Promise<BlockModel[]> | never {
 
-    // if (!TransactionUtil.isSet())
-    //   TransactionUtil.setHost(await this.sequelize.transaction());
-    //
-    // return await Promise.all(blocks.map(async (blockId: number) => {
-    //
-    //   const block = await this.getOne(blockId, true);
-    //   if (!block)
-    //     throw new ModelNotFoundException(BlockModel, blockId);
-    //
-    //   return await this.createModel({
-    //     name: block.name,
-    //     company_id: companyId,
-    //     tests: await this.testBlockProvider.getTests(blockId)
-    //   }, TransactionUtil.getHost())
-    //     .catch(err => {
-    //       throw err;
-    //     })
-    //     .then(data => data);
-    //
-    // })).catch(err => {
-    //   TransactionUtil.rollback();
-    //   throw err;
-    // });
-
-    return await (new Promise(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = transaction.transaction ? transaction : { transaction: t };
-        await Promise.all(blocks.map(async blockId => {
-          const block = await this.getOne(blockId, true);
-          if (!block) {
-            throw new ModelNotFoundException(BlockModel, blockId);
-          }
-          return await this.createModel({
-            name: block.name,
-            company_id: parseInt(companyId),
-            tests: await this.testBlockProvider.getTests(block.id)
-          }, host).catch(err => {
-            throw err;
-          }).then(block => block);
-        })).catch(err => {
-          host.transaction.rollback();
-          reject(err);
-        }).then(data => data ? resolve(data) : resolve(null));
-      }).catch(err => reject(err));
-    }));
-  }
-
-  async onCompanyRemove(companyId: number, removeBlocks: boolean): Promise<boolean> {
-    if (removeBlocks) {
-      await Promise.all((await BlockModel.findAll({
-        where: {
-          company_id: companyId
-        }
-      })).map(async el => {
-        await this.remove([el.id]);
-      }));
-      return true;
-    } else {
-      return !!(await BlockModel.update({
-        company_id: null
-      }, {
-        where: {
-          company_id: companyId
-        }
-      }));
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-  }
+    return await Promise.all(blocks.map(async (blockId: number) => {
 
-  async testTransactionHost() {
-    TransactionUtil.setHost(await this.sequelize.transaction());
-    await BlockModel.update({
-      name: ""
-    }, {
-      where: {
-        id: 2
-      },
-      ...TransactionUtil.getHost()
-    });
-    await this.testBlockProvider.test().catch(err => {
-      TransactionUtil.rollback().catch(err => {
-        console.log(err);
-      });
+      const block = await this.getOne(blockId, true);
+      if (!block)
+        throw new ModelNotFoundException(BlockModel, blockId);
+
+      return await this.createModel({
+        name: block.name,
+        company_id: companyId,
+        tests: await this.testBlockProvider.getTests(blockId)
+      })
+        .catch(err => {
+          throw err;
+        })
+        .then(data => data);
+
+    })).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
       throw err;
+    }).then(async data => {
+      if (!isPropagate)
+        await TransactionUtil.commit();
+      return await this.getAll({ id: data.map(el => el.id) });
     });
+
   }
 
   private createTestBlockDto(blockId: number, tests: number[]): TestBlockCreateDto[] {

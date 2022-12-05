@@ -48,7 +48,7 @@ export class TestController {
   }
 
   @Post("/remove/:blockId")
-  public async removeFromBlock(@Body("tests") tests: number[], @Param("blockId") blockId: number, @Body("removeIfNoBlocks") confirmIfLast: boolean): Promise<boolean> {
-    return await this.testProvider.removeFromBlock(tests, blockId, confirmIfLast);
+  public async removeFromBlock(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<boolean> {
+    return await this.testProvider.removeFromBlock(tests, blockId);
   }
 }

@@ -30,7 +30,7 @@ export class CompanyController {
   }
 
   @Patch(":companyId")
-  public update(@Param("companyId") id: number, @Body("company") updateDto: CompanyUpdateDto): Promise<boolean> {
+  public update(@Param("companyId") id: number, @Body("company") updateDto: CompanyUpdateDto): Promise<CompanyModel> {
     return this.companyProvider.update(id, updateDto);
   }
 

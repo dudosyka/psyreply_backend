@@ -6,9 +6,11 @@ import { CompanyCreateDto } from "../dtos/company-create.dto";
 import { CompanyUpdateDto } from "../dtos/company-update.dto";
 import { BlockModel } from "../../block/models/block.model";
 import { Sequelize } from "sequelize-typescript";
-import { Transaction } from "sequelize";
 import { UserModel } from "../../user/models/user.model";
 import { CompanyUserModel } from "../models/company-user.model";
+import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
+import { ResultModel } from "../../result/models/result.model";
 
 @Injectable()
 export class CompanyProvider {
@@ -20,26 +22,39 @@ export class CompanyProvider {
   }
 
   public async create(createDto: CompanyCreateDto, inputBlocks: number[] = []): Promise<CompanyModel> {
-    return new Promise<CompanyModel>((resolve, reject) => {
-      this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        const company = await CompanyModel.create({
-          ...createDto
-        }, host);
-        await this.addBlocks(company.id, inputBlocks, host).then(() => resolve(company)).catch(err => {
-          host.transaction.rollback();
-          reject(err);
-        });
-      }).catch(err => reject(err));
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const company = await CompanyModel.create({
+      ...createDto
+    }, TransactionUtil.getHost());
+
+    await this.addBlocks(company.id, inputBlocks).catch(async err => {
+      if (!isPropagate)
+        await TransactionUtil.rollback();
+      throw err;
     });
+
+    if (!isPropagate)
+      await TransactionUtil.commit();
+
+    return company;
   }
 
-  public getOne(id: number): Promise<CompanyModel> {
-    return CompanyModel.findOne({
+  public async getOne(id: number): Promise<CompanyModel> {
+    const company = await CompanyModel.findOne({
       where: {
         id
-      }
+      },
+      include: [BlockModel]
     });
+    if (!company)
+      throw new ModelNotFoundException(CompanyModel, id);
+    return company;
   }
 
   public getAll(): Promise<CompanyModel[]> {
@@ -48,23 +63,83 @@ export class CompanyProvider {
     });
   }
 
-  public async update(id: number, updateDto: CompanyUpdateDto): Promise<boolean> {
-    return !!(await CompanyModel.update({
+  public async update(id: number, updateDto: CompanyUpdateDto): Promise<CompanyModel> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const company = await CompanyModel.findOne({
+      where: {
+        id
+      }
+    });
+
+    if (!company) {
+      if (!isPropagate)
+        await TransactionUtil.rollback();
+      throw new ModelNotFoundException(CompanyModel, id);
+    }
+
+    await company.update({
       ...updateDto
+    });
+
+    await ResultModel.update({
+      company_title: company.name
     }, {
       where: {
-        id
-      }
-    }));
+        company_id: id
+      },
+      ...TransactionUtil.getHost()
+    });
+
+    if (!isPropagate)
+      await TransactionUtil.commit();
+
+    return company;
   }
 
-  public async remove(id: number, removeBlocks: boolean = true): Promise<boolean> {
-    await this.blockProvider.onCompanyRemove(id, removeBlocks);
-    return (await CompanyModel.destroy({
+  public async remove(id: number): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const company = await this.getOne(id);
+
+    if (!company) {
+      if (!isPropagate)
+        await TransactionUtil.rollback();
+      throw new ModelNotFoundException(CompanyModel, id);
+    }
+
+    await ResultModel.update({
+      company_title: company.name
+    }, {
       where: {
-        id
-      }
-    })) > 0;
+        company_id: company.id
+      },
+      ...TransactionUtil.getHost()
+    });
+
+    await this.blockProvider.remove(company.blocks ? company.blocks.map(el => el.id) : []);
+
+    return await company.destroy({
+      ...TransactionUtil.getHost()
+    }).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
+      return true;
+    });
   }
 
   public async appendBlocks(id: number, blocks: number[]): Promise<boolean> {
@@ -85,10 +160,10 @@ export class CompanyProvider {
     }));
   }
 
-  private async addBlocks(id: number, blocks: number[], transaction: { transaction: Transaction } = { transaction: null }) {
+  private async addBlocks(id: number, blocks: number[]) {
     if (blocks.length > 0) {
-      return !!(await this.blockProvider.copyToCompany(blocks, id, transaction).catch(err => {
-        throw new Error(err);
+      return !!(await this.blockProvider.copyToCompany(blocks, id).catch(err => {
+        throw err;
       }));
     }
   }
