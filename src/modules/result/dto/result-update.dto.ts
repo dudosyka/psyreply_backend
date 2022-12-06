@@ -4,5 +4,6 @@ type ResultDataType = {
 }
 
 export class ResultUpdateDto {
+  approved: boolean;
   newData: ResultDataType[];
 }

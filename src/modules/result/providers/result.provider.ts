@@ -157,7 +157,10 @@ export class ResultProvider {
     if (!resModel)
       throw new ModelNotFoundException(ResultModel, resultId);
 
-    resModel.data = JSON.stringify(updateDto);
+    if (updateDto.newData)
+      resModel.data = JSON.stringify(updateDto.newData);
+    if (updateDto.approved != null)
+      resModel.approved = updateDto.approved
     await resModel.save();
     return resModel;
   }

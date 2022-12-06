@@ -258,7 +258,7 @@ export class BlockProvider {
     return this.authService.createBlockToken(blockModel, week);
   }
 
-  async createPassLink(blockId: number, week: number, userId: number) {
+  async createPassLink(blockId: number, week: number, jetBotId: number) {
     const blockModel = await BlockModel.findOne({
       where: {
         id: blockId
@@ -267,12 +267,12 @@ export class BlockProvider {
 
     const userModel = await UserModel.findOne({
       where: {
-        id: userId
+        jetBotId
       }
     });
 
     if (!userModel) {
-      throw new ModelNotFoundException(UserModel, userId)
+      throw new ModelNotFoundException(UserModel, jetBotId)
     }
 
     if (!blockModel) {
