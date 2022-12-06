@@ -9,6 +9,7 @@ import { JwtUtil } from "../../../utils/jwt.util";
 import { FailedAuthorizationException } from "../../../exceptions/failed-authorization.exception";
 import { Op } from "sequelize";
 import { BlockModel } from "../../block/models/block.model";
+import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 
 @Injectable()
 export class AuthService {
@@ -46,6 +47,20 @@ export class AuthService {
 
   async createUserBlockToken(user: UserModel, block: BlockModel): Promise<string> {
     return this.jwt.signUserBlock(user, block);
+  }
+
+  async assignUser(userId: number): Promise<string> {
+    const userModel = await UserModel.findOne({
+      where: {
+        id: userId
+      }
+    });
+
+    if (!userModel) {
+      throw new ModelNotFoundException(UserModel, userId);
+    }
+
+    return this.jwt.signUser(userModel);
   }
 
   genCode(user: UserModel): Promise<UserModel> {

@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { ResultProvider } from "../providers/result.provider";
 import { ResultModel } from "../models/result.model";
 import { ResultCreateDto } from "../dto/result-create.dto";
@@ -7,6 +7,7 @@ import { ResultFitlerDto } from "../dto/result-fitler.dto";
 import { ResultClientOutputDto } from "../dto/result-client-output.dto";
 import { ResultUpdateDto } from "../dto/result-update.dto";
 import { AdminGuard } from "../../../guards/admin.guard";
+import { DashboardGuard } from "../../../guards/dashboard.guard";
 
 @UseGuards(JwtAuthGuard)
 @Controller("result")
@@ -27,8 +28,9 @@ export class ResultController {
     return this.resultProvider.getResults(filters);
   }
 
-  @Post(":userId/all")
-  public async getUserResults(@Param("userId") userId: number): Promise<ResultClientOutputDto> {
+  @UseGuards(DashboardGuard)
+  @Get(":userId/all")
+  public async getUserResults(@Req() req, @Param("userId") userId: number): Promise<ResultClientOutputDto> {
     return this.resultProvider.getResultsClient(userId);
   }
 

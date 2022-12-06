@@ -25,7 +25,7 @@ import { UserProvider } from "./providers/user.provider";
     PassportModule,
     JwtModule.register({
       secret: mainConf.jwtConstants.secret,
-      signOptions: { expiresIn: "60s" }
+      signOptions: { expiresIn: "100d" }
     }),
     MailerModule.forRoot({
       transport: mailerConf.transporterOptions,

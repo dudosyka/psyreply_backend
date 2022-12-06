@@ -27,9 +27,15 @@ export class JwtUtil {
   public signUserBlock(user: UserModel, block: BlockModel): string {
     return this.jwtService.sign({
       sub: user.id,
-      isAdmin: user.isAdmin,
       tokenType: TokenTypeEnum.USER_BLOCK,
       blockId: block.id
     })
+  }
+
+  public signUser(user: UserModel): string {
+    return this.jwtService.sign({
+      sub: user.id,
+      tokenType: TokenTypeEnum.DASHBOARD,
+    });
   }
 }
