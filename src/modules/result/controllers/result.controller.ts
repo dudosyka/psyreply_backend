@@ -10,6 +10,7 @@ import { AdminGuard } from "../../../guards/admin.guard";
 import { DashboardGuard } from "../../../guards/dashboard.guard";
 import { BlockStatDto } from "../dto/block-stat.dto";
 import { BlockStatOutputDto } from "../dto/block-stat-output.dto";
+import { UserBlockGuard } from "../../../guards/user-block.guard";
 
 @UseGuards(JwtAuthGuard)
 @Controller("result")
@@ -19,9 +20,10 @@ export class ResultController {
   ) {
   }
 
+  @UseGuards(UserBlockGuard)
   @Post("/block/pass")
   public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResultModel> {
-    return this.resultProvider.pass(req.user.id, req.user.blockId, createDto);
+    return this.resultProvider.pass(req.user.id, req.user.blockId, req.user.week, createDto);
   }
 
   @UseGuards(AdminGuard)

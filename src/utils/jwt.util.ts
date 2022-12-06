@@ -17,20 +17,20 @@ export class JwtUtil {
     }, { expiresIn: "30d" });
   }
 
-  public signBlock(block: BlockModel): string {
+  public signBlock(block: BlockModel, week: number): string {
     return this.jwtService.sign({
       tokenType: TokenTypeEnum.BLOCK,
       blockId: block.id,
-      week: block.week
+      week
     })
   }
 
-  public signUserBlock(user: UserModel, block: BlockModel): string {
+  public signUserBlock(user: UserModel, week: number, block: BlockModel): string {
     return this.jwtService.sign({
       sub: user.id,
       tokenType: TokenTypeEnum.USER_BLOCK,
       blockId: block.id,
-      week: block.week
+      week
     })
   }
 

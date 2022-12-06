@@ -41,12 +41,12 @@ export class AuthService {
     };
   }
 
-  async createBlockToken(block: BlockModel): Promise<string> {
-    return this.jwt.signBlock(block)
+  async createBlockToken(block: BlockModel, week: number): Promise<string> {
+    return this.jwt.signBlock(block, week)
   }
 
-  async createUserBlockToken(user: UserModel, block: BlockModel): Promise<string> {
-    return this.jwt.signUserBlock(user, block);
+  async createUserBlockToken(user: UserModel, week: number, block: BlockModel): Promise<string> {
+    return this.jwt.signUserBlock(user, week, block);
   }
 
   async assignUser(userId: number): Promise<string> {

@@ -25,15 +25,16 @@ export class BlockController {
   }
 
   @UseGuards(AdminGuard)
-  @Get(":blockId/hash")
-  async createBlockToken(@Param("blockId") blockId: number): Promise<string> {
-    return this.blockProvider.createBlockHash(blockId);
+  @Post("hash")
+  async createBlockToken(@Body("blockId") blockId: number, @Body("week") week: number): Promise<string> {
+    return this.blockProvider.createBlockHash(blockId, week);
   }
 
   @UseGuards(BlockGuard)
   @Get("assign/:userId")
   async assignUserToBlockToken(@Req() req, @Param('userId') userId: number): Promise<string> {
-    const hash = await this.blockProvider.createPassLink(req.user.blockId, userId);
+    console.log(req.user)
+    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, userId);
     return 'https://test.psyreply.com?t=' + hash;
   }
 

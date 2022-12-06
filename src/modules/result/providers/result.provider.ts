@@ -18,13 +18,14 @@ import { BlockStatDto } from "../dto/block-stat.dto";
 import { GroupBlockStatModel } from "../models/group-block-stat.model";
 import { GroupModel } from "../../company/models/group.model";
 import { UserModel } from "../../user/models/user.model";
+import { TransactionUtil } from "../../../utils/TransactionUtil";
 
 @Injectable()
 export class ResultProvider {
   constructor(
     @Inject(TestProvider) private testProvider: TestProvider,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
-    @Inject(BlockProvider) private companyProvider: CompanyProvider,
+    @Inject(CompanyProvider) private companyProvider: CompanyProvider,
     private sequelize: Sequelize
   ) {
   }
@@ -35,36 +36,62 @@ export class ResultProvider {
     return (resultData.time_on_pass <= block.time);
   }
 
-  public async pass(userId: number, blockId: number, passDto: ResultCreateDto): Promise<ResultModel> {
-    return new Promise<ResultModel>(async (resolve, reject) => {
-      await this.sequelize.transaction(async t => {
-        const host = { transaction: t };
-        const data: TestResultDto[] = [];
-        await Promise.all(passDto.tests.map(async test => {
-          const res = await this.testProvider.pass(test).catch(err => reject(err));
-          if (res)
-            data.push(res);
-        }));
-        const blockModel = await this.blockProvider.getOne(blockId, true).then(res => res).catch(err => reject(err));
-        let block_title = "";
-        let company_title = "";
-        if (blockModel) {
-          block_title = blockModel.name;
-          const companyModel = await this.companyProvider.getOne(blockModel.company_id);
-          if (companyModel)
-            company_title = companyModel.name;
-        }
-        resolve(await ResultModel.create({
-          user_id: userId,
-          block_id: blockId,
-          block_title,
-          company_title,
-          approved: this.checkApproved(blockModel ? blockModel : null, passDto),
-          data: JSON.stringify(data),
-          company_id: blockModel ? blockModel.company_id : null
-        }, host));
+  public async pass(userId: number, blockId: number, week: number, passDto: ResultCreateDto): Promise<ResultModel> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction())
+    }
+
+    const data: TestResultDto[] = [];
+
+    await Promise.all(passDto.tests.map(async test => {
+      const res = await this.testProvider.pass(test).catch(err => {
+        if (!isPropagate)
+          TransactionUtil.rollback()
+        throw err;
       });
+      if (res)
+        data.push(res);
+    }));
+    const blockModel = await this.blockProvider.getOne(blockId, true).then(res => res).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback()
+      throw err;
     });
+    let block_title = "";
+    let company_title = "";
+    if (blockModel) {
+      block_title = blockModel.name;
+      const companyModel = await this.companyProvider.getOne(blockModel.company_id);
+      if (companyModel)
+        company_title = companyModel.name;
+    }
+
+    const resultData = {
+      user_id: userId,
+      block_id: blockId,
+      block_title,
+      company_title,
+      week,
+      time_on_pass: passDto.time_on_pass,
+      approved: await this.checkApproved(blockModel ? blockModel : null, passDto),
+      data: JSON.stringify(data),
+      company_id: blockModel ? blockModel.company_id : null
+    }
+    console.log(resultData)
+
+    return await ResultModel.create(resultData, TransactionUtil.getHost()).then(res => {
+      if (!isPropagate)
+        TransactionUtil.commit();
+      return res;
+    }).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    });
+
   }
 
   public async getResults(filterDto: ResultFitlerDto): Promise<ResultModel[]> {

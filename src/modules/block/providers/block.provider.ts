@@ -245,7 +245,7 @@ export class BlockProvider {
 
   }
 
-  async createBlockHash(blockId: number) {
+  async createBlockHash(blockId: number, week: number) {
     const blockModel = await BlockModel.findOne({
       where: {
         id: blockId
@@ -255,10 +255,10 @@ export class BlockProvider {
     if (!blockModel)
       throw new ModelNotFoundException(BlockModel, blockId)
 
-    return this.authService.createBlockToken(blockModel);
+    return this.authService.createBlockToken(blockModel, week);
   }
 
-  async createPassLink(blockId: number, userId: number) {
+  async createPassLink(blockId: number, week: number, userId: number) {
     const blockModel = await BlockModel.findOne({
       where: {
         id: blockId
@@ -279,7 +279,7 @@ export class BlockProvider {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
-    return await this.authService.createUserBlockToken(userModel, blockModel);
+    return await this.authService.createUserBlockToken(userModel, week, blockModel);
   }
 
   private createTestBlockDto(blockId: number, tests: number[]): TestBlockCreateDto[] {
