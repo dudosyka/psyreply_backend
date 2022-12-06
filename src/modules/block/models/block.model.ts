@@ -25,6 +25,9 @@ export class BlockModel extends Model {
   time: number;
 
   @Column
+  week: number;
+
+  @Column
   company_id: number;
 
   @BelongsTo(() => CompanyModel, "company_id")

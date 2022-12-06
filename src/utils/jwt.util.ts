@@ -20,7 +20,8 @@ export class JwtUtil {
   public signBlock(block: BlockModel): string {
     return this.jwtService.sign({
       tokenType: TokenTypeEnum.BLOCK,
-      blockId: block.id
+      blockId: block.id,
+      week: block.week
     })
   }
 
@@ -28,7 +29,8 @@ export class JwtUtil {
     return this.jwtService.sign({
       sub: user.id,
       tokenType: TokenTypeEnum.USER_BLOCK,
-      blockId: block.id
+      blockId: block.id,
+      week: block.week
     })
   }
 

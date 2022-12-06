@@ -34,6 +34,9 @@ export class ResultModel extends Model {
   @Column
   approved: boolean
 
+  @Column
+  week: number
+
   @BelongsTo(() => BlockModel, "block_id")
   block: BlockModel;
 

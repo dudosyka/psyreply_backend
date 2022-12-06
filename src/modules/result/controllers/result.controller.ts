@@ -8,6 +8,8 @@ import { ResultClientOutputDto } from "../dto/result-client-output.dto";
 import { ResultUpdateDto } from "../dto/result-update.dto";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { DashboardGuard } from "../../../guards/dashboard.guard";
+import { BlockStatDto } from "../dto/block-stat.dto";
+import { BlockStatOutputDto } from "../dto/block-stat-output.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller("result")
@@ -17,7 +19,7 @@ export class ResultController {
   ) {
   }
 
-  @Post("/pass")
+  @Post("/block/pass")
   public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResultModel> {
     return this.resultProvider.pass(req.user.id, req.user.blockId, createDto);
   }
@@ -26,6 +28,18 @@ export class ResultController {
   @Post("/all")
   public async getAll(@Body() filters: ResultFitlerDto): Promise<ResultModel[]> {
     return this.resultProvider.getResults(filters);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post("/calculate")
+  public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
+    return this.resultProvider.calculateBlockStat(blockStatDto);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post("/calculate/save")
+  public async saveBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
+    return this.resultProvider.saveBlockStat(blockStatDto);
   }
 
   @UseGuards(DashboardGuard)

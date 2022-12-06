@@ -5,6 +5,7 @@ class Filter {
   block_id?: number;
   createdAt?: string;
   user_id?: number;
+  week?: number;
 }
 
 export class ResultFitlerDto extends SearchFilter<Filter> {

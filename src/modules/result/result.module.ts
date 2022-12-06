@@ -9,9 +9,10 @@ import { TestProvider } from "../test/providers/test.provider";
 import { ResultProvider } from "./providers/result.provider";
 import { CompanyModule } from "../company/company.module";
 import { CompanyProvider } from "../company/providers/company.provider";
+import { GroupBlockStatModel } from "./models/group-block-stat.model";
 
 @Module({
-  imports: [SequelizeModule.forFeature([ResultModel]), BlockModule, TestModule, CompanyModule],
+  imports: [SequelizeModule.forFeature([ResultModel, GroupBlockStatModel]), BlockModule, TestModule, CompanyModule],
   controllers: [ResultController],
   providers: [ResultProvider, BlockProvider, TestProvider, CompanyProvider]
 })
