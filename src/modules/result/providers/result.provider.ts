@@ -11,6 +11,8 @@ import { ModelNotFoundException } from "../../../exceptions/model-not-found.exce
 import { CompanyProvider } from "../../company/providers/company.provider";
 import { BlockModel } from "../../block/models/block.model";
 import { CompanyModel } from "../../company/models/company.model";
+import { ResultClientOutputDto } from "../dto/result-client-output.dto";
+import { MetricModel } from "../../metric/models/metric.model";
 
 @Injectable()
 export class ResultProvider {
@@ -68,6 +70,39 @@ export class ResultProvider {
       });
     } else
       return results;
+  }
+
+  public async getResultsClient(userId: number): Promise<ResultClientOutputDto> {
+    const models = await this.getResults({ filters: { user_id: userId } });
+    const result = {
+      metrics: {}
+    };
+
+    await Promise.all(models.map(async el => {
+      const data = JSON.parse(el.data);
+      await Promise.all(data.map(async metric => {
+        // console.log(metric);
+        // console.log(metric['metric_id'])
+        const metricModel = await MetricModel.findOne({
+          where: {
+            id: metric["metric_id"]
+          }
+        });
+        if (metricModel) {
+          if (result.metrics[metricModel.id]) {
+            result.metrics[metricModel.id].values.push(metric.value)
+          } else {
+            result.metrics[metricModel.id] = {
+              name: metricModel.name,
+              values: [metric.value]
+            }
+          }
+        }
+      }));
+
+    }));
+
+    return result;
   }
 
   public async update(resultId: number, updateDto: ResultUpdateDto): Promise<ResultModel> {

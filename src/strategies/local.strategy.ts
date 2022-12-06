@@ -20,8 +20,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     if (!user) {
       throw new UnauthorizedException();
     }
-    // user.emailCode = "";
-    // await user.save();
+
     return user;
   }
 }

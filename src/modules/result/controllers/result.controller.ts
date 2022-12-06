@@ -16,9 +16,9 @@ export class ResultController {
   ) {
   }
 
-  @Post("/:blockId/pass")
+  @Post("/pass")
   public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResultModel> {
-    return this.resultProvider.pass(req.user.id, blockId, createDto);
+    return this.resultProvider.pass(req.user.id, req.user.blockId, createDto);
   }
 
   @UseGuards(AdminGuard)
@@ -28,8 +28,8 @@ export class ResultController {
   }
 
   @Post(":userId/all")
-  public async getUserResults(@Param("userId") userId: number): Promise<ResultClientOutputDto[]> {
-    return this.resultProvider.getResults({ filters: { user_id: userId } });
+  public async getUserResults(@Param("userId") userId: number): Promise<ResultClientOutputDto> {
+    return this.resultProvider.getResultsClient(userId);
   }
 
   @UseGuards(AdminGuard)

@@ -12,12 +12,16 @@ import { ModelNotFoundException } from "../../../exceptions/model-not-found.exce
 import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ResultModel } from "../../result/models/result.model";
 import { CompanyModel } from "../../company/models/company.model";
+import { AuthService } from "../../user/providers/auth.service";
+import { UserModel } from "../../user/models/user.model";
+import { QuestionModel } from "../../question/models/question.model";
 
 @Injectable()
 export class BlockProvider {
   constructor(
     @InjectModel(BlockModel) private blockModel: BlockModel,
     @Inject(TestBlockProvider) private testBlockProvider: TestBlockProvider,
+    @Inject(AuthService) private authService: AuthService,
     private sequelize: Sequelize
   ) {
   }
@@ -50,7 +54,7 @@ export class BlockProvider {
       where: {
         id: blockId
       },
-      include: rawData ? [] : [TestModel]
+      include: rawData ? [] : [{ model: TestModel, include: [ QuestionModel ] }]
     });
 
     if (!block)
@@ -237,6 +241,43 @@ export class BlockProvider {
       return await this.getAll({ id: data.map(el => el.id) });
     });
 
+  }
+
+  async createBlockHash(blockId: number) {
+    const blockModel = await BlockModel.findOne({
+      where: {
+        id: blockId
+      }
+    });
+
+    if (!blockModel)
+      throw new ModelNotFoundException(BlockModel, blockId)
+
+    return this.authService.createBlockToken(blockModel);
+  }
+
+  async createPassLink(blockId: number, userId: number) {
+    const blockModel = await BlockModel.findOne({
+      where: {
+        id: blockId
+      }
+    });
+
+    const userModel = await UserModel.findOne({
+      where: {
+        id: userId
+      }
+    });
+
+    if (!userModel) {
+      throw new ModelNotFoundException(UserModel, userId)
+    }
+
+    if (!blockModel) {
+      throw new ModelNotFoundException(BlockModel, blockId);
+    }
+
+    return await this.authService.createUserBlockToken(userModel, blockModel);
   }
 
   private createTestBlockDto(blockId: number, tests: number[]): TestBlockCreateDto[] {

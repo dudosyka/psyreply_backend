@@ -8,6 +8,7 @@ import mainConf from "../../../confs/main.conf";
 import { JwtUtil } from "../../../utils/jwt.util";
 import { FailedAuthorizationException } from "../../../exceptions/failed-authorization.exception";
 import { Op } from "sequelize";
+import { BlockModel } from "../../block/models/block.model";
 
 @Injectable()
 export class AuthService {
@@ -37,6 +38,14 @@ export class AuthService {
     return {
       token: this.jwt.signAdmin(user)
     };
+  }
+
+  async createBlockToken(block: BlockModel): Promise<string> {
+    return this.jwt.signBlock(block)
+  }
+
+  async createUserBlockToken(user: UserModel, block: BlockModel): Promise<string> {
+    return this.jwt.signUserBlock(user, block);
   }
 
   genCode(user: UserModel): Promise<UserModel> {
@@ -71,18 +80,4 @@ export class AuthService {
     };
   }
 
-  // async secondStep(code: string): Promise<TokenOutputDto | boolean> {
-  //   const user = await UserModel.findOne({
-  //     where: {
-  //       emailCode: code
-  //     }
-  //   });
-  //
-  //   if (!user)
-  //     return false;
-  //   else
-  //     return {
-  //       token: this.jwt.signAdmin(user)
-  //     };
-  // }
 }
