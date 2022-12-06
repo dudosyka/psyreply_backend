@@ -24,6 +24,12 @@ export class ResultProvider {
   ) {
   }
 
+  private async checkApproved(block: BlockModel, resultData: ResultCreateDto): Promise<boolean> {
+    if (!block)
+      return false;
+    return (resultData.time_on_pass <= block.time);
+  }
+
   public async pass(userId: number, blockId: number, passDto: ResultCreateDto): Promise<ResultModel> {
     return new Promise<ResultModel>(async (resolve, reject) => {
       await this.sequelize.transaction(async t => {
@@ -34,7 +40,7 @@ export class ResultProvider {
           if (res)
             data.push(res);
         }));
-        const blockModel = await this.blockProvider.getOne(blockId, true).catch(err => reject(err));
+        const blockModel = await this.blockProvider.getOne(blockId, true).then(res => res).catch(err => reject(err));
         let block_title = "";
         let company_title = "";
         if (blockModel) {
@@ -48,6 +54,7 @@ export class ResultProvider {
           block_id: blockId,
           block_title,
           company_title,
+          approved: this.checkApproved(blockModel ? blockModel : null, passDto),
           data: JSON.stringify(data),
           company_id: blockModel ? blockModel.company_id : null
         }, host));
@@ -68,8 +75,9 @@ export class ResultProvider {
         const date = `${el.createdAt.getFullYear()}-${(el.createdAt.getMonth() + 1)}-${el.createdAt.getDate()}`;
         return date == createdAt;
       });
-    } else
+    } else {
       return results;
+    }
   }
 
   public async getResultsClient(userId: number): Promise<ResultClientOutputDto> {
@@ -81,8 +89,6 @@ export class ResultProvider {
     await Promise.all(models.map(async el => {
       const data = JSON.parse(el.data);
       await Promise.all(data.map(async metric => {
-        // console.log(metric);
-        // console.log(metric['metric_id'])
         const metricModel = await MetricModel.findOne({
           where: {
             id: metric["metric_id"]

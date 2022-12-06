@@ -4,6 +4,9 @@ export class BlockCreateDto {
   @IsNotEmpty()
   name: string;
 
+  @IsNotEmpty()
+  time: number;
+
   company_id?: number;
 
   @IsNotEmpty()

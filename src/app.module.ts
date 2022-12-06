@@ -19,6 +19,7 @@ import { GlobalExceptionFilter } from "./filters/global-exception.filter";
 import { HttpExceptionFilter } from "./filters/http-exception.filter";
 import { DatabaseErrorFilter } from "./filters/database-error.filter";
 import { BcryptUtil } from "./utils/bcrypt.util";
+import { GameModule } from "./modules/game/game.module";
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -39,7 +40,8 @@ const db_conf = main.isDev ? db.dev : db.prod;
     QuestionTypeModule,
     TestBlockModule,
     CompanyModule,
-    LoggerModule
+    LoggerModule,
+    GameModule,
   ],
   controllers: [AppController],
   providers: [

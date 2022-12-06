@@ -1,4 +1,4 @@
-import { IsArray, IsNumber, ValidateNested } from "class-validator";
+import { IsArray, IsNotEmpty, IsNumber, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 class AnswerPassDto {
@@ -24,4 +24,8 @@ export class ResultCreateDto {
   @ValidateNested({ each: true })
   @Type(() => TestPassDto)
   tests: TestPassDto[];
+
+  @IsNotEmpty()
+  @IsNumber()
+  time_on_pass: number
 }

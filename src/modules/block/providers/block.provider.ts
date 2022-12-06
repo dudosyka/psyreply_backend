@@ -71,9 +71,10 @@ export class BlockProvider {
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
+    const { tests, ...data } = createDto;
+
     const block = await BlockModel.create({
-      name: createDto.name,
-      company_id: createDto.company_id
+      ...data
     }, TransactionUtil.getHost()).catch(err => {
       throw err;
     }).then(block => block);
@@ -224,6 +225,7 @@ export class BlockProvider {
       return await this.createModel({
         name: block.name,
         company_id: companyId,
+        time: block.time,
         tests: await this.testBlockProvider.getTests(blockId)
       })
         .catch(err => {

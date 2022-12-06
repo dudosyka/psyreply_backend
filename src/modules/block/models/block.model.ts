@@ -22,6 +22,9 @@ export class BlockModel extends Model {
   name: string;
 
   @Column
+  time: number;
+
+  @Column
   company_id: number;
 
   @BelongsTo(() => CompanyModel, "company_id")

@@ -26,7 +26,13 @@ export class ResultModel extends Model {
   data: string;
 
   @Column
-  block_id: number;
+  block_id: number | null;
+
+  @Column
+  time_on_pass: number
+
+  @Column
+  approved: boolean
 
   @BelongsTo(() => BlockModel, "block_id")
   block: BlockModel;
