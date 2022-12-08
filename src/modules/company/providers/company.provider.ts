@@ -94,10 +94,10 @@ export class CompanyProvider {
         company_id: id
       },
       ...TransactionUtil.getHost()
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
     });
-
-    if (!isPropagate)
-      await TransactionUtil.commit();
 
     return company;
   }

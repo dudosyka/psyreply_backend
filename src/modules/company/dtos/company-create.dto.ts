@@ -1,11 +1,16 @@
-import { IsNotEmpty, IsNumber, ValidateIf } from "class-validator";
+import { IsNumber, IsString, ValidateIf } from "class-validator";
 
 
 export class CompanyCreateDto {
-  @IsNotEmpty()
+  @IsString({
+    message: "name must be STRING"
+  })
   name: string;
 
-  @IsNumber({}, { each: true })
+  @IsNumber({}, {
+    each: true,
+    message: "inputBlocks must be INT"
+  })
   @ValidateIf((object, value) => value !== undefined)
   inputBlocks?: number[] | null;
 }

@@ -20,6 +20,7 @@ import { HttpExceptionFilter } from "./filters/http-exception.filter";
 import { DatabaseErrorFilter } from "./filters/database-error.filter";
 import { BcryptUtil } from "./utils/bcrypt.util";
 import { GameModule } from "./modules/game/game.module";
+import { ValidationExceptionFilter } from "./filters/validation-exception.filter";
 
 const db_conf = main.isDev ? db.dev : db.prod;
 
@@ -54,6 +55,10 @@ const db_conf = main.isDev ? db.dev : db.prod;
     {
       provide: APP_FILTER,
       useClass: HttpExceptionFilter
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ValidationExceptionFilter
     },
     {
       provide: APP_FILTER,

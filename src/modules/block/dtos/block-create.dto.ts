@@ -1,14 +1,26 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNumber, IsString, ValidateIf } from "class-validator";
 
 export class BlockCreateDto {
-  @IsNotEmpty()
+  @IsString({
+    message: "name must be string"
+  })
   name: string;
 
-  @IsNotEmpty()
+  @IsNumber({}, {
+    message: "time must be INT"
+  })
   time: number;
 
+  @IsNumber({}, {
+    message: "company_id must be INT"
+  })
+  @ValidateIf((object, value) => value !== undefined)
   company_id?: number;
 
-  @IsNotEmpty()
+
+  @IsNumber({}, {
+    each: true,
+    message: "tests must be INT"
+  })
   tests: number[];
 }

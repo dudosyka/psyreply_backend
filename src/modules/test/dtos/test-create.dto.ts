@@ -1,26 +1,41 @@
 import { QuestionDto } from "../../question/dtos/question.dto";
-import { ArrayMaxSize, ArrayMinSize, IsNotEmpty, IsNumber, Matches } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsNumber, IsString, Matches, ValidateNested } from "class-validator";
 import { ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
+import { Type } from "class-transformer";
 
 export class TestCreateDto {
-  @IsNotEmpty()
-  @IsNumber()
+  @IsNumber({}, {
+    message: "type must be INT"
+  })
   type: number;
 
-  @IsNotEmpty()
+  @IsString({
+    message: "title must be STRING"
+  })
   title: string;
 
-  @IsNumber()
+  @IsNumber({}, {
+    message: "metric must be INT"
+  })
   metric: number;
 
-  @IsNotEmpty()
-  @Matches(ShlyapaMarkupUtil.validate_pattern)
+  @Matches(ShlyapaMarkupUtil.validate_pattern, {
+    message: "formula must be a valid ShlyapaMarkup string"
+  })
   formula: string;
 
+  @IsNumber({}, {
+    message: "block_id must be INT"
+  })
   block_id: number;
 
-  @IsNotEmpty()
-  @ArrayMinSize(1)
-  @ArrayMaxSize(20)
+  @ArrayMinSize(1, {
+    message: "questions min length is 1"
+  })
+  @ArrayMaxSize(20, {
+    message: "questions max length is 20"
+  })
+  @ValidateNested({ each: true })
+  @Type(() => QuestionDto)
   questions: QuestionDto[];
 }

@@ -44,8 +44,6 @@ export class GameProvider {
 
     return await GameResultModel.create({
       ...createDto
-    }, {
-      ...TransactionUtil.getHost()
     }).then(res => {
       if (!isPropagate)
         TransactionUtil.commit();

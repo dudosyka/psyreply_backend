@@ -3,8 +3,11 @@ import { Transaction } from "sequelize";
 export module TransactionUtil {
   let host: { transaction: Transaction | null } = { transaction: null };
 
-  export function getHost(): { transaction: Transaction } {
-    return host;
+  export function getHost(): { transaction: Transaction } | { } {
+    if (host.transaction)
+      return host;
+    else
+      return {}
   }
 
   export function setHost(t: Transaction) {

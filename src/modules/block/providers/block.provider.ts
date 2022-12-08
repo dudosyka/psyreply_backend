@@ -157,6 +157,8 @@ export class BlockProvider {
 
     await block.update({
       ...updateDto
+    }, {
+      ...TransactionUtil.getHost()
     })
 
     await ResultModel.update({
@@ -166,10 +168,11 @@ export class BlockProvider {
         block_id: blockId
       },
       ...TransactionUtil.getHost()
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
     });
 
-    if (!isPropagate)
-      await TransactionUtil.commit();
 
     return block;
   }

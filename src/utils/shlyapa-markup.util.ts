@@ -19,7 +19,7 @@ export type ShlyapaMarkup = {
 
 @Injectable()
 export class ShlyapaMarkupUtil {
-  static validate_pattern = "^(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+$";
+  static validate_pattern = new RegExp("^(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+$");
   static parse_pattern = "((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\)))";
   private static parse_item = new RegExp("(\\d+)|(\\$\\d+)", "gm");
   private static parse_var_id = new RegExp("\\d+", "gm");
