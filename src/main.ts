@@ -1,7 +1,7 @@
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./app.module";
 import { ValidationPipe } from "@nestjs/common";
-import mainConf from "./confs/main.conf";
+import mainConf, { ProjectState } from "./confs/main.conf";
 
 
 // process.on('unhandledRejection', err => {
@@ -17,7 +17,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
-  await app.listen(mainConf.isDev ? mainConf.devPort : mainConf.prodPort);
+  await app.listen(mainConf.isDev == ProjectState.DEV ? mainConf.devPort : mainConf.prodPort);
 }
 
 bootstrap().then(() => {});

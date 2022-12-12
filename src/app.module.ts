@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { SequelizeModule } from "@nestjs/sequelize";
-import { default as main } from "./confs/main.conf";
+import { default as main, ProjectState } from "./confs/main.conf";
 import { default as db } from "./confs/db.conf";
 import { UserModule } from "./modules/user/user.module";
 import { TestModule } from "./modules/test/test.module";
@@ -22,7 +22,7 @@ import { BcryptUtil } from "./utils/bcrypt.util";
 import { GameModule } from "./modules/game/game.module";
 import { ValidationExceptionFilter } from "./filters/validation-exception.filter";
 
-const db_conf = main.isDev ? db.dev : db.prod;
+const db_conf = main.isDev == ProjectState.DEV ? db.dev : db.prod;
 
 @Module({
   imports: [

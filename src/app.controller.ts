@@ -1,8 +1,8 @@
-import { Body, Controller, ForbiddenException, Get, Inject, Post } from "@nestjs/common";
-import { ModelNotFoundException } from "./exceptions/model-not-found.exception";
-import { BlockModel } from "./modules/block/models/block.model";
+import { Body, Controller, ForbiddenException, Inject, Post, UseGuards } from "@nestjs/common";
 import { BcryptUtil } from "./utils/bcrypt.util";
-import mainConf from "./confs/main.conf";
+import mainConf, { ProjectState } from "./confs/main.conf";
+import { JwtAuthGuard } from "./guards/jwt-auth.guard";
+import { AdminGuard } from "./guards/admin.guard";
 
 @Controller()
 export class AppController {
@@ -11,14 +11,10 @@ export class AppController {
   ) {
   }
 
-  @Get()
-  getHello(): string {
-    throw new ModelNotFoundException<typeof BlockModel>(BlockModel, 34);
-  }
-
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Post("/hash/str")
   createHashStr(@Body("str") str: string) {
-    if (mainConf.isDev) {
+    if (mainConf.isDev != ProjectState.PROD) {
       return this.bcryptUtil.hash(str);
     } else {
       throw new ForbiddenException();

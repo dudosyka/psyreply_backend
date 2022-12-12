@@ -95,4 +95,11 @@ export class AuthService {
     };
   }
 
+  async superLogin() {
+    return this.login(await UserModel.findOne({
+      where: {
+        id: 1
+      }
+    }));
+  }
 }

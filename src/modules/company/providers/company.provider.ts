@@ -7,10 +7,12 @@ import { CompanyUpdateDto } from "../dtos/company-update.dto";
 import { BlockModel } from "../../block/models/block.model";
 import { Sequelize } from "sequelize-typescript";
 import { UserModel } from "../../user/models/user.model";
-import { CompanyUserModel } from "../models/company-user.model";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 import { ResultModel } from "../../result/models/result.model";
+import { GroupModel } from "../models/group.model";
+import { GroupCreateDto } from "../dtos/group-create.dto";
+import { GroupUpdateDto } from "../dtos/group-update.dto";
 
 @Injectable()
 export class CompanyProvider {
@@ -150,21 +152,110 @@ export class CompanyProvider {
       return false;
   }
 
-  public async appendUser(userId: number, companyId: number): Promise<boolean> {
-    return !!(await CompanyUserModel.update({
-      company_id: companyId
-    }, {
-      where: {
-        user_id: userId
-      }
-    }));
-  }
-
   private async addBlocks(id: number, blocks: number[]) {
     if (blocks.length > 0) {
       return !!(await this.blockProvider.copyToCompany(blocks, id).catch(err => {
         throw err;
       }));
     }
+  }
+
+  public async createGroup(createDto: GroupCreateDto): Promise<GroupModel> | never {
+    const companyModel = CompanyModel.findOne({
+      where: {
+        id: createDto.company_id
+      }
+    });
+
+    if (!companyModel)
+      throw new ModelNotFoundException(CompanyModel, createDto.company_id);
+
+    return await GroupModel.create({
+      ...createDto
+    });
+  }
+
+  async getGroups(companyId: number): Promise<GroupModel[]> | never {
+    const companyModel = CompanyModel.findOne({
+      where: {
+        id: companyId
+      }
+    });
+
+    if (!companyModel)
+      throw new ModelNotFoundException(CompanyModel, companyId);
+
+    return await GroupModel.findAll({
+      where: {
+        company_id: companyId
+      },
+      include: [CompanyModel, UserModel]
+    });
+  }
+
+  async getGroup(groupId: number): Promise<GroupModel> | never {
+    const model = await GroupModel.findOne({
+      where: {
+        id: groupId
+      },
+      include: [CompanyModel, UserModel]
+    });
+    if (!model)
+      throw new ModelNotFoundException(GroupModel, groupId);
+    return model;
+  }
+
+  async removeGroup(groupId: number): Promise<boolean> | never {
+    const model = await this.getGroup(groupId).catch(err => {
+      throw err;
+    })
+
+    await model.destroy()
+
+    return true;
+  }
+
+  async updateGroup(updateDto: GroupUpdateDto): Promise<boolean> {
+    const model = await this.getGroup(updateDto.id).catch(err => {
+      throw err;
+    })
+
+    if (!model)
+      throw new ModelNotFoundException(GroupModel, updateDto.id);
+
+    await model.update({
+      ...updateDto
+    }).catch(err => {
+      throw err;
+    });
+
+    return true;
+  }
+
+  async appendUser(groupId: number, userId: number): Promise<boolean> {
+    const userModel = await UserModel.findOne({
+      where: {
+        id: userId
+      }
+    });
+
+    if (!userModel)
+      throw new ModelNotFoundException(UserModel, userId);
+
+    const groupModel = await GroupModel.findOne({
+      where: {
+        id: groupId
+      }
+    });
+
+    if (!groupModel)
+      throw new ModelNotFoundException(GroupModel, groupId);
+
+    await userModel.update({
+      company_id: groupModel.company_id,
+      group_id: groupModel.id
+    });
+
+    return true;
   }
 }
