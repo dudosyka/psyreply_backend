@@ -1,5 +1,5 @@
 import { QuestionAnswerDto } from "./question-answer.dto";
-import { IsNumber, ValidateNested } from "class-validator";
+import { IsNumber, IsString, ValidateIf, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
 export class QuestionDto {
@@ -17,13 +17,14 @@ export class QuestionDto {
   })
   coins: number;
 
-  @IsNumber({}, {
+  @IsString({
     message: "title must be STRING"
   })
   title: string;
 
-  @IsNumber({}, {
+  @IsString({
     message: "picture must be STRING"
   })
-  picture: string;
+  @ValidateIf((object, value) => value !== null)
+  picture: string | null;
 }

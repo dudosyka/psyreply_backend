@@ -1,5 +1,5 @@
 import { QuestionDto } from "../../question/dtos/question.dto";
-import { ArrayMaxSize, ArrayMinSize, IsNumber, IsString, Matches, ValidateNested } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsNumber, IsString, Matches, ValidateIf, ValidateNested } from "class-validator";
 import { ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 import { Type } from "class-transformer";
 
@@ -27,7 +27,8 @@ export class TestCreateDto {
   @IsNumber({}, {
     message: "block_id must be INT"
   })
-  block_id: number;
+  @ValidateIf((object, value) => value !== undefined)
+  block_id: number | null;
 
   @ArrayMinSize(1, {
     message: "questions min length is 1"
