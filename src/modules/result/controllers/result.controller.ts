@@ -32,6 +32,12 @@ export class ResultController {
     return this.resultProvider.getResults(filters);
   }
 
+  @UseGuards(UserBlockGuard)
+  @Post('/all/last')
+  public async getLast(@Req() req): Promise<ResultClientOutputDto> {
+    return this.resultProvider.getResultsClient(req.user.id, true);
+  }
+
   @UseGuards(AdminGuard)
   @Post("/calculate")
   public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
@@ -45,9 +51,9 @@ export class ResultController {
   }
 
   @UseGuards(DashboardGuard)
-  @Get(":userId/all")
-  public async getUserResults(@Req() req, @Param("userId") userId: number): Promise<ResultClientOutputDto> {
-    return this.resultProvider.getResultsClient(userId);
+  @Get("user/all")
+  public async getUserResults(@Req() req): Promise<ResultClientOutputDto> {
+    return this.resultProvider.getResultsClient(req.user.id);
   }
 
   @UseGuards(AdminGuard)

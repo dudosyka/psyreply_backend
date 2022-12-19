@@ -1,9 +1,6 @@
 import { IsNumber } from "class-validator";
 
 export class GameResultCreateDto {
-  @IsNumber({}, {
-    message: "user_id must be INT"
-  })
   user_id: number;
 
   @IsNumber({}, {

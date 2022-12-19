@@ -69,6 +69,28 @@ export class ResultProvider {
         company_title = companyModel.name;
     }
 
+    let dataMetrics = {}
+    data.map(el => {
+      if (dataMetrics[el.metric_id]) {
+        dataMetrics[el.metric_id].push(el.value)
+      } else {
+        dataMetrics[el.metric_id] = [ el.value ]
+      }
+    });
+    const newData = [];
+    Object.keys(dataMetrics).map(el => {
+      let sum = 0;
+      dataMetrics[el].forEach(el => {
+        sum += parseInt(el)
+      });
+      newData.push(
+          {
+            metric_id: parseInt(el),
+            value: sum
+          }
+      );
+    });
+
     const resultData = {
       user_id: userId,
       block_id: blockId,
@@ -77,7 +99,7 @@ export class ResultProvider {
       week,
       time_on_pass: passDto.time_on_pass,
       approved: await this.checkApproved(blockModel ? blockModel : null, passDto),
-      data: JSON.stringify(data),
+      data: JSON.stringify(newData),
       company_id: blockModel ? blockModel.company_id : null
     }
     console.log(resultData)
@@ -100,6 +122,9 @@ export class ResultProvider {
       where: {
         ...filter
       },
+      order: [
+        ['id', 'DESC']
+      ],
       include: [BlockModel, CompanyModel, { model: UserModel, include: [ GroupModel ] }]
     });
     if (createdAt) {
@@ -112,9 +137,10 @@ export class ResultProvider {
     }
   }
 
-  private async resultsByMetrics(models: ResultModel[]): Promise<ResultClientOutputDto> {
+  private async resultsByMetrics(models: ResultModel[], parted: boolean = false): Promise<ResultClientOutputDto> {
     const result = {
-      metrics: {}
+      metrics: {},
+      part: parted
     };
 
     await Promise.all(models.map(async el => {
@@ -142,9 +168,12 @@ export class ResultProvider {
     return result;
   }
 
-  public async getResultsClient(userId: number): Promise<ResultClientOutputDto> {
+  public async getResultsClient(userId: number, last: boolean = false): Promise<ResultClientOutputDto> {
     const models = await this.getResults({ filters: { user_id: userId } });
-    return await this.resultsByMetrics(models)
+    if (last) {
+      return await this.resultsByMetrics([ models[models.length - 1] ], last);
+    }
+    return await this.resultsByMetrics(models, last)
   }
 
   public async update(resultId: number, updateDto: ResultUpdateDto): Promise<ResultModel> {

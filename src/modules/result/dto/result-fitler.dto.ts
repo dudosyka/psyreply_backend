@@ -8,5 +8,4 @@ class Filter {
   week?: number;
 }
 
-export class ResultFitlerDto extends SearchFilter<Filter> {
-}
+export class ResultFitlerDto extends SearchFilter<Filter> {}

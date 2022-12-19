@@ -49,7 +49,23 @@ export class AuthService {
     return this.jwt.signUserBlock(user, week, block);
   }
 
-  async assignUser(userId: number): Promise<string> {
+  async assignUser(jbId: number, userModel: UserModel | null = null): Promise<string> {
+    if (!userModel) {
+      userModel = await UserModel.findOne({
+        where: {
+          jetBotId: jbId
+        }
+      });
+
+      if (!userModel) {
+        throw new ModelNotFoundException(UserModel, jbId);
+      }
+    }
+
+    return this.jwt.signUser(userModel);
+  }
+
+  async assignUserByUserBlock(userId: number) {
     const userModel = await UserModel.findOne({
       where: {
         id: userId
@@ -60,7 +76,7 @@ export class AuthService {
       throw new ModelNotFoundException(UserModel, userId);
     }
 
-    return this.jwt.signUser(userModel);
+    return await this.assignUser(null, userModel);
   }
 
   genCode(user: UserModel): Promise<UserModel> {

@@ -1,3 +1,4 @@
 export class ResultClientOutputDto {
-  metrics: any
+  metrics: any;
+  part: boolean;
 }

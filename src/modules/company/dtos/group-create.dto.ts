@@ -4,7 +4,7 @@ export class GroupCreateDto {
   company_id: number;
 
   @IsString({
-    message: "must be STRING"
+    message: "name must be STRING"
   })
   name: string;
 }
