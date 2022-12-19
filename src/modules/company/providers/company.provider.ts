@@ -13,6 +13,7 @@ import { ResultModel } from "../../result/models/result.model";
 import { GroupModel } from "../models/group.model";
 import { GroupCreateDto } from "../dtos/group-create.dto";
 import { GroupUpdateDto } from "../dtos/group-update.dto";
+import { Op } from "sequelize";
 
 @Injectable()
 export class CompanyProvider {
@@ -164,8 +165,37 @@ export class CompanyProvider {
     }
   }
 
+  private async appendUsersArray(group: GroupModel, users: number[]) {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    return await Promise.all(users.map(async el => {
+      await this.appendUser(null, el, group).catch(err => {
+        throw err;
+      })
+    })).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
+    });
+  }
+
+
   public async createGroup(createDto: GroupCreateDto): Promise<GroupModel> | never {
-    const companyModel = CompanyModel.findOne({
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+    const companyModel = await CompanyModel.findOne({
       where: {
         id: createDto.company_id
       }
@@ -174,9 +204,22 @@ export class CompanyProvider {
     if (!companyModel)
       throw new ModelNotFoundException(CompanyModel, createDto.company_id);
 
-    return await GroupModel.create({
-      ...createDto
-    });
+    const group = await GroupModel.create({
+      name: createDto.name,
+      company_id: createDto.company_id
+    }, TransactionUtil.getHost())
+
+    await this.appendUsersArray(group, createDto.users).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit()
+    }).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+
+      throw err;
+    })
+
+    return group;
   }
 
   async getGroups(companyId: number): Promise<GroupModel[]> | never {
@@ -220,6 +263,13 @@ export class CompanyProvider {
   }
 
   async updateGroup(updateDto: GroupUpdateDto): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
     const model = await this.getGroup(updateDto.id).catch(err => {
       throw err;
     })
@@ -228,15 +278,47 @@ export class CompanyProvider {
       throw new ModelNotFoundException(GroupModel, updateDto.id);
 
     await model.update({
-      ...updateDto
-    }).catch(err => {
+      name: updateDto.name
+    }, TransactionUtil.getHost()).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
       throw err;
+    });
+
+    await this.appendUsersArray(model, updateDto.users).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback();
+      throw err;
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit();
+    })
+
+    return true;
+  }
+
+  async removeUsersFromGroup(users: number[]): Promise<boolean> {
+    await UserModel.update({
+      group_id: null
+    }, {
+      where: {
+        id: {
+          [Op.in]: users
+        }
+      }
     });
 
     return true;
   }
 
-  async appendUser(groupId: number, userId: number): Promise<boolean> {
+  async appendUser(groupId: number, userId: number, group: GroupModel = null): Promise<boolean> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
     const userModel = await UserModel.findOne({
       where: {
         id: userId
@@ -246,7 +328,7 @@ export class CompanyProvider {
     if (!userModel)
       throw new ModelNotFoundException(UserModel, userId);
 
-    const groupModel = await GroupModel.findOne({
+    const groupModel = group ? group : await GroupModel.findOne({
       where: {
         id: groupId
       }
@@ -258,6 +340,13 @@ export class CompanyProvider {
     await userModel.update({
       company_id: groupModel.company_id,
       group_id: groupModel.id
+    }, TransactionUtil.getHost()).catch(err => {
+      if (!isPropagate)
+        TransactionUtil.rollback()
+      throw err;
+    }).then(() => {
+      if (!isPropagate)
+        TransactionUtil.commit()
     });
 
     return true;

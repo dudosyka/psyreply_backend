@@ -3,8 +3,6 @@ import { CompanyProvider } from "../../company/providers/company.provider";
 import { UserModel } from "../models/user.model";
 import { UserFilterDto } from "../dtos/user-filter.dto";
 import { Op } from "sequelize";
-import { CompanyModel } from "../../company/models/company.model";
-import { GroupModel } from "../../company/models/group.model";
 
 @Injectable()
 export class UserProvider {
@@ -18,22 +16,24 @@ export class UserProvider {
   }
 
   public async getAll({ filters }: UserFilterDto): Promise<UserModel[]> {
-    const { except_company_id, ...filter } = filters;
-    let where = {
+    const { except_group_id, ...filter } = filters;
+    let where: any = {
       ...filter
     };
-    if (filters.except_company_id) {
+    if (filters.except_group_id) {
       where = {
-        company_id: {
-          [Op.not]: filters.except_company_id
+        group_id: {
+          [Op.or]: [
+            {[Op.not]: filters.except_group_id},
+            {[Op.is]: null}
+          ]
         },
         ...filter
       }
     }
 
     return UserModel.findAll({
-      where,
-      include: [CompanyModel, GroupModel]
+      where
     });
   }
 }

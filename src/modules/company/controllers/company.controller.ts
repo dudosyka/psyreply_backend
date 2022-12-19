@@ -74,6 +74,11 @@ export class CompanyController {
     return await this.companyProvider.updateGroup(groupUpdateDto);
   }
 
+  @Delete('group/:groupId/user')
+  public async removeUserFromGroup(@Param('groupId') groupId: number, @Body('users') users: number[]): Promise<boolean> {
+    return await this.companyProvider.removeUsersFromGroup(users);
+  }
+
   @Post('group/:groupId/user/:userId')
   public async appendUser(@Param('groupId') groupId: number, @Param('userId') userId: number): Promise<boolean> {
     return await this.companyProvider.appendUser(groupId, userId);
