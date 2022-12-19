@@ -29,7 +29,7 @@ export class CompanyController {
 
   @Get(":companyId")
   public getOne(@Param("companyId") id: number): Promise<CompanyModel> {
-    return this.companyProvider.getOne(id);
+    return this.companyProvider.getOne(id, true);
   }
 
   @Patch(":companyId")

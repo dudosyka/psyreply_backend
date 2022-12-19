@@ -47,12 +47,16 @@ export class CompanyProvider {
     return company;
   }
 
-  public async getOne(id: number): Promise<CompanyModel> {
+  public async getOne(id: number, fullData: boolean = false): Promise<CompanyModel> {
+    let include: any = [BlockModel];
+    if (fullData) {
+       include = [BlockModel, { model: GroupModel, include: [UserModel] }]
+    }
     const company = await CompanyModel.findOne({
       where: {
         id
       },
-      include: [BlockModel]
+      include
     });
     if (!company)
       throw new ModelNotFoundException(CompanyModel, id);

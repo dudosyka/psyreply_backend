@@ -1,6 +1,7 @@
 import { AutoIncrement, BelongsToMany, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
 import { BlockModel } from "../../block/models/block.model";
 import { UserModel } from "../../user/models/user.model";
+import { GroupModel } from "./group.model";
 
 @Table
 export class CompanyModel extends Model {
@@ -17,4 +18,7 @@ export class CompanyModel extends Model {
 
   @BelongsToMany(() => UserModel, () => UserModel, "company_id", "id")
   users: UserModel[];
+
+  @BelongsToMany(() => GroupModel, () => GroupModel, "company_id", "id")
+  groups: GroupModel[];
 }

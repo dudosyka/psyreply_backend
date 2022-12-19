@@ -1,9 +1,11 @@
-import { Controller, Get, Inject, Param, Post, Req, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post, Req, Request, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { UserProvider } from "../providers/user.provider";
 import { AuthService } from "../providers/auth.service";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
+import { UserFilterDto } from "../dtos/user-filter.dto";
+import { UserModel } from "../models/user.model";
 
 @Controller("user")
 export class UserController {
@@ -18,6 +20,12 @@ export class UserController {
   @Get()
   get(@Request() req) {
     return req.user;
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @Post('/all')
+  getAll(@Req() req, @Body() filter: UserFilterDto): Promise<UserModel[]> {
+    return this.userProvider.getAll(filter);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
