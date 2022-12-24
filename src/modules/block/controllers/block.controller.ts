@@ -35,7 +35,7 @@ export class BlockController {
   async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number): Promise<string> {
     console.log(req.user)
     const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId);
-    return 'https://test.psyreply.com?t=' + hash;
+    return 'https://client.psyreply.com/test/' + hash;
   }
 
   @UseGuards(UserBlockGuard)

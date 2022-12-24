@@ -102,7 +102,6 @@ export class ResultProvider {
       data: JSON.stringify(newData),
       company_id: blockModel ? blockModel.company_id : null
     }
-    console.log(resultData)
 
     return await ResultModel.create(resultData, TransactionUtil.getHost()).then(res => {
       if (!isPropagate)
