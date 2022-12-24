@@ -117,14 +117,15 @@ export class ResultProvider {
 
   public async getResults(filterDto: ResultFitlerDto): Promise<ResultModel[]> {
     const { createdAt, ...filter } = filterDto.filters;
+    const { group_id, ...filters } = filter;
     const results = await ResultModel.findAll({
       where: {
-        ...filter
+        ...filters
       },
       order: [
         ['id', 'DESC']
       ],
-      include: [BlockModel, CompanyModel, { model: UserModel, include: [ GroupModel ] }]
+      include: [BlockModel, CompanyModel, { model: UserModel, include: [ GroupModel ], ...(group_id ? ({ where: { group_id: group_id } }) : ({})) }]
     });
     if (createdAt) {
       return results.filter(el => {

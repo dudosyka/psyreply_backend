@@ -5,6 +5,7 @@ class Filter {
   block_id?: number;
   createdAt?: string;
   user_id?: number;
+  group_id?: number;
   week?: number;
 }
 
