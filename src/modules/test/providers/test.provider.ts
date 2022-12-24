@@ -11,7 +11,7 @@ import { QuestionTypeModel } from "../../question-type/models/question-type.mode
 import { MetricModel } from "../../metric/models/metric.model";
 import { QuestionModel } from "../../question/models/question.model";
 import { TestPassDto } from "../../result/dto/result-create.dto";
-import { OperandType, ShlyapaMarkup, ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
+import { OperandType, Parsed, ShlyapaMarkupUtil } from "../../../utils/shlyapa-markup.util";
 import { TestResultDto } from "../dtos/test-result.dto";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
@@ -230,9 +230,9 @@ export class TestProvider {
       return sum;
     };
     const testModel = await this.getOne(test.test_id);
-    const formula: ShlyapaMarkup[] = this.markupUtil.parse(testModel.formula);
+    const formula: Parsed = this.markupUtil.parse(testModel.formula);
     let testResult = 0;
-    await Promise.all(formula.map(async el => {
+    await Promise.all(formula.markup.map(async el => {
       let itemValue = 0;
       let multiplier = 1;
 
@@ -261,7 +261,7 @@ export class TestProvider {
     }));
     return {
       metric_id: testModel.metric.id,
-      value: testResult
+      value: testResult / formula.div
     };
   }
 
