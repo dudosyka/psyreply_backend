@@ -6,6 +6,7 @@ import { AuthService } from "../providers/auth.service";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { UserFilterDto } from "../dtos/user-filter.dto";
 import { UserModel } from "../models/user.model";
+import { BlockGuard } from "../../../guards/block.guard";
 
 @Controller("user")
 export class UserController {
@@ -32,6 +33,14 @@ export class UserController {
   @Get(':jbId/assign')
   public async assignUser(@Param('jbId') userId: number): Promise<string> {
     return `https://client.psyreply.com/results/${await this.authService.assignUser(userId)}`;
+  }
+
+  @UseGuards(JwtAuthGuard, BlockGuard)
+  @Get('/client/:jbId/assign')
+  public async assignUserFromBot(@Param('jbId') jetBotId: number): Promise<{ link2: string }> {
+    return {
+      link2: `https://client.psyreply.com/results/${await this.authService.assignUser(jetBotId)}`
+    }
   }
 
 

@@ -1,6 +1,7 @@
 import { SearchFilter } from "../../../filters/search.filter";
 
 class Filter {
+  id?: number[] | number;
   company_id?: number;
   block_id?: number;
   createdAt?: string;

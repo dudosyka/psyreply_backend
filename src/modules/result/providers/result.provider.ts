@@ -65,8 +65,7 @@ export class ResultProvider {
     if (blockModel) {
       block_title = blockModel.name;
       const companyModel = await this.companyProvider.getOne(blockModel.company_id);
-      if (companyModel)
-        company_title = companyModel.name;
+      company_title = companyModel.name;
     }
 
     let dataMetrics = {}
@@ -171,9 +170,9 @@ export class ResultProvider {
   public async getResultsClient(userId: number, last: boolean = false): Promise<ResultClientOutputDto> {
     const models = await this.getResults({ filters: { user_id: userId } });
     if (last) {
-      return await this.resultsByMetrics([ models[models.length - 1] ], last);
+      return await this.resultsByMetrics([ models[0] ], last);
     }
-    return await this.resultsByMetrics(models, last)
+    return await this.resultsByMetrics(models.reverse(), last)
   }
 
   public async update(resultId: number, updateDto: ResultUpdateDto): Promise<ResultModel> {
@@ -232,8 +231,13 @@ export class ResultProvider {
     }
   }
 
-  public async calculateBlockStat(blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
-    const results = await this.getResults({ filters: { week: blockStatDto.week, block_id: blockStatDto.blockId } });
+  public async calculateBlockStat(blockStatDto: BlockStatDto | false, ids: number[] = []): Promise<BlockStatOutputDto | ResultClientOutputDto> {
+    let results = await this.getResults({ filters: { id: ids } })
+    if (blockStatDto)
+      results = await this.getResults({ filters: { week: blockStatDto.week, block_id: blockStatDto.blockId } });
+
+    if (ids)
+      return this.resultsByMetrics(results);
 
     let group_results = {};
     results.map(el => {
@@ -260,15 +264,16 @@ export class ResultProvider {
 
   public async saveBlockStat(blockStatDto: BlockStatDto): Promise<any> {
     const stat = await this.calculateBlockStat(blockStatDto);
-    return await Promise.all(stat.groupsResult.map(async groupStat => {
-      return GroupBlockStatModel.create({
-        data: JSON.stringify(groupStat.group_result),
-        percent: groupStat.percent,
-        week: blockStatDto.week,
-        company_id: groupStat.group.company_id,
-        group_id: groupStat.group.id,
-        block_id: blockStatDto.blockId
-      });
-    }));
+    if (stat instanceof BlockStatOutputDto)
+      return await Promise.all(stat.groupsResult.map(async groupStat => {
+        return GroupBlockStatModel.create({
+          data: JSON.stringify(groupStat.group_result),
+          percent: groupStat.percent,
+          week: blockStatDto.week,
+          company_id: groupStat.group.company_id,
+          group_id: groupStat.group.id,
+          block_id: blockStatDto.blockId
+        });
+      }));
   }
 }

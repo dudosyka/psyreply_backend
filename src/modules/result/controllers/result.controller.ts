@@ -41,7 +41,15 @@ export class ResultController {
   @UseGuards(AdminGuard)
   @Post("/calculate")
   public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
-    return this.resultProvider.calculateBlockStat(blockStatDto);
+    const res = await this.resultProvider.calculateBlockStat(blockStatDto);
+    if (res instanceof BlockStatOutputDto)
+      return res;
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('/calculate/special')
+  public async calculateBlockStatByIds(@Body() body: { ids: number[] }): Promise<any> {
+    return this.resultProvider.calculateBlockStat(false, body.ids)
   }
 
   @UseGuards(AdminGuard)

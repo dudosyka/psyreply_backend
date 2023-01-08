@@ -31,11 +31,10 @@ export class BlockController {
   }
 
   @UseGuards(BlockGuard)
-  @Get("assign/:jetBotId")
-  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number): Promise<string> {
-    console.log(req.user)
-    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId);
-    return 'https://client.psyreply.com/test/' + hash;
+  @Get("assign/:jetBotId/:companyId")
+  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number, @Param('companyId') companyId: number): Promise<{ link: string }> {
+    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId, companyId);
+    return { link: "https://client.psyreply.com/test/" + hash };
   }
 
   @UseGuards(UserBlockGuard)

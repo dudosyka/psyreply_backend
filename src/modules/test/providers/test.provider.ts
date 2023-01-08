@@ -259,9 +259,10 @@ export class TestProvider {
       }
       testResult += itemValue;
     }));
+
     return {
       metric_id: testModel.metric.id,
-      value: testResult / formula.div
+      value: Math.round(testResult / formula.div * 100)
     };
   }
 

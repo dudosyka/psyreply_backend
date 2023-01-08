@@ -118,4 +118,14 @@ export class AuthService {
       }
     }));
   }
+
+  public async createUser(jetBotId: number, companyId: number): Promise<UserModel> {
+    return await UserModel.create({
+      jetBotId,
+      login: `jetBotUser_${jetBotId}`,
+      isAdmin: false,
+      coins: 0,
+      company_id: companyId
+    })
+  }
 }
