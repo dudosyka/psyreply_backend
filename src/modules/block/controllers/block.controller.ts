@@ -9,12 +9,15 @@ import { BlockUpdateDto } from "../dtos/block-update.dto";
 import { SearchFilter } from "../../../filters/search.filter";
 import { BlockGuard } from "../../../guards/block.guard";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
+import { AuthService } from "../../user/providers/auth.service";
+import { UserModel } from "../../user/models/user.model";
 
 @UseGuards(JwtAuthGuard)
 @Controller("block")
 export class BlockController {
   constructor(
-    @Inject(BlockProvider) private blockProvider: BlockProvider
+    @Inject(BlockProvider) private blockProvider: BlockProvider,
+    @Inject(AuthService) private authService: AuthService
   ) {
   }
 
@@ -31,10 +34,16 @@ export class BlockController {
   }
 
   @UseGuards(BlockGuard)
-  @Get("assign/:jetBotId/:companyId")
-  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number, @Param('companyId') companyId: number): Promise<{ link: string }> {
-    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId, companyId);
-    return { link: "https://client.psyreply.com/test/" + hash };
+  @Get("assign/:jetBotId")
+  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number): Promise<{ link: string, linkdb: string }> {
+    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId, req.user.companyId);
+    const userModel = await UserModel.findOne({
+      where: {
+        jetBotId: jetBotId
+      }
+    });
+    const dashHash = await this.authService.assignUserByUserBlock(userModel.id)
+    return { link: "https://client.psyreply.com/test/" + hash, linkdb: "https://client.psyreply.com/results/" + dashHash };
   }
 
   @UseGuards(UserBlockGuard)

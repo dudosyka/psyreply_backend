@@ -7,6 +7,8 @@ export class QuestionDto {
   @Type(() => QuestionAnswerDto)
   answers: QuestionAnswerDto[];
 
+  value: String;
+
   @IsNumber({}, {
     message: "relative_id must be INT"
   })

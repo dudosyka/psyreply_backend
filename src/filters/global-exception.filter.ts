@@ -1,8 +1,8 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from "@nestjs/common";
-import { BaseFilter } from "./base.filter";
+import { BaseExceptionFilter } from "./base-exception.filter";
 
 @Catch(Error)
-export class GlobalExceptionFilter extends BaseFilter implements ExceptionFilter {
+export class GlobalExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {
   catch(exception: Error, host: ArgumentsHost) {
     const response = this.log(exception, host);
     this.sendResponse(response, 500, {

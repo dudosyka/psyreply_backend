@@ -103,6 +103,12 @@ export class TestProvider {
         id: testUpdate.id
       }
     });
+
+    testUpdate.questions = testUpdate.questions.map(el => {
+      el.value = JSON.stringify(el.answers)
+      return el;
+    })
+
     if (!testModel)
       throw new ModelNotFoundException(TestModel, testUpdate.id);
 
@@ -209,7 +215,7 @@ export class TestProvider {
     const passDtoQuestions = test.answers.map(el => el.question_id);
     //We get all questions
     let questions = await this.questionProvider.getAll(passDtoQuestions);
-    //Our formula use relative_ids so we need to search in questions by relative_id
+    //Our formula use relative_ids, so we need to search in questions by relative_id
     const getQuestionValue = async relative_id => {
       let sum = 0;
       //This is all questions in formula
@@ -222,7 +228,20 @@ export class TestProvider {
           const answers = JSON.parse(el.value);
           answers.map(el => {
             //if answer from dto contains some ids from question-answer we sum it
-            if (passDtoQuestion.answer.includes(el.id))
+            //Sometimes happens that test is created with answers which ids started not from 1
+            // For example:
+            //   [
+            //     { id: 6, title: 'Никогда', value: 0 },
+            //     { id: 7, title: 'Очень редко', value: 1 },
+            //     { id: 8, title: 'Редко', value: 2 },
+            //     { id: 9, title: 'Иногда', value: 3 },
+            //     { id: 10, title: 'Часто', value: 4 },
+            //     { id: 11, title: 'Очень часто', value: 5 },
+            //     { id: 12, title: 'Ежедневно', value: 6 }
+            //   ]
+            // So, we need to minus all ids on first answer id value (6 in example) of course except first answer in a row
+            // -----------------------------------------------(|)
+            if (passDtoQuestion.answer.includes((el.id !== answers[0].id) ? el.id - answers[0].id : el.id))
               sum += parseInt(el.value);
           });
         }

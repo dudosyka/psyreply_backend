@@ -1,8 +1,9 @@
 import { ArgumentsHost, Inject } from "@nestjs/common";
 import { Response } from "express";
 import { LoggerProvider } from "../modules/logger/providers/logger.provider";
+import { TransactionUtil } from "../utils/TransactionUtil";
 
-export class BaseFilter {
+export class BaseExceptionFilter {
   constructor(
     @Inject(LoggerProvider) private loggerProvider: LoggerProvider
   ) {
@@ -23,6 +24,9 @@ export class BaseFilter {
   }
 
   sendResponse(response: Response, status: number, body: any) {
-    response.status(status).contentType("json").send(JSON.stringify(body));
+    if (TransactionUtil.isSet())
+      TransactionUtil.rollback().finally(() => {
+        response.status(status).contentType("json").send(JSON.stringify(body));
+      });
   }
 }

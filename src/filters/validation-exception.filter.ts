@@ -1,8 +1,8 @@
 import { ArgumentsHost, BadRequestException, Catch, ExceptionFilter } from "@nestjs/common";
-import { BaseFilter } from "./base.filter";
+import { BaseExceptionFilter } from "./base-exception.filter";
 
 @Catch(BadRequestException)
-export class ValidationExceptionFilter extends BaseFilter implements ExceptionFilter {
+export class ValidationExceptionFilter extends BaseExceptionFilter implements ExceptionFilter {
 
   private formatObject(key, value) {
     console.log(key);

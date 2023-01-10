@@ -15,16 +15,25 @@ export class QuestionProvider {
   }
 
   async add(questions: QuestionDto[], testModel: TestModel): Promise<boolean> {
-    const records = [];
+    let records = [];
     questions.map(el => {
       const { answers, ...data } = el;
       records.push({
         test_id: testModel.id,
         type_id: testModel.type_id,
         value: JSON.stringify(el.answers),
-        ...data
+        ...data,
+        id: null
       });
     });
+    console.log(records);
+    records = records.map(el => {
+      return {
+        ...el,
+        id: null
+      }
+    });
+    console.log(records);
     await QuestionModel.bulkCreate(records, TransactionUtil.getHost());
     return true;
   }

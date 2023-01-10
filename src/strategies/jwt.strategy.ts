@@ -14,12 +14,13 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(payload: { sub?: number, isAdmin?: boolean, tokenType: TokenTypeEnum, blockId?: number, week?: number }) {
+  async validate(payload: { sub?: number, isAdmin?: boolean, tokenType: TokenTypeEnum, blockId?: number, week?: number, companyId?: number }) {
     return {
       id: payload.sub,
       isAdmin: payload.isAdmin,
       tokenType: payload.tokenType,
       blockId: payload.blockId,
+      companyId: payload.companyId,
       week: payload.week
     };
   }

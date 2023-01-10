@@ -21,6 +21,7 @@ export class JwtUtil {
     return this.jwtService.sign({
       tokenType: TokenTypeEnum.BLOCK,
       blockId: block.id,
+      companyId: block.company_id,
       week
     })
   }
@@ -30,6 +31,7 @@ export class JwtUtil {
       sub: user.id,
       tokenType: TokenTypeEnum.USER_BLOCK,
       blockId: block.id,
+      companyId: block.company_id,
       week
     })
   }
