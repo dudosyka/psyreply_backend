@@ -19,12 +19,16 @@ export module TransactionUtil {
   }
 
   export function commit(): Promise<void> {
+    if (!host.transaction)
+      return;
     const res = host.transaction.commit();
     host.transaction = null;
     return res;
   }
 
   export function rollback(): Promise<void> {
+    if (!host.transaction)
+      return;
     const res = host.transaction.rollback();
     host.transaction = null;
     return res;

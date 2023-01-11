@@ -157,7 +157,8 @@ export class TestProvider {
         TransactionUtil.rollback();
       throw err;
     }).then(() => {
-      TransactionUtil.commit();
+      if (!isPropagate)
+        TransactionUtil.commit();
       return true;
     });
   }
@@ -241,7 +242,8 @@ export class TestProvider {
             //   ]
             // So, we need to minus all ids on first answer id value (6 in example) of course except first answer in a row
             // -----------------------------------------------(|)
-            if (passDtoQuestion.answer.includes((el.id !== answers[0].id) ? el.id - answers[0].id : el.id))
+            //(el.id !== answers[0].id) ? el.id - answers[0].id : el.id
+            if (passDtoQuestion.answer.includes(el.id))
               sum += parseInt(el.value);
           });
         }

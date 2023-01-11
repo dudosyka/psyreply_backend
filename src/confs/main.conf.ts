@@ -6,7 +6,7 @@ export enum ProjectState {
 }
 
 export default {
-  isDev: ProjectState.DEV,
+  isDev: ProjectState.TEST_PROD,
   jwtConstants: {
     secret: "SECRET_KEY"
   },
