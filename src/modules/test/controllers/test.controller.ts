@@ -7,6 +7,7 @@ import { TestModel } from "../models/test.model";
 import { TestUpdateDto } from "../dtos/test-update.dto";
 import { TestFilterDto } from "../dtos/test-filter.dto";
 import { SearchFilter } from "../../../filters/search.filter";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller("test")
@@ -17,38 +18,41 @@ export class TestController {
   }
 
   @Post("all")
-  public async getAll(@Body() filter: SearchFilter<TestFilterDto>): Promise<TestModel[]> {
-    return await this.testProvider.getAll(filter.filters);
+  public async getAll(@Body() filter: SearchFilter<TestFilterDto>): Promise<ResponseFilter<TestModel[]>> {
+    return ResponseFilter.response<TestModel[]>(await this.testProvider.getAll(filter.filters), ResponseStatus.SUCCESS);
   }
 
   @Get(":testId")
-  public async getOne(@Param("testId") testId: number): Promise<TestModel> {
-    return await this.testProvider.getOne(testId);
+  public async getOne(@Param("testId") testId: number): Promise<ResponseFilter<TestModel>> {
+    return ResponseFilter.response<TestModel>(await this.testProvider.getOne(testId), ResponseStatus.SUCCESS);
   }
 
   @Post()
-  public async create(@Req() req, @Body() test: TestCreateDto): Promise<TestModel> {
-    return await this.testProvider.create(test, req.user.id);
+  public async create(@Req() req, @Body() test: TestCreateDto): Promise<ResponseFilter<TestModel>> {
+    return ResponseFilter.response<TestModel>(await this.testProvider.create(test, req.user.id), ResponseStatus.CREATED);
   }
 
   @Patch(":testId")
-  public async update(@Param("testId") testId: number, @Body() testUpdate: TestUpdateDto): Promise<TestModel> {
+  public async update(@Param("testId") testId: number, @Body() testUpdate: TestUpdateDto): Promise<ResponseFilter<TestModel>> {
     testUpdate.id = testId;
-    return await this.testProvider.update(testUpdate);
+    return ResponseFilter.response<TestModel>(await this.testProvider.update(testUpdate), ResponseStatus.SUCCESS);
   }
 
   @Delete(":testId")
-  public async remove(@Param("testId") testId: number): Promise<boolean> {
-    return await this.testProvider.remove(testId);
+  public async remove(@Param("testId") testId: number): Promise<ResponseFilter<null>> {
+    await this.testProvider.remove(testId)
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 
   @Post("/move/:blockId")
-  public async move(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<boolean> {
-    return await this.testProvider.move(tests, blockId);
+  public async move(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<ResponseFilter<null>> {
+    await this.testProvider.move(tests, blockId);
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 
   @Post("/remove/:blockId")
-  public async removeFromBlock(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<boolean> {
-    return await this.testProvider.removeFromBlock(tests, blockId);
+  public async removeFromBlock(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<ResponseFilter<null>> {
+    await this.testProvider.removeFromBlock(tests, blockId);
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 }

@@ -261,7 +261,10 @@ export class BlockProvider {
     return this.authService.createBlockToken(blockModel, week);
   }
 
-  async createPassLink(blockId: number, week: number, jetBotId: number, companyId: number) {
+  async createLinks({ blockId, week, companyId }: { blockId: number, week: number, companyId: number }, jetBotId: number): Promise<{
+    link: string,
+    linkdb: string
+  }> {
     const blockModel = await BlockModel.findOne({
       where: {
         id: blockId
@@ -282,7 +285,13 @@ export class BlockProvider {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
-    return await this.authService.createUserBlockToken(userModel, week, blockModel);
+    const link = await this.authService.createUserBlockToken(userModel, week, blockModel);
+
+    const linkdb = await this.authService.assignUserByUserBlock(userModel.id)
+
+    return {
+      link, linkdb
+    }
   }
 
   private createTestBlockDto(blockId: number, tests: number[]): TestBlockCreateDto[] {

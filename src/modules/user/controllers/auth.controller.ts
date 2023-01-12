@@ -4,6 +4,8 @@ import { AuthService } from "../providers/auth.service";
 import { AuthOutputDto } from "../dtos/auth/auth-output.dto";
 import { AuthInputDto } from "../dtos/auth/auth-input.dto";
 import mainConf, { ProjectState } from "../../../confs/main.conf";
+import { TokenOutputDto } from "../dtos/auth/token-output.dto";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @Controller("auth")
 export class AuthController {
@@ -13,18 +15,18 @@ export class AuthController {
   }
 
   @Post("/")
-  async firstStep(@Body() credentials: AuthInputDto): Promise<AuthOutputDto | { token: string }> {
+  async firstStep(@Body() credentials: AuthInputDto): Promise<ResponseFilter<AuthOutputDto | TokenOutputDto>> {
     if (credentials.email == 'shut_up_and_let_me_in' && mainConf.isDev != ProjectState.PROD) {
-      return await this.authService.superLogin()
+      return ResponseFilter.response<TokenOutputDto>(await this.authService.superLogin(), ResponseStatus.SUCCESS)
     }
-    return this.authService.firstStep(credentials.email, credentials.password);
+    return ResponseFilter.response<AuthOutputDto>(await this.authService.firstStep(credentials.email, credentials.password), ResponseStatus.SUCCESS);
   }
 
   // $2b$10$yCg8bueBdAb5GUwpGNN3QOGKk2zIwEOSuV1zMVF.TaEEbVTK35eDm
 
   @UseGuards(LocalAuthGuard)
   @Post("/code")
-  async secondStep(@Request() req, @Body("code") code: string): Promise<{ token: string }> {
-    return this.authService.login(req.user);
+  async secondStep(@Request() req, @Body("code") code: string): Promise<ResponseFilter<TokenOutputDto>> {
+    return ResponseFilter.response<TokenOutputDto>(await this.authService.login(req.user), ResponseStatus.SUCCESS);
   }
 }

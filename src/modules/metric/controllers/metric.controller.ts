@@ -4,6 +4,7 @@ import { AdminGuard } from "../../../guards/admin.guard";
 import { MetricProvider } from "../providers/metric.provider";
 import { MetricModel } from "../models/metric.model";
 import CreateMetricDto from "../dto/create-metric.dto";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller("metric")
@@ -14,12 +15,12 @@ export class MetricController {
   }
 
   @Get()
-  public getAll(): Promise<MetricModel[]> {
-    return this.metricProvider.getAll();
+  public async getAll(): Promise<ResponseFilter<MetricModel[]>> {
+    return ResponseFilter.response<MetricModel[]>(await this.metricProvider.getAll(), ResponseStatus.SUCCESS);
   }
 
   @Post()
-  public create(@Body() createDto: CreateMetricDto): Promise<MetricModel> {
-    return this.metricProvider.create(createDto);
+  public async create(@Body() createDto: CreateMetricDto): Promise<ResponseFilter<MetricModel>> {
+    return ResponseFilter.response<MetricModel>(await this.metricProvider.create(createDto), ResponseStatus.CREATED);
   }
 }

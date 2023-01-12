@@ -10,7 +10,7 @@ import { SearchFilter } from "../../../filters/search.filter";
 import { BlockGuard } from "../../../guards/block.guard";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { AuthService } from "../../user/providers/auth.service";
-import { UserModel } from "../../user/models/user.model";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard)
 @Controller("block")
@@ -23,62 +23,56 @@ export class BlockController {
 
   @UseGuards(AdminGuard)
   @Post("all")
-  async getAll(@Body() filter: SearchFilter<BlockFilterDto>): Promise<BlockModel[]> {
-    return this.blockProvider.getAll(filter.filters);
+  async getAll(@Body() filter: SearchFilter<BlockFilterDto>): Promise<ResponseFilter<BlockModel[]>> {
+    return ResponseFilter.response<BlockModel[]>(await this.blockProvider.getAll(filter.filters), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post("hash")
-  async createBlockToken(@Body("blockId") blockId: number, @Body("week") week: number): Promise<string> {
-    return this.blockProvider.createBlockHash(blockId, week);
+  async createBlockToken(@Body("blockId") blockId: number, @Body("week") week: number): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(await this.blockProvider.createBlockHash(blockId, week), ResponseStatus.CREATED);
   }
 
   @UseGuards(BlockGuard)
   @Get("assign/:jetBotId")
-  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number): Promise<{ link: string, linkdb: string }> {
-    const hash = await this.blockProvider.createPassLink(req.user.blockId, req.user.week, jetBotId, req.user.companyId);
-    const userModel = await UserModel.findOne({
-      where: {
-        jetBotId: jetBotId
-      }
-    });
-    const dashHash = await this.authService.assignUserByUserBlock(userModel.id)
-    return { link: "https://client.psyreply.com/test/" + hash, linkdb: "https://client.psyreply.com/results/" + dashHash };
+  async assignUserToBlockToken(@Req() req, @Param('jetBotId') jetBotId: number): Promise<ResponseFilter<{ link: string, linkdb: string }>> {
+    return ResponseFilter.response<{ link: string, linkdb: string }>(await this.blockProvider.createLinks(req.user, jetBotId), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(UserBlockGuard)
   @Get("user")
-  async getOneUser(@Req() req): Promise<BlockModel> {
-    return await this.blockProvider.getOne(req.user.blockId);
+  async getOneUser(@Req() req): Promise<ResponseFilter<BlockModel>> {
+    return ResponseFilter.response<BlockModel>(await this.blockProvider.getOne(req.user.blockId), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Get(":blockId")
-  async getOne(@Param("blockId") blockId: number): Promise<BlockModel> {
-    return await this.blockProvider.getOne(blockId);
+  async getOne(@Param("blockId") blockId: number): Promise<ResponseFilter<BlockModel>> {
+    return ResponseFilter.response<BlockModel>(await this.blockProvider.getOne(blockId), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post()
-  async create(@Body() createDto: BlockCreateDto): Promise<BlockModel> {
-    return await this.blockProvider.createModel(createDto);
+  async create(@Body() createDto: BlockCreateDto): Promise<ResponseFilter<BlockModel>> {
+    return ResponseFilter.response<BlockModel>(await this.blockProvider.createModel(createDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(AdminGuard)
   @Delete("")
-  async remove(@Body("blocks") blocks: number[]): Promise<boolean> {
-    return await this.blockProvider.remove(blocks);
+  async remove(@Body("blocks") blocks: number[]): Promise<ResponseFilter<null>> {
+    await this.blockProvider.remove(blocks);
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 
   @UseGuards(AdminGuard)
   @Patch(":blockId")
-  async update(@Param("blockId") blockId: number, @Body() updateDto: BlockUpdateDto): Promise<BlockModel> {
-    return await this.blockProvider.update(blockId, updateDto);
+  async update(@Param("blockId") blockId: number, @Body() updateDto: BlockUpdateDto): Promise<ResponseFilter<BlockModel>> {
+    return ResponseFilter.response<BlockModel>(await this.blockProvider.update(blockId, updateDto), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post("/copy/:companyId")
-  async copyToCompany(@Body("blocks") blocks: number[], @Param("companyId") companyId: number): Promise<BlockModel[] | void> {
-    return await this.blockProvider.copyToCompany(blocks, companyId);
+  async copyToCompany(@Body("blocks") blocks: number[], @Param("companyId") companyId: number): Promise<ResponseFilter<BlockModel[] | void>> {
+    return ResponseFilter.response<BlockModel[] | void>(await this.blockProvider.copyToCompany(blocks, companyId), ResponseStatus.SUCCESS);
   }
 }

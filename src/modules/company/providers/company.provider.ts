@@ -136,7 +136,7 @@ export class CompanyProvider {
 
     await this.blockProvider.remove(company.blocks ? company.blocks.map(el => el.id) : []);
 
-    return await company.destroy({
+    return company.destroy({
       ...TransactionUtil.getHost()
     }).catch(err => {
       if (!isPropagate)

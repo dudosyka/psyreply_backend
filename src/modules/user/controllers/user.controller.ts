@@ -7,6 +7,7 @@ import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { UserFilterDto } from "../dtos/user-filter.dto";
 import { UserModel } from "../models/user.model";
 import { BlockGuard } from "../../../guards/block.guard";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @Controller("user")
 export class UserController {
@@ -25,14 +26,14 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post('/all')
-  getAll(@Req() req, @Body() filter: UserFilterDto): Promise<UserModel[]> {
-    return this.userProvider.getAll(filter);
+  public async getAll(@Req() req, @Body() filter: UserFilterDto): Promise<ResponseFilter<UserModel[]>> {
+    return ResponseFilter.response<UserModel[]>(await this.userProvider.getAll(filter), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get(':jbId/assign')
-  public async assignUser(@Param('jbId') userId: number): Promise<string> {
-    return `https://client.psyreply.com/results/${await this.authService.assignUser(userId)}`;
+  public async assignUser(@Param('jbId') userId: number): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(`https://client.psyreply.com/results/${await this.authService.assignUser(userId)}`, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(JwtAuthGuard, BlockGuard)

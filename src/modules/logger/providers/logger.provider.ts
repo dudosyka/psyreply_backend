@@ -2,10 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { LoggerModel } from "../models/logger.model";
 import { ErrorCreateDto } from "../dtos/error.create.dto";
-import { ChlenSubscribersModel } from "../models/chlen-subscribers.model";
 import { MailerUtil } from "../../../utils/mailer.util";
-// import { ChlenCollectionModel } from "../models/chlen-collection.model";
-// import mainConf from "../../../confs/main.conf";
 
 @Injectable()
 export class LoggerProvider {
@@ -47,9 +44,9 @@ export class LoggerProvider {
   //   return ChlenSubscribersModel.findAll();
   // }
 
-  async addChlenSubscriber(email: string) {
-    await ChlenSubscribersModel.create({
-      email: email
-    });
-  }
+  // async addChlenSubscriber(email: string) {
+  //   await ChlenSubscribersModel.create({
+  //     email: email
+  //   });
+  // }
 }

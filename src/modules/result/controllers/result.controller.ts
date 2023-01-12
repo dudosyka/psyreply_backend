@@ -11,6 +11,7 @@ import { DashboardGuard } from "../../../guards/dashboard.guard";
 import { BlockStatDto } from "../dto/block-stat.dto";
 import { BlockStatOutputDto } from "../dto/block-stat-output.dto";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
+import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard)
 @Controller("result")
@@ -22,51 +23,51 @@ export class ResultController {
 
   @UseGuards(UserBlockGuard)
   @Post("/block/pass")
-  public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResultModel> {
-    return this.resultProvider.pass(req.user.id, req.user.blockId, req.user.week, createDto);
+  public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResponseFilter<ResultModel>> {
+    return ResponseFilter.response<ResultModel>(await this.resultProvider.pass(req.user.id, req.user.blockId, req.user.week, createDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(AdminGuard)
   @Post("/all")
-  public async getAll(@Body() filters: ResultFitlerDto): Promise<ResultModel[]> {
-    return this.resultProvider.getResults(filters);
+  public async getAll(@Body() filters: ResultFitlerDto): Promise<ResponseFilter<ResultModel[]>> {
+    return ResponseFilter.response<ResultModel[]>(await this.resultProvider.getResults(filters), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(UserBlockGuard)
   @Post('/all/last')
-  public async getLast(@Req() req): Promise<ResultClientOutputDto> {
-    return this.resultProvider.getResultsClient(req.user.id, true);
+  public async getLast(@Req() req): Promise<ResponseFilter<ResultClientOutputDto>> {
+    return ResponseFilter.response<ResultClientOutputDto>(await this.resultProvider.getResultsClient(req.user.id, true), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post("/calculate")
-  public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
+  public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
     const res = await this.resultProvider.calculateBlockStat(blockStatDto);
     if (res instanceof BlockStatOutputDto)
-      return res;
+      return ResponseFilter.response<BlockStatOutputDto>(res, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post('/calculate/special')
-  public async calculateBlockStatByIds(@Body() body: { ids: number[] }): Promise<any> {
-    return this.resultProvider.calculateBlockStat(false, body.ids)
+  public async calculateBlockStatByIds(@Body() body: { ids: number[] }): Promise<ResponseFilter<any>> {
+    return ResponseFilter.response<any>(await this.resultProvider.calculateBlockStat(false, body.ids), ResponseStatus.SUCCESS)
   }
 
   @UseGuards(AdminGuard)
   @Post("/calculate/save")
-  public async saveBlockStat(@Body() blockStatDto: BlockStatDto): Promise<BlockStatOutputDto> {
-    return this.resultProvider.saveBlockStat(blockStatDto);
+  public async saveBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
+    return ResponseFilter.response<BlockStatOutputDto>(await this.resultProvider.saveBlockStat(blockStatDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(DashboardGuard)
   @Get("user/all")
-  public async getUserResults(@Req() req): Promise<ResultClientOutputDto> {
-    return this.resultProvider.getResultsClient(req.user.id);
+  public async getUserResults(@Req() req): Promise<ResponseFilter<ResultClientOutputDto>> {
+    return ResponseFilter.response<ResultClientOutputDto>(await this.resultProvider.getResultsClient(req.user.id), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Patch(":resultId")
-  public async update(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto): Promise<ResultModel> {
-    return this.resultProvider.update(resultId, updateDto);
+  public async update(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto): Promise<ResponseFilter<ResultModel>> {
+    return ResponseFilter.response<ResultModel>(await this.resultProvider.update(resultId, updateDto), ResponseStatus.SUCCESS);
   }
 }
