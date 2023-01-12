@@ -15,15 +15,17 @@ import { CompanyModel } from "../../company/models/company.model";
 import { AuthService } from "../../user/providers/auth.service";
 import { UserModel } from "../../user/models/user.model";
 import { QuestionModel } from "../../question/models/question.model";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
-export class BlockProvider {
+export class BlockProvider extends BaseProvider<BlockModel>{
   constructor(
     @InjectModel(BlockModel) private blockModel: BlockModel,
     @Inject(TestBlockProvider) private testBlockProvider: TestBlockProvider,
     @Inject(AuthService) private authService: AuthService,
     private sequelize: Sequelize
   ) {
+    super(BlockModel)
   }
 
   async getAll(filter: BlockFilterDto): Promise<BlockModel[]> {
@@ -41,7 +43,8 @@ export class BlockProvider {
         });
       });
     }
-    return await BlockModel.findAll({
+
+    return super.getAll({
       where: {
         ...filters
       },
@@ -49,18 +52,13 @@ export class BlockProvider {
     });
   }
 
-  async getOne(blockId: number, rawData: boolean = false): Promise<BlockModel> {
-    const block = await BlockModel.findOne({
+  async getOne(blockId: number,  rawData: boolean = false): Promise<BlockModel> {
+    return super.getOne({
       where: {
         id: blockId
       },
       include: rawData ? [] : [{ model: TestModel, include: [ QuestionModel ] }]
     });
-
-    if (!block)
-      throw new ModelNotFoundException(BlockModel, blockId);
-
-    return block;
   }
 
   async createModel(createDto: BlockCreateDto): Promise<BlockModel> {

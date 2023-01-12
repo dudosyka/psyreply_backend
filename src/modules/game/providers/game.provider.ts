@@ -6,13 +6,15 @@ import { Sequelize } from "sequelize-typescript";
 import { GameResultCreateDto } from "../dtos/game-result-create.dto";
 import { UserModel } from "../../user/models/user.model";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
+import { BaseProvider } from "../../base/base.provider";
 
-export class GameProvider {
+export class GameProvider extends BaseProvider<GameResultModel> {
   constructor(
     @InjectModel(GameMetricModel) private gameMetricModel: GameMetricModel,
     @InjectModel(GameResultModel) private gameResultModel: GameResultModel,
     private sequelize: Sequelize
   ) {
+    super(GameResultModel)
   }
 
   public async save(createDto: GameResultCreateDto): Promise<GameResultModel> {
@@ -51,8 +53,8 @@ export class GameProvider {
     });
   }
 
-  public async getAll(userId: number, metricId: number) {
-    return await GameResultModel.findAll({
+  public async getAll({ userId, metricId }: { userId: number, metricId: number }): Promise<GameResultModel[]> {
+    return super.getAll({
       where: {
         user_id: userId,
         metric_id: metricId

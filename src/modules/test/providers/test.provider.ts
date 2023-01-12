@@ -15,9 +15,10 @@ import { OperandType, Parsed, ShlyapaMarkupUtil } from "../../../utils/shlyapa-m
 import { TestResultDto } from "../dtos/test-result.dto";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
-export class TestProvider {
+export class TestProvider extends BaseProvider<TestModel> {
   constructor(
     @InjectModel(TestModel) private testModel: TestModel,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
@@ -25,6 +26,7 @@ export class TestProvider {
     @Inject(ShlyapaMarkupUtil) private markupUtil: ShlyapaMarkupUtil,
     private sequelize: Sequelize
   ) {
+    super(TestModel)
   }
 
   async create(test: TestCreateDto, authorId: number): Promise<TestModel> {
@@ -186,14 +188,14 @@ export class TestProvider {
   }
 
   async getAll(filters: TestFilterDto): Promise<TestModel[]> {
-
     if (filters.block_id)
       return await this.blockProvider.includes(filters.block_id);
     if (filters.except_block)
       return await this.getExceptBlock(filters.except_block);
 
     const { block_id, except_block, ...filter } = filters;
-    return TestModel.findAll({
+
+    return super.getAll({
       where: {
         ...filter
       },
@@ -202,13 +204,10 @@ export class TestProvider {
   }
 
   async getOne(testId: number): Promise<TestModel> {
-    const model = await TestModel.findOne({
+    return super.getOne({
       where: { id: testId },
       include: [QuestionTypeModel, MetricModel, QuestionModel]
     });
-    if (!model)
-      throw new ModelNotFoundException(TestModel, testId)
-    return model;
   }
 
   async pass(test: TestPassDto): Promise<TestResultDto> {

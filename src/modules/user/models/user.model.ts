@@ -2,15 +2,15 @@ import {
   AutoIncrement,
   BelongsTo,
   Column,
-  Model,
   PrimaryKey,
   Table
 } from "sequelize-typescript";
 import { CompanyModel } from "../../company/models/company.model";
 import { GroupModel } from "../../company/models/group.model";
+import { BaseModel } from "../../base/base.provider";
 
 @Table
-export class UserModel extends Model {
+export class UserModel extends BaseModel {
   @PrimaryKey
   @AutoIncrement
   @Column

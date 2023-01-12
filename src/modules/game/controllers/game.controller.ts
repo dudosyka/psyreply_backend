@@ -24,6 +24,6 @@ export class GameController {
   @Get(":metricId")
   @HttpCode(ResponseStatus.SUCCESS)
   public async getByMetric(@Req() { user }, @Param('metricId') metricId: number): Promise<ResponseFilter<GameResultModel[]>> {
-    return ResponseFilter.response<GameResultModel[]>(await this.gameProvider.getAll(user.id, metricId), ResponseStatus.SUCCESS);
+    return ResponseFilter.response<GameResultModel[]>(await this.gameProvider.getAll({ userId: user.id, metricId }), ResponseStatus.SUCCESS);
   }
 }

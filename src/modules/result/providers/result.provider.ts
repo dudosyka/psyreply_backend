@@ -19,15 +19,17 @@ import { GroupBlockStatModel } from "../models/group-block-stat.model";
 import { GroupModel } from "../../company/models/group.model";
 import { UserModel } from "../../user/models/user.model";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
-export class ResultProvider {
+export class ResultProvider extends BaseProvider<ResultModel> {
   constructor(
     @Inject(TestProvider) private testProvider: TestProvider,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
     @Inject(CompanyProvider) private companyProvider: CompanyProvider,
     private sequelize: Sequelize
   ) {
+    super(ResultModel)
   }
 
   private async checkApproved(block: BlockModel, resultData: ResultCreateDto): Promise<boolean> {

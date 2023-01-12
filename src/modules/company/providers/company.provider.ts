@@ -14,14 +14,16 @@ import { GroupModel } from "../models/group.model";
 import { GroupCreateDto } from "../dtos/group-create.dto";
 import { GroupUpdateDto } from "../dtos/group-update.dto";
 import { Op } from "sequelize";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
-export class CompanyProvider {
+export class CompanyProvider extends BaseProvider<CompanyModel> {
   constructor(
     @InjectModel(CompanyModel) private companyModel: CompanyModel,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
     private sequelize: Sequelize
   ) {
+    super(CompanyModel)
   }
 
   public async create(createDto: CompanyCreateDto, inputBlocks: number[] = []): Promise<CompanyModel> {
@@ -53,21 +55,19 @@ export class CompanyProvider {
     if (fullData) {
        include = [BlockModel, { model: GroupModel, include: [UserModel] }]
     }
-    const company = await CompanyModel.findOne({
+
+    return super.getOne({
       where: {
         id
       },
       include
     });
-    if (!company)
-      throw new ModelNotFoundException(CompanyModel, id);
-    return company;
   }
 
   public getAll(): Promise<CompanyModel[]> {
-    return CompanyModel.findAll({
+    return super.getAll({
       include: [BlockModel, UserModel]
-    });
+    })
   }
 
   public async update(id: number, updateDto: CompanyUpdateDto): Promise<CompanyModel> {

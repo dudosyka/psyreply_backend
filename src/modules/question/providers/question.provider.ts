@@ -5,13 +5,15 @@ import { QuestionDto } from "../dtos/question.dto";
 import { TestModel } from "../../test/models/test.model";
 import { GlobalExceptionFilter } from "../../../filters/global-exception.filter";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
 @UseFilters(GlobalExceptionFilter)
-export class QuestionProvider {
+export class QuestionProvider extends BaseProvider<QuestionModel> {
   constructor(
     @InjectModel(QuestionModel) private questionModel: QuestionModel
   ) {
+    super(QuestionModel)
   }
 
   async add(questions: QuestionDto[], testModel: TestModel): Promise<boolean> {
@@ -47,16 +49,8 @@ export class QuestionProvider {
     });
   }
 
-  // async getOne(id: number): Promise<QuestionModel> {
-  //   return await QuestionModel.findOne({
-  //     where: {
-  //       id
-  //     }
-  //   });
-  // }
-
   async getAll(ids: number[]): Promise<QuestionModel[]> {
-    return await QuestionModel.findAll({
+    return super.getAll({
       where: {
         id: ids
       }

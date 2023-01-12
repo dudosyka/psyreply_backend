@@ -1,9 +1,10 @@
-import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, PrimaryKey, Table } from "sequelize-typescript";
 import { UserModel } from "../../user/models/user.model";
 import { GameMetricModel } from "./game-metric.model";
+import { BaseModel } from "../../base/base.provider";
 
 @Table
-export class GameResultModel extends Model {
+export class GameResultModel extends BaseModel {
   @AutoIncrement
   @PrimaryKey
   @Column

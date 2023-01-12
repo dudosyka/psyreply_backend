@@ -3,16 +3,16 @@ import {
   BelongsTo,
   BelongsToMany,
   Column,
-  Model,
   PrimaryKey,
   Table
 } from "sequelize-typescript";
 import { CompanyModel } from "../../company/models/company.model";
 import { TestModel } from "../../test/models/test.model";
 import { TestBlockModel } from "../../test-block/models/test-block.model";
+import { BaseModel } from "../../base/base.provider";
 
 @Table
-export class BlockModel extends Model {
+export class BlockModel extends BaseModel {
   @PrimaryKey
   @AutoIncrement
   @Column

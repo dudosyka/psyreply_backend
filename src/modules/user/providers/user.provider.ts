@@ -3,12 +3,14 @@ import { CompanyProvider } from "../../company/providers/company.provider";
 import { UserModel } from "../models/user.model";
 import { UserFilterDto } from "../dtos/user-filter.dto";
 import { Op } from "sequelize";
+import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
-export class UserProvider {
+export class UserProvider extends BaseProvider<UserModel> {
   constructor(
     @Inject(CompanyProvider) private companyProvider: CompanyProvider
   ) {
+    super(UserModel)
   }
 
   public async moveToCompany(userId: number, companyId: number): Promise<boolean> {
@@ -32,7 +34,7 @@ export class UserProvider {
       }
     }
 
-    return UserModel.findAll({
+    return super.getAll({
       where
     });
   }

@@ -1,9 +1,10 @@
-import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, PrimaryKey, Table } from "sequelize-typescript";
 import { QuestionTypeModel } from "../../question-type/models/question-type.model";
 import { TestModel } from "../../test/models/test.model";
+import { BaseModel } from "../../base/base.provider";
 
 @Table
-export class QuestionModel extends Model {
+export class QuestionModel extends BaseModel {
   @PrimaryKey
   @AutoIncrement
   @Column

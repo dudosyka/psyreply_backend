@@ -1,10 +1,11 @@
-import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, PrimaryKey, Table } from "sequelize-typescript";
 import { UserModel } from "../../user/models/user.model";
 import { BlockModel } from "../../block/models/block.model";
 import { CompanyModel } from "../../company/models/company.model";
+import { BaseModel } from "../../base/base.provider";
 
 @Table
-export class ResultModel extends Model {
+export class ResultModel extends BaseModel {
   @PrimaryKey
   @AutoIncrement
   @Column
