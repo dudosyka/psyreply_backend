@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, HttpCode, Inject, Post, Request, UseGuards } from "@nestjs/common";
 import { LocalAuthGuard } from "../../../guards/local-auth.guard";
 import { AuthService } from "../providers/auth.service";
 import { AuthOutputDto } from "../dtos/auth/auth-output.dto";
@@ -15,7 +15,8 @@ export class AuthController {
   }
 
   @Post("/")
-  async firstStep(@Body() credentials: AuthInputDto): Promise<ResponseFilter<AuthOutputDto | TokenOutputDto>> {
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async firstStep(@Body() credentials: AuthInputDto): Promise<ResponseFilter<AuthOutputDto | TokenOutputDto>> {
     if (credentials.email == 'shut_up_and_let_me_in' && mainConf.isDev != ProjectState.PROD) {
       return ResponseFilter.response<TokenOutputDto>(await this.authService.superLogin(), ResponseStatus.SUCCESS)
     }
@@ -26,7 +27,8 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post("/code")
-  async secondStep(@Request() req, @Body("code") code: string): Promise<ResponseFilter<TokenOutputDto>> {
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async secondStep(@Request() req, @Body("code") code: string): Promise<ResponseFilter<TokenOutputDto>> {
     return ResponseFilter.response<TokenOutputDto>(await this.authService.login(req.user), ResponseStatus.SUCCESS);
   }
 }

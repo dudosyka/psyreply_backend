@@ -1,4 +1,4 @@
-import { Body, Controller, ForbiddenException, Inject, Post } from "@nestjs/common";
+import { Body, Controller, ForbiddenException, HttpCode, Inject, Post } from "@nestjs/common";
 import { LoggerProvider } from "../providers/logger.provider";
 import loggerConf from "../../../confs/logger.conf";
 import { ErrorOutputDto } from "../dtos/error.output.dto";
@@ -12,7 +12,8 @@ export class LoggerController {
   }
 
   @Post()
-  async getAll(@Body("passphrase") passphrase: string): Promise<ResponseFilter<ErrorOutputDto[]>> | never{
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getAll(@Body("passphrase") passphrase: string): Promise<ResponseFilter<ErrorOutputDto[]>> | never{
     if (passphrase == loggerConf.passphrase)
       return ResponseFilter.response<ErrorOutputDto[] | {}[]>(
         (await this.loggerProvider.getAll()).map(el => {
@@ -34,11 +35,4 @@ export class LoggerController {
     else
       throw new ForbiddenException(new Error("Failed passphrase"), "Passphrase check failed");
   }
-
-  // @Post("sub")
-  // async addChlenSubscriber(@Req() request, @Body("email") email: string): Promise<string> {
-  //   console.log(request.body);
-  //   await this.loggerProvider.addChlenSubscriber(request.body.message.text);
-  //   return "string";
-  // }
 }

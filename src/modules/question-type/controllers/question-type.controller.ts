@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, UseGuards } from "@nestjs/common";
+import { Controller, Get, HttpCode, Inject, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { QuestionTypeProvider } from "../providers/question-type.provider";
@@ -14,6 +14,7 @@ export class QuestionTypeController {
   }
 
   @Get()
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getAll(): Promise<ResponseFilter<QuestionTypeModel[]>> {
     return ResponseFilter.response<QuestionTypeModel[]>(await this.questionTypeProvider.getAll(), ResponseStatus.SUCCESS);
   }

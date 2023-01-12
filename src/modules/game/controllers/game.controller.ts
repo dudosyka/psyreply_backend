@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Req, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { GameResultModel } from "../models/game-result.model";
@@ -15,12 +15,14 @@ export class GameController {
   }
 
   @Post()
+  @HttpCode(ResponseStatus.CREATED)
   public async save(@Req() { user }, @Body() createDto: GameResultCreateDto): Promise<ResponseFilter<GameResultModel>> {
     createDto.user_id = user.id;
     return ResponseFilter.response<GameResultModel>(await this.gameProvider.save(createDto), ResponseStatus.CREATED);
   }
 
   @Get(":metricId")
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getByMetric(@Req() { user }, @Param('metricId') metricId: number): Promise<ResponseFilter<GameResultModel[]>> {
     return ResponseFilter.response<GameResultModel[]>(await this.gameProvider.getAll(user.id, metricId), ResponseStatus.SUCCESS);
   }

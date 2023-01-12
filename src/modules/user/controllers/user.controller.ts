@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post, Req, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, Post, Req, Request, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { UserProvider } from "../providers/user.provider";
@@ -26,34 +26,41 @@ export class UserController {
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post('/all')
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getAll(@Req() req, @Body() filter: UserFilterDto): Promise<ResponseFilter<UserModel[]>> {
     return ResponseFilter.response<UserModel[]>(await this.userProvider.getAll(filter), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get(':jbId/assign')
+  @HttpCode(ResponseStatus.SUCCESS)
   public async assignUser(@Param('jbId') userId: number): Promise<ResponseFilter<string>> {
     return ResponseFilter.response<string>(`https://client.psyreply.com/results/${await this.authService.assignUser(userId)}`, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(JwtAuthGuard, BlockGuard)
   @Get('/client/:jbId/assign')
-  public async assignUserFromBot(@Param('jbId') jetBotId: number): Promise<{ link2: string }> {
-    return {
-      link2: `https://client.psyreply.com/results/${await this.authService.assignUser(jetBotId)}`
-    }
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async assignUserFromBot(@Param('jbId') jetBotId: number): Promise<ResponseFilter<{ linkdb: string }>> {
+    return ResponseFilter.response<{ linkdb: string }>({
+      linkdb: `https://client.psyreply.com/results/${await this.authService.assignUser(jetBotId)}`
+    }, ResponseStatus.SUCCESS)
   }
 
 
   @UseGuards(JwtAuthGuard, UserBlockGuard)
   @Get('/assign')
-  public async assignUserByUserBlockToken(@Req() req) {
-    return `https://client.psyreply.com/results/${await this.authService.assignUserByUserBlock(req.user.id)}`;
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async assignUserByUserBlockToken(@Req() req): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(`https://client.psyreply.com/results/${await this.authService.assignUserByUserBlock(req.user.id)}`, ResponseStatus.SUCCESS)
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post(":userId/move/:companyId")
-  moveToCompany(@Param("userId") userId: number, @Param("companyId") companyId: number): Promise<boolean> {
-    return this.userProvider.moveToCompany(userId, companyId);
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async moveToCompany(@Param("userId") userId: number, @Param("companyId") companyId: number): Promise<ResponseFilter<null>> {
+    await this.userProvider.moveToCompany(userId, companyId);
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT)
   }
+
 }

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
 import { ResultProvider } from "../providers/result.provider";
 import { ResultModel } from "../models/result.model";
 import { ResultCreateDto } from "../dto/result-create.dto";
@@ -23,24 +23,28 @@ export class ResultController {
 
   @UseGuards(UserBlockGuard)
   @Post("/block/pass")
+  @HttpCode(ResponseStatus.CREATED)
   public async pass(@Req() req, @Param("blockId") blockId: number, @Body() createDto: ResultCreateDto): Promise<ResponseFilter<ResultModel>> {
     return ResponseFilter.response<ResultModel>(await this.resultProvider.pass(req.user.id, req.user.blockId, req.user.week, createDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(AdminGuard)
   @Post("/all")
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getAll(@Body() filters: ResultFitlerDto): Promise<ResponseFilter<ResultModel[]>> {
     return ResponseFilter.response<ResultModel[]>(await this.resultProvider.getResults(filters), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(UserBlockGuard)
   @Post('/all/last')
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getLast(@Req() req): Promise<ResponseFilter<ResultClientOutputDto>> {
     return ResponseFilter.response<ResultClientOutputDto>(await this.resultProvider.getResultsClient(req.user.id, true), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Post("/calculate")
+  @HttpCode(ResponseStatus.SUCCESS)
   public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
     const res = await this.resultProvider.calculateBlockStat(blockStatDto);
     if (res instanceof BlockStatOutputDto)
@@ -49,24 +53,28 @@ export class ResultController {
 
   @UseGuards(AdminGuard)
   @Post('/calculate/special')
+  @HttpCode(ResponseStatus.SUCCESS)
   public async calculateBlockStatByIds(@Body() body: { ids: number[] }): Promise<ResponseFilter<any>> {
     return ResponseFilter.response<any>(await this.resultProvider.calculateBlockStat(false, body.ids), ResponseStatus.SUCCESS)
   }
 
   @UseGuards(AdminGuard)
   @Post("/calculate/save")
+  @HttpCode(ResponseStatus.CREATED)
   public async saveBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
     return ResponseFilter.response<BlockStatOutputDto>(await this.resultProvider.saveBlockStat(blockStatDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(DashboardGuard)
   @Get("user/all")
+  @HttpCode(ResponseStatus.SUCCESS)
   public async getUserResults(@Req() req): Promise<ResponseFilter<ResultClientOutputDto>> {
     return ResponseFilter.response<ResultClientOutputDto>(await this.resultProvider.getResultsClient(req.user.id), ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
   @Patch(":resultId")
+  @HttpCode(ResponseStatus.SUCCESS)
   public async update(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto): Promise<ResponseFilter<ResultModel>> {
     return ResponseFilter.response<ResultModel>(await this.resultProvider.update(resultId, updateDto), ResponseStatus.SUCCESS);
   }
