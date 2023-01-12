@@ -7,7 +7,6 @@ export class DatabaseErrorFilter extends BaseExceptionFilter implements Exceptio
   catch(exception: BaseError, host: ArgumentsHost): any {
     const response = this.log(exception, host);
     this.sendResponse(response, 500, {
-      "status": 500,
       "type": "database",
       "error": "Database error"
     });

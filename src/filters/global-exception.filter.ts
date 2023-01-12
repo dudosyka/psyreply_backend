@@ -6,7 +6,6 @@ export class GlobalExceptionFilter extends BaseExceptionFilter implements Except
   catch(exception: Error, host: ArgumentsHost) {
     const response = this.log(exception, host);
     this.sendResponse(response, 500, {
-      "status": 500,
       "type": "unknown",
       "error": exception.message
     });

@@ -2,6 +2,7 @@ import { ArgumentsHost, Inject } from "@nestjs/common";
 import { Response } from "express";
 import { LoggerProvider } from "../modules/logger/providers/logger.provider";
 import { TransactionUtil } from "../utils/TransactionUtil";
+import { ResponseFilter } from "./response.filter";
 
 export class BaseExceptionFilter {
   constructor(
@@ -26,7 +27,7 @@ export class BaseExceptionFilter {
   sendResponse(response: Response, status: number, body: any) {
     if (TransactionUtil.isSet())
       TransactionUtil.rollback().finally(() => {
-        response.status(status).contentType("json").send(JSON.stringify(body));
+        response.status(status).contentType("json").send(JSON.stringify(ResponseFilter.response<string>(body, status)));
       });
   }
 }

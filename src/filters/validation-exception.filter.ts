@@ -45,7 +45,6 @@ export class ValidationExceptionFilter extends BaseExceptionFilter implements Ex
     }
 
     this.sendResponse(response, exception.getStatus(), {
-      "status": exception.getStatus(),
       "type": "common",
       "error": err
     });
