@@ -1,16 +1,16 @@
-import { Strategy } from "passport-local";
-import { PassportStrategy } from "@nestjs/passport";
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { AuthService } from "../modules/user/providers/auth.service";
-import { UserModel } from "../modules/user/models/user.model";
+import { Strategy } from 'passport-local';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { AuthService } from '../modules/user/providers/auth.service';
+import { UserModel } from '../modules/user/models/user.model';
 
 @Injectable()
 export class LocalStrategy extends PassportStrategy(Strategy) {
   constructor(private authService: AuthService) {
     //We will auth user only by code, so to prevent Unauthorized exception we tell to PassportLocal that our code field is both "username" and "password"
     super({
-      usernameField: "code",
-      passwordField: "code"
+      usernameField: 'code',
+      passwordField: 'code',
     });
   }
 

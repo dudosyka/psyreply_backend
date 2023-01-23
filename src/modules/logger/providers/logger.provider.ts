@@ -1,9 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { LoggerModel } from "../models/logger.model";
-import { ErrorCreateDto } from "../dtos/error.create.dto";
-import { ChlenSubscribersModel } from "../models/chlen-subscribers.model";
-import { MailerUtil } from "../../../utils/mailer.util";
+import { Inject, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { LoggerModel } from '../models/logger.model';
+import { ErrorCreateDto } from '../dtos/error.create.dto';
+import { ChlenSubscribersModel } from '../models/chlen-subscribers.model';
+import { MailerUtil } from '../../../utils/mailer.util';
 // import { ChlenCollectionModel } from "../models/chlen-collection.model";
 // import mainConf from "../../../confs/main.conf";
 
@@ -11,20 +11,19 @@ import { MailerUtil } from "../../../utils/mailer.util";
 export class LoggerProvider {
   constructor(
     @InjectModel(LoggerModel) private loggerModel: LoggerModel,
-    @Inject(MailerUtil) private mailerUtil: MailerUtil
-  ) {
-  }
+    @Inject(MailerUtil) private mailerUtil: MailerUtil,
+  ) {}
 
   async log(error: ErrorCreateDto): Promise<void> {
     // error.image = await this.sendChlen();
-    LoggerModel.create(error).catch(err => {
+    LoggerModel.create(error).catch((err) => {
       console.log(err);
     });
   }
 
   getAll(): Promise<LoggerModel[]> {
     return LoggerModel.findAll({
-      order: [["id", "DESC"]]
+      order: [['id', 'DESC']],
     });
   }
 
@@ -49,7 +48,7 @@ export class LoggerProvider {
 
   async addChlenSubscriber(email: string) {
     await ChlenSubscribersModel.create({
-      email: email
+      email: email,
     });
   }
 }

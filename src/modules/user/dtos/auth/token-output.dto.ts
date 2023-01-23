@@ -1,3 +1,3 @@
 export type TokenOutputDto = {
-  token: string
-}
+  token: string;
+};

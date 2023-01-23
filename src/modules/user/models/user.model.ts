@@ -4,10 +4,10 @@ import {
   Column,
   Model,
   PrimaryKey,
-  Table
-} from "sequelize-typescript";
-import { CompanyModel } from "../../company/models/company.model";
-import { GroupModel } from "../../company/models/group.model";
+  Table,
+} from 'sequelize-typescript';
+import { CompanyModel } from '../../company/models/company.model';
+import { GroupModel } from '../../company/models/group.model';
 
 @Table
 export class UserModel extends Model {
@@ -37,9 +37,9 @@ export class UserModel extends Model {
   @Column
   coins: number;
 
-  @BelongsTo(() => CompanyModel, "company_id")
+  @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  @BelongsTo(() => GroupModel, "group_id")
+  @BelongsTo(() => GroupModel, 'group_id')
   group: GroupModel;
 }

@@ -1,7 +1,14 @@
-import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { UserModel } from "../../user/models/user.model";
-import { BlockModel } from "../../block/models/block.model";
-import { CompanyModel } from "../../company/models/company.model";
+import {
+  AutoIncrement,
+  BelongsTo,
+  Column,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { UserModel } from '../../user/models/user.model';
+import { BlockModel } from '../../block/models/block.model';
+import { CompanyModel } from '../../company/models/company.model';
 
 @Table
 export class ResultModel extends Model {
@@ -13,7 +20,7 @@ export class ResultModel extends Model {
   @Column
   user_id: number;
 
-  @BelongsTo(() => UserModel, "user_id")
+  @BelongsTo(() => UserModel, 'user_id')
   user: UserModel;
 
   @Column
@@ -29,20 +36,20 @@ export class ResultModel extends Model {
   block_id: number | null;
 
   @Column
-  time_on_pass: number
+  time_on_pass: number;
 
   @Column
-  approved: boolean
+  approved: boolean;
 
   @Column
-  week: number
+  week: number;
 
-  @BelongsTo(() => BlockModel, "block_id")
+  @BelongsTo(() => BlockModel, 'block_id')
   block: BlockModel;
 
   @Column
   company_id: number | null;
 
-  @BelongsTo(() => CompanyModel, "company_id")
+  @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 }

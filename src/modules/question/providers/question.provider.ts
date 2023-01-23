@@ -1,37 +1,36 @@
-import { Injectable, UseFilters } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { QuestionModel } from "../models/question.model";
-import { QuestionDto } from "../dtos/question.dto";
-import { TestModel } from "../../test/models/test.model";
-import { GlobalExceptionFilter } from "../../../filters/global-exception.filter";
-import { TransactionUtil } from "../../../utils/TransactionUtil";
+import { Injectable, UseFilters } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { QuestionModel } from '../models/question.model';
+import { QuestionDto } from '../dtos/question.dto';
+import { TestModel } from '../../test/models/test.model';
+import { GlobalExceptionFilter } from '../../../filters/global-exception.filter';
+import { TransactionUtil } from '../../../utils/TransactionUtil';
 
 @Injectable()
 @UseFilters(GlobalExceptionFilter)
 export class QuestionProvider {
   constructor(
-    @InjectModel(QuestionModel) private questionModel: QuestionModel
-  ) {
-  }
+    @InjectModel(QuestionModel) private questionModel: QuestionModel,
+  ) {}
 
   async add(questions: QuestionDto[], testModel: TestModel): Promise<boolean> {
     let records = [];
-    questions.map(el => {
+    questions.map((el) => {
       const { answers, ...data } = el;
       records.push({
         test_id: testModel.id,
         type_id: testModel.type_id,
         value: JSON.stringify(el.answers),
         ...data,
-        id: null
+        id: null,
       });
     });
     console.log(records);
-    records = records.map(el => {
+    records = records.map((el) => {
       return {
         ...el,
-        id: null
-      }
+        id: null,
+      };
     });
     console.log(records);
     await QuestionModel.bulkCreate(records, TransactionUtil.getHost());
@@ -41,9 +40,9 @@ export class QuestionProvider {
   async removeByTest(testId: number): Promise<void> {
     await QuestionModel.destroy({
       where: {
-        test_id: testId
+        test_id: testId,
       },
-      ...TransactionUtil.getHost()
+      ...TransactionUtil.getHost(),
     });
   }
 
@@ -58,8 +57,8 @@ export class QuestionProvider {
   async getAll(ids: number[]): Promise<QuestionModel[]> {
     return await QuestionModel.findAll({
       where: {
-        id: ids
-      }
+        id: ids,
+      },
     });
   }
 }

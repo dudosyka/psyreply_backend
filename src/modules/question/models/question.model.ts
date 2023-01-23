@@ -1,6 +1,13 @@
-import { AutoIncrement, BelongsTo, Column, Model, PrimaryKey, Table } from "sequelize-typescript";
-import { QuestionTypeModel } from "../../question-type/models/question-type.model";
-import { TestModel } from "../../test/models/test.model";
+import {
+  AutoIncrement,
+  BelongsTo,
+  Column,
+  Model,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
+import { QuestionTypeModel } from '../../question-type/models/question-type.model';
+import { TestModel } from '../../test/models/test.model';
 
 @Table
 export class QuestionModel extends Model {
@@ -15,7 +22,7 @@ export class QuestionModel extends Model {
   @Column
   type_id: number;
 
-  @BelongsTo(() => QuestionTypeModel, "type_id")
+  @BelongsTo(() => QuestionTypeModel, 'type_id')
   type: QuestionTypeModel;
 
   @Column
@@ -24,7 +31,7 @@ export class QuestionModel extends Model {
   @Column
   relative_id: number;
 
-  @BelongsTo(() => TestModel, "test_id")
+  @BelongsTo(() => TestModel, 'test_id')
   test: TestModel;
 
   @Column

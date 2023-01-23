@@ -1,5 +1,5 @@
-import { ResultModel } from "../models/result.model";
-import { GroupModel } from "../../company/models/group.model";
+import { ResultModel } from '../models/result.model';
+import { GroupModel } from '../../company/models/group.model';
 
 export class BlockGroupStatOutputDto {
   group: GroupModel;
@@ -9,5 +9,5 @@ export class BlockGroupStatOutputDto {
 
 export class BlockStatOutputDto {
   allResults: ResultModel[];
-  groupsResult: BlockGroupStatOutputDto[]
+  groupsResult: BlockGroupStatOutputDto[];
 }

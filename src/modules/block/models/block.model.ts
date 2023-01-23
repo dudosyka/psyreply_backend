@@ -5,11 +5,11 @@ import {
   Column,
   Model,
   PrimaryKey,
-  Table
-} from "sequelize-typescript";
-import { CompanyModel } from "../../company/models/company.model";
-import { TestModel } from "../../test/models/test.model";
-import { TestBlockModel } from "../../test-block/models/test-block.model";
+  Table,
+} from 'sequelize-typescript';
+import { CompanyModel } from '../../company/models/company.model';
+import { TestModel } from '../../test/models/test.model';
+import { TestBlockModel } from '../../test-block/models/test-block.model';
 
 @Table
 export class BlockModel extends Model {
@@ -30,9 +30,9 @@ export class BlockModel extends Model {
   @Column
   company_id: number;
 
-  @BelongsTo(() => CompanyModel, "company_id")
+  @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  @BelongsToMany(() => TestModel, () => TestBlockModel, "block_id", "test_id")
+  @BelongsToMany(() => TestModel, () => TestBlockModel, 'block_id', 'test_id')
   tests: TestModel[];
 }

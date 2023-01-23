@@ -1,8 +1,8 @@
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { PassportStrategy } from "@nestjs/passport";
-import { Injectable } from "@nestjs/common";
-import mainConf from "../confs/main.conf";
-import { TokenTypeEnum } from "../utils/token.type.enum";
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { PassportStrategy } from '@nestjs/passport';
+import { Injectable } from '@nestjs/common';
+import mainConf from '../confs/main.conf';
+import { TokenTypeEnum } from '../utils/token.type.enum';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -10,18 +10,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: mainConf.jwtConstants.secret
+      secretOrKey: mainConf.jwtConstants.secret,
     });
   }
 
-  async validate(payload: { sub?: number, isAdmin?: boolean, tokenType: TokenTypeEnum, blockId?: number, week?: number, companyId?: number }) {
+  async validate(payload: {
+    sub?: number;
+    isAdmin?: boolean;
+    tokenType: TokenTypeEnum;
+    blockId?: number;
+    week?: number;
+    companyId?: number;
+  }) {
     return {
       id: payload.sub,
       isAdmin: payload.isAdmin,
       tokenType: payload.tokenType,
       blockId: payload.blockId,
       companyId: payload.companyId,
-      week: payload.week
+      week: payload.week,
     };
   }
 }
