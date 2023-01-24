@@ -29,7 +29,7 @@ export class ShlyapaMarkupUtil {
   static parse_pattern = /((\$\d+)|(\(((\d+)|(\$\d+))[+*-]\$\d+\))|(\(\-?\$\d+\)))/
   private static parse_item = /(\\d+)|(\\$\\d+)/gm;
   private static parse_var_id = /\d+/gm;
-  private static parse_operation = /+*-/gm;
+  private static parse_operation = /\+\*\-/gm;
 
   public parse(markup: string): Parsed {
     const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, 'gm');

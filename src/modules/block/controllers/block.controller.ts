@@ -11,6 +11,7 @@ import { BlockGuard } from "../../../guards/block.guard";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { AuthService } from "../../user/providers/auth.service";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
+import { BlockGroupStatOutputDto } from "../../result/dto/block-stat-output.dto";
 
 @UseGuards(JwtAuthGuard)
 @Controller('block')
@@ -82,5 +83,39 @@ export class BlockController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async copyToCompany(@Body("blocks") blocks: number[], @Param("companyId") companyId: number): Promise<ResponseFilter<BlockModel[] | void>> {
     return ResponseFilter.response<BlockModel[] | void>(await this.blockProvider.copyToCompany(blocks, companyId), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('stat/:blockId/:week')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async saveStat(
+    @Param('blockId') blockId: number,
+    @Param('week') week: number
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+    return ResponseFilter.response<BlockGroupStatOutputDto[]>(await this.blockProvider.saveStat(blockId, week), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('/stat/:blockId/:week/:groupId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async saveStatByGroup(
+    @Param('blockId') blockId: number,
+    @Param('week') week: number,
+    @Param('groupId') groupId: number,
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+    return ResponseFilter.response<BlockGroupStatOutputDto[]>(await this.blockProvider.saveStat(blockId, week, groupId), ResponseStatus.SUCCESS)
+  }
+
+  @UseGuards(AdminGuard)
+  @Post('/stat/:blockId/:week/:groupId/special')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async saveStatSpecialIds(
+    @Param('blockId') blockId: number,
+    @Param('week') week: number,
+    @Param('groupId') groupId: number,
+    @Body('resultIds') resultIds: number[]
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+    console.log(resultIds);
+    return ResponseFilter.response<BlockGroupStatOutputDto[]>(await this.blockProvider.saveStat(blockId, week, groupId, resultIds), ResponseStatus.SUCCESS)
   }
 }

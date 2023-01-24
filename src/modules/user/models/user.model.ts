@@ -37,8 +37,14 @@ export class UserModel extends BaseModel {
   @Column
   coins: number;
 
+  @Column
+  company_id: number;
+
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
+
+  @Column
+  group_id: number;
 
   @BelongsTo(() => GroupModel, 'group_id')
   group: GroupModel;

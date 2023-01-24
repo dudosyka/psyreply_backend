@@ -8,6 +8,7 @@ export class BaseExceptionFilter {
   constructor(@Inject(LoggerProvider) private loggerProvider: LoggerProvider) {}
 
   log(exception: Error, host: ArgumentsHost): Response {
+    console.error(exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
     const request = ctx.getRequest<Request>();
@@ -28,9 +29,9 @@ export class BaseExceptionFilter {
   async sendResponse(response: Response, status: number, body: any) {
     if (TransactionUtil.isSet()) {
       await TransactionUtil.rollback();
-      return ResponseFilter.response(body, status);
+      response.status(status).send(ResponseFilter.response(body, status));
     } else {
-      return ResponseFilter.response(body, status);
+      response.status(status).send(ResponseFilter.response(body, status));
     }
   }
 }

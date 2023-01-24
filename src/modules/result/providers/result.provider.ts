@@ -13,9 +13,6 @@ import { BlockModel } from "../../block/models/block.model";
 import { CompanyModel } from "../../company/models/company.model";
 import { ResultClientOutputDto } from "../dto/result-client-output.dto";
 import { MetricModel } from "../../metric/models/metric.model";
-import { BlockGroupStatOutputDto, BlockStatOutputDto } from "../dto/block-stat-output.dto";
-import { BlockStatDto } from "../dto/block-stat.dto";
-import { GroupBlockStatModel } from "../models/group-block-stat.model";
 import { GroupModel } from "../../company/models/group.model";
 import { UserModel } from "../../user/models/user.model";
 import { TransactionUtil } from "../../../utils/TransactionUtil";
@@ -217,101 +214,5 @@ export class ResultProvider extends BaseProvider<ResultModel> {
     if (updateDto.approved != null) resModel.approved = updateDto.approved;
     await resModel.save();
     return resModel;
-  }
-
-  private async getGroupStat(
-    group: GroupModel,
-    results: ResultModel[],
-  ): Promise<BlockGroupStatOutputDto> {
-    const approved = results.filter((el) => el.approved);
-    const allGroup = await GroupModel.findOne({
-      where: {
-        id: group.id,
-      },
-      include: [UserModel],
-    });
-
-    const percent = Math.round((approved.length / allGroup.users.length) * 100);
-
-    const resultsByMetric = await this.resultsByMetrics(approved);
-    const group_result = Object.keys(resultsByMetric).map((el) => {
-      const metric = resultsByMetric[el];
-      let metric_id = 0;
-      let value = 0;
-
-      Object.keys(metric).forEach((id) => {
-        metric_id = parseInt(id);
-        let sum = 0;
-        metric[id].values.forEach((el) => (sum += el));
-        if (sum) value = sum / metric[id].values.length;
-      });
-
-      return {
-        metric_id,
-        value,
-      };
-    });
-
-    return {
-      group,
-      percent,
-      group_result,
-    };
-  }
-
-  public async calculateBlockStat(
-    blockStatDto: BlockStatDto | false,
-    ids: number[] = [],
-  ): Promise<BlockStatOutputDto | ResultClientOutputDto> {
-    let results = await this.getResults({ filters: { id: ids } });
-    if (blockStatDto)
-      results = await this.getResults({
-        filters: { week: blockStatDto.week, block_id: blockStatDto.blockId },
-      });
-
-    if (ids) return this.resultsByMetrics(results);
-
-    let group_results = {};
-    results.forEach((el) => {
-      const group = el.user.group;
-      if (group_results[group.id]) {
-        group_results[group.id].results.push(el);
-      } else {
-        group_results[group.id] = {
-          group: el.user.group,
-          results: [el],
-        };
-      }
-    });
-
-    const groupsResult = await Promise.all(
-      Object.values(group_results).map(
-        async (el: { group: GroupModel; results: ResultModel[] }) => {
-          return await this.getGroupStat(el.group, el.results);
-        },
-      ),
-    );
-
-    return {
-      allResults: results,
-      groupsResult,
-    };
-  }
-
-  public async saveBlockStat(blockStatDto: BlockStatDto): Promise<any> {
-    const stat = await this.calculateBlockStat(blockStatDto);
-    if (stat instanceof BlockStatOutputDto)
-      return await Promise.all(
-        stat.groupsResult.map(async (groupStat) => {
-          return GroupBlockStatModel.create({
-            data: JSON.stringify(groupStat.group_result),
-            percent: groupStat.percent,
-            week: blockStatDto.week,
-            company_id: groupStat.group.company_id,
-            group_id: groupStat.group.id,
-            block_id: blockStatDto.blockId,
-          });
-        }),
-      );
   }
 }

@@ -19,8 +19,6 @@ import { ResultClientOutputDto } from "../dto/result-client-output.dto";
 import { ResultUpdateDto } from "../dto/result-update.dto";
 import { AdminGuard } from "../../../guards/admin.guard";
 import { DashboardGuard } from "../../../guards/dashboard.guard";
-import { BlockStatDto } from "../dto/block-stat.dto";
-import { BlockStatOutputDto } from "../dto/block-stat-output.dto";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
@@ -48,29 +46,6 @@ export class ResultController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getLast(@Req() req): Promise<ResponseFilter<ResultClientOutputDto>> {
     return ResponseFilter.response<ResultClientOutputDto>(await this.resultProvider.getResultsClient(req.user.id, true), ResponseStatus.SUCCESS);
-  }
-
-  @UseGuards(AdminGuard)
-  @Post("/calculate")
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async calculateBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
-    const res = await this.resultProvider.calculateBlockStat(blockStatDto);
-    if (res instanceof BlockStatOutputDto)
-      return ResponseFilter.response<BlockStatOutputDto>(res, ResponseStatus.SUCCESS);
-  }
-
-  @UseGuards(AdminGuard)
-  @Post('/calculate/special')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async calculateBlockStatByIds(@Body() body: { ids: number[] }): Promise<ResponseFilter<any>> {
-    return ResponseFilter.response<any>(await this.resultProvider.calculateBlockStat(false, body.ids), ResponseStatus.SUCCESS)
-  }
-
-  @UseGuards(AdminGuard)
-  @Post("/calculate/save")
-  @HttpCode(ResponseStatus.CREATED)
-  public async saveBlockStat(@Body() blockStatDto: BlockStatDto): Promise<ResponseFilter<BlockStatOutputDto>> {
-    return ResponseFilter.response<BlockStatOutputDto>(await this.resultProvider.saveBlockStat(blockStatDto), ResponseStatus.CREATED);
   }
 
   @UseGuards(DashboardGuard)
