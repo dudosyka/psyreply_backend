@@ -13,25 +13,25 @@ export class UserProvider extends BaseProvider<UserModel> {
     super(UserModel)
   }
 
-  public async moveToCompany(userId: number, companyId: number): Promise<boolean> {
+  public async moveToCompany(
+    userId: number,
+    companyId: number,
+  ): Promise<boolean> {
     return await this.companyProvider.appendUser(userId, companyId);
   }
 
   public async getAll({ filters }: UserFilterDto): Promise<UserModel[]> {
     const { except_group_id, ...filter } = filters;
     let where: any = {
-      ...filter
+      ...filter,
     };
     if (filters.except_group_id) {
       where = {
         group_id: {
-          [Op.or]: [
-            {[Op.not]: filters.except_group_id},
-            {[Op.is]: null}
-          ]
+          [Op.or]: [{ [Op.not]: filters.except_group_id }, { [Op.is]: null }],
         },
-        ...filter
-      }
+        ...filter,
+      };
     }
 
     return super.getAll({

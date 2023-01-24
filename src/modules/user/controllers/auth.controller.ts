@@ -7,12 +7,9 @@ import mainConf, { ProjectState } from "../../../confs/main.conf";
 import { TokenOutputDto } from "../dtos/auth/token-output.dto";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
-@Controller("auth")
+@Controller('auth')
 export class AuthController {
-  constructor(
-    @Inject(AuthService) private authService: AuthService
-  ) {
-  }
+  constructor(@Inject(AuthService) private authService: AuthService) {}
 
   @Post("/")
   @HttpCode(ResponseStatus.SUCCESS)

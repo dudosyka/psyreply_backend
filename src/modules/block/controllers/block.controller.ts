@@ -13,13 +13,12 @@ import { AuthService } from "../../user/providers/auth.service";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard)
-@Controller("block")
+@Controller('block')
 export class BlockController {
   constructor(
     @Inject(BlockProvider) private blockProvider: BlockProvider,
-    @Inject(AuthService) private authService: AuthService
-  ) {
-  }
+    @Inject(AuthService) private authService: AuthService,
+  ) {}
 
   @UseGuards(AdminGuard)
   @Post("all")

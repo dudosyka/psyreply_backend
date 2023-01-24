@@ -1,4 +1,3 @@
-import { CompanyCreateDto } from "./company-create.dto";
+import { CompanyCreateDto } from './company-create.dto';
 
-export class CompanyUpdateDto extends CompanyCreateDto {
-}
+export class CompanyUpdateDto extends CompanyCreateDto {}

@@ -30,9 +30,9 @@ export class BlockModel extends BaseModel {
   @Column
   company_id: number;
 
-  @BelongsTo(() => CompanyModel, "company_id")
+  @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  @BelongsToMany(() => TestModel, () => TestBlockModel, "block_id", "test_id")
+  @BelongsToMany(() => TestModel, () => TestBlockModel, 'block_id', 'test_id')
   tests: TestModel[];
 }

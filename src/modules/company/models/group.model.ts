@@ -8,17 +8,17 @@ export class GroupModel extends BaseModel {
   @AutoIncrement
   @PrimaryKey
   @Column
-  id: number
+  id: number;
 
   @Column
-  name: string
+  name: string;
 
   @Column
-  company_id: number
+  company_id: number;
 
-  @BelongsTo(() => CompanyModel, "company_id")
-  company: CompanyModel
+  @BelongsTo(() => CompanyModel, 'company_id')
+  company: CompanyModel;
 
-  @BelongsToMany(() => UserModel, () => UserModel, "group_id", "id")
-  users: UserModel[]
+  @BelongsToMany(() => UserModel, () => UserModel, 'group_id', 'id')
+  users: UserModel[];
 }

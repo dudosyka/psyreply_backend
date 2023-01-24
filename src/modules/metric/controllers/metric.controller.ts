@@ -7,12 +7,9 @@ import CreateMetricDto from "../dto/create-metric.dto";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller("metric")
+@Controller('metric')
 export class MetricController {
-  constructor(
-    @Inject(MetricProvider) private metricProvider: MetricProvider
-  ) {
-  }
+  constructor(@Inject(MetricProvider) private metricProvider: MetricProvider) {}
 
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)

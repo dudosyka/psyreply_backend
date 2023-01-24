@@ -6,15 +6,17 @@ import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()
 export class MetricProvider extends BaseProvider<MetricModel> {
-  constructor(
-    @InjectModel(MetricModel) private metricModel: MetricModel
-  ) {
+  constructor(@InjectModel(MetricModel) private metricModel: MetricModel) {
     super(MetricModel)
+  }
+
+  getAll(): Promise<MetricModel[]> {
+    return MetricModel.findAll();
   }
 
   async create(createDto: CreateMetricDto): Promise<MetricModel> {
     return await MetricModel.create({
-      ...createDto
+      ...createDto,
     });
   }
 }

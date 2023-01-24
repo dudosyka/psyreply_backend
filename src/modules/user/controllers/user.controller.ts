@@ -9,14 +9,12 @@ import { UserModel } from "../models/user.model";
 import { BlockGuard } from "../../../guards/block.guard";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
-@Controller("user")
+@Controller('user')
 export class UserController {
-
   constructor(
     @Inject(UserProvider) private userProvider: UserProvider,
-    @Inject(AuthService) private authService: AuthService
-  ) {
-  }
+    @Inject(AuthService) private authService: AuthService,
+  ) {}
 
   @UseGuards(JwtAuthGuard)
   @Get()
@@ -46,7 +44,6 @@ export class UserController {
       linkdb: `https://client.psyreply.com/results/${await this.authService.assignUser(jetBotId)}`
     }, ResponseStatus.SUCCESS)
   }
-
 
   @UseGuards(JwtAuthGuard, UserBlockGuard)
   @Get('/assign')

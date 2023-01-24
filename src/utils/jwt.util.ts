@@ -1,20 +1,22 @@
-import { JwtService } from "@nestjs/jwt";
-import { UserModel } from "../modules/user/models/user.model";
-import { TokenTypeEnum } from "./token.type.enum";
-import { Injectable } from "@nestjs/common";
-import { BlockModel } from "../modules/block/models/block.model";
+import { JwtService } from '@nestjs/jwt';
+import { UserModel } from '../modules/user/models/user.model';
+import { TokenTypeEnum } from './token.type.enum';
+import { Injectable } from '@nestjs/common';
+import { BlockModel } from '../modules/block/models/block.model';
 
 @Injectable()
 export class JwtUtil {
-  constructor(private jwtService: JwtService) {
-  }
+  constructor(private jwtService: JwtService) {}
 
   public signAdmin(user: UserModel): string {
-    return this.jwtService.sign({
-      sub: user.id,
-      isAdmin: user.isAdmin,
-      tokenType: TokenTypeEnum.ADMIN
-    }, { expiresIn: "30d" });
+    return this.jwtService.sign(
+      {
+        sub: user.id,
+        isAdmin: user.isAdmin,
+        tokenType: TokenTypeEnum.ADMIN,
+      },
+      { expiresIn: '30d' },
+    );
   }
 
   public signBlock(block: BlockModel, week: number): string {
@@ -22,18 +24,22 @@ export class JwtUtil {
       tokenType: TokenTypeEnum.BLOCK,
       blockId: block.id,
       companyId: block.company_id,
-      week
-    })
+      week,
+    });
   }
 
-  public signUserBlock(user: UserModel, week: number, block: BlockModel): string {
+  public signUserBlock(
+    user: UserModel,
+    week: number,
+    block: BlockModel,
+  ): string {
     return this.jwtService.sign({
       sub: user.id,
       tokenType: TokenTypeEnum.USER_BLOCK,
       blockId: block.id,
       companyId: block.company_id,
-      week
-    })
+      week,
+    });
   }
 
   public signUser(user: UserModel): string {

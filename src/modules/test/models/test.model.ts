@@ -15,21 +15,21 @@ export class TestModel extends BaseModel {
   @Column
   title: string;
 
-  @BelongsTo(() => UserModel, "author_id")
+  @BelongsTo(() => UserModel, 'author_id')
   author: UserModel;
 
   @Column
   type_id: number;
 
-  @BelongsTo(() => QuestionTypeModel, "type_id")
+  @BelongsTo(() => QuestionTypeModel, 'type_id')
   type: QuestionTypeModel;
 
   @Column
   formula: string;
 
-  @BelongsTo(() => MetricModel, "metric_id")
+  @BelongsTo(() => MetricModel, 'metric_id')
   metric: MetricModel;
 
-  @BelongsToMany(() => QuestionModel, () => QuestionModel, "test_id", "id")
+  @BelongsToMany(() => QuestionModel, () => QuestionModel, 'test_id', 'id')
   questions: QuestionModel[];
 }

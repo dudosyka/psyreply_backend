@@ -11,12 +11,11 @@ import { GroupUpdateDto } from "../dtos/group-update.dto";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller("company")
+@Controller('company')
 export class CompanyController {
   constructor(
-    @Inject(CompanyProvider) private companyProvider: CompanyProvider
-  ) {
-  }
+    @Inject(CompanyProvider) private companyProvider: CompanyProvider,
+  ) {}
 
   @Post()
   @HttpCode(ResponseStatus.CREATED)

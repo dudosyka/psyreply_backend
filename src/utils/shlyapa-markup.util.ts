@@ -1,45 +1,45 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable } from '@nestjs/common';
 
 export enum OperandType {
   VARIABLE,
-  CONST
+  CONST,
 }
 
 type Operand = {
-  sign: number,
-  type: OperandType
-  value: number
-}
+  sign: number;
+  type: OperandType;
+  value: number;
+};
 
 export type ShlyapaMarkup = {
-  item: Operand
-  sum: Operand | null,
-  composition: Operand | null
-}
+  item: Operand;
+  sum: Operand | null;
+  composition: Operand | null;
+};
 
 export type Parsed = {
-  markup: ShlyapaMarkup[]
-  div: number
-}
+  markup: ShlyapaMarkup[];
+  div: number;
+};
 
 @Injectable()
 export class ShlyapaMarkupUtil {
-  static get_formula_body = new RegExp("\\[(.*)\\]\\/(\\d+)");
-  static validate_pattern = new RegExp("^\\[(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+\\]\\/\\d+$");
-  static parse_pattern = "((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\)))";
-  private static parse_item = new RegExp("(\\d+)|(\\$\\d+)", "gm");
-  private static parse_var_id = new RegExp("\\d+", "gm");
-  private static parse_operation = new RegExp("[+*\-]", "gm");
+  static get_formula_body = /\[(.*)\]\/(\d+)/;
+  static validate_pattern = /^\[(\+((\$\d+)|(\(((\d+)|(\$\d+))[+*-]\$\d+\))|(\(\-?\$\d+\))))+\]\/\d+$/
+  static parse_pattern = /((\$\d+)|(\(((\d+)|(\$\d+))[+*-]\$\d+\))|(\(\-?\$\d+\)))/
+  private static parse_item = /(\\d+)|(\\$\\d+)/gm;
+  private static parse_var_id = /\d+/gm;
+  private static parse_operation = /+*-/gm;
 
   public parse(markup: string): Parsed {
-    const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, "gm");
+    const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, 'gm');
 
     const body = markup.match(ShlyapaMarkupUtil.get_formula_body);
 
-    const m = body[1].match(regex).map(el => {
+    const m = body[1].match(regex).map((el) => {
       let res: ShlyapaMarkup = { item: null, sum: null, composition: null };
       //Cut ( ) if exists
-      if (el[0] == "(") {
+      if (el[0] == '(') {
         el = el.substring(1, el.length - 1);
       }
       const item = el.match(ShlyapaMarkupUtil.parse_item);
@@ -54,12 +54,10 @@ export class ShlyapaMarkupUtil {
         //If we have sign before both operands
         if (sign.length > 1)
           res.item = this.getOperand(sign[0] + item[0], item[0]);
-        else
-          res.item = this.getOperand(item[0], item[0]);
+        else res.item = this.getOperand(item[0], item[0]);
         //If we have two operands after we process first, we place main operator on first place
-        if (sign.length > 1)
-          sign[0] = sign[1];
-        if (sign[0] == "-" || sign[0] == "+") {
+        if (sign.length > 1) sign[0] = sign[1];
+        if (sign[0] == '-' || sign[0] == '+') {
           res.sum = this.getOperand(sign[0] + item[1], item[1]);
         } else {
           res.composition = this.getOperand(item[1], item[1]);
@@ -70,20 +68,19 @@ export class ShlyapaMarkupUtil {
 
     return {
       markup: m,
-      div: parseInt(body[2])
-    }
+      div: parseInt(body[2]),
+    };
   }
 
   private getOperand(el: string, item: string): Operand {
     let value = parseInt(item.match(ShlyapaMarkupUtil.parse_var_id)[0]);
     let sign = 1;
-    let type = item[0] == "$" ? OperandType.VARIABLE : OperandType.CONST;
-    if (el[0] == "-")
-      sign = -1;
+    let type = item[0] == '$' ? OperandType.VARIABLE : OperandType.CONST;
+    if (el[0] == '-') sign = -1;
     return {
       value,
       sign,
-      type
+      type,
     };
   }
 }

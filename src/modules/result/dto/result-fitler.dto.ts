@@ -1,4 +1,4 @@
-import { SearchFilter } from "../../../filters/search.filter";
+import { SearchFilter } from '../../../filters/search.filter';
 
 class Filter {
   id?: number[] | number;

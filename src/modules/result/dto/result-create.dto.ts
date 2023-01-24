@@ -1,23 +1,32 @@
-import { IsArray, IsNumber, ValidateNested } from "class-validator";
-import { Type } from "class-transformer";
+import { IsArray, IsNumber, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 class AnswerPassDto {
-  @IsNumber({}, {
-    message: "question_id must be INT"
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'question_id must be INT',
+    },
+  )
   question_id: number;
 
-  @IsNumber({}, {
-    each: true,
-    message: "answer must be INT"
-  })
+  @IsNumber(
+    {},
+    {
+      each: true,
+      message: 'answer must be INT',
+    },
+  )
   answer: number[];
 }
 
 export class TestPassDto {
-  @IsNumber({}, {
-    message: "test_id must be INT"
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'test_id must be INT',
+    },
+  )
   test_id: number;
 
   @IsArray()
@@ -32,8 +41,11 @@ export class ResultCreateDto {
   @Type(() => TestPassDto)
   tests: TestPassDto[];
 
-  @IsNumber({}, {
-    message: "time_on_pass must be INT"
-  })
-  time_on_pass: number
+  @IsNumber(
+    {},
+    {
+      message: 'time_on_pass must be INT',
+    },
+  )
+  time_on_pass: number;
 }

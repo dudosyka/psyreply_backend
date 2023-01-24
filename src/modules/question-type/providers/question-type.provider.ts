@@ -1,6 +1,6 @@
-import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/sequelize";
-import { QuestionTypeModel } from "../models/question-type.model";
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/sequelize';
+import { QuestionTypeModel } from '../models/question-type.model';
 import { BaseProvider } from "../../base/base.provider";
 
 @Injectable()

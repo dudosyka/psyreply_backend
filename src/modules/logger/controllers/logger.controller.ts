@@ -1,15 +1,19 @@
-import { Body, Controller, ForbiddenException, HttpCode, Inject, Post } from "@nestjs/common";
-import { LoggerProvider } from "../providers/logger.provider";
-import loggerConf from "../../../confs/logger.conf";
-import { ErrorOutputDto } from "../dtos/error.output.dto";
+import {
+  Body,
+  Controller,
+  ForbiddenException,
+  Inject,
+  Post,
+  HttpCode,
+} from '@nestjs/common';
+import { LoggerProvider } from '../providers/logger.provider';
+import loggerConf from '../../../confs/logger.conf';
+import { ErrorOutputDto } from '../dtos/error.output.dto';
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
-@Controller("logger")
+@Controller('logger')
 export class LoggerController {
-  constructor(
-    @Inject(LoggerProvider) private loggerProvider: LoggerProvider
-  ) {
-  }
+  constructor(@Inject(LoggerProvider) private loggerProvider: LoggerProvider) {}
 
   @Post()
   @HttpCode(ResponseStatus.SUCCESS)
@@ -33,6 +37,9 @@ export class LoggerController {
         ResponseStatus.SUCCESS
       )
     else
-      throw new ForbiddenException(new Error("Failed passphrase"), "Passphrase check failed");
+      throw new ForbiddenException(
+        new Error('Failed passphrase'),
+        'Passphrase check failed',
+      );
   }
 }

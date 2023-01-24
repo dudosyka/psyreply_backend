@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
+  HttpCode,
+} from '@nestjs/common';
 import { ResultProvider } from "../providers/result.provider";
 import { ResultModel } from "../models/result.model";
 import { ResultCreateDto } from "../dto/result-create.dto";
@@ -14,12 +25,9 @@ import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard)
-@Controller("result")
+@Controller('result')
 export class ResultController {
-  constructor(
-    @Inject(ResultProvider) private resultProvider: ResultProvider
-  ) {
-  }
+  constructor(@Inject(ResultProvider) private resultProvider: ResultProvider) {}
 
   @UseGuards(UserBlockGuard)
   @Post("/block/pass")

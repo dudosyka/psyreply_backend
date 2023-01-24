@@ -10,12 +10,9 @@ import { SearchFilter } from "../../../filters/search.filter";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller("test")
+@Controller('test')
 export class TestController {
-  constructor(
-    @Inject(TestProvider) private testProvider: TestProvider
-  ) {
-  }
+  constructor(@Inject(TestProvider) private testProvider: TestProvider) {}
 
   @Post("all")
   @HttpCode(ResponseStatus.SUCCESS)

@@ -33,36 +33,35 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     if (filter.exclude_test) {
       return await BlockModel.findAll({
         where: {
-          ...filters
+          ...filters,
         },
-        include: [TestModel, CompanyModel]
-      }).then(el => {
-        return el.filter(block => {
-          const tests = block.tests.map(el => el.id);
-          return !(tests.includes(exclude_test));
+        include: [TestModel, CompanyModel],
+      }).then((el) => {
+        return el.filter((block) => {
+          const tests = block.tests.map((el) => el.id);
+          return !tests.includes(exclude_test);
         });
       });
     }
 
     return super.getAll({
       where: {
-        ...filters
+        ...filters,
       },
-      include: [TestModel, CompanyModel]
+      include: [TestModel, CompanyModel],
     });
   }
 
   async getOne(blockId: number,  rawData: boolean = false): Promise<BlockModel> {
     return super.getOne({
       where: {
-        id: blockId
+        id: blockId,
       },
-      include: rawData ? [] : [{ model: TestModel, include: [ QuestionModel ] }]
+      include: rawData ? [] : [{ model: TestModel, include: [QuestionModel] }],
     });
   }
 
   async createModel(createDto: BlockCreateDto): Promise<BlockModel> {
-
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
@@ -71,13 +70,18 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
     const { tests, ...data } = createDto;
 
-    const block = await BlockModel.create({
-      ...data
-    }, TransactionUtil.getHost()).catch(err => {
-      throw err;
-    }).then(block => block);
+    const block = await BlockModel.create(
+      {
+        ...data,
+      },
+      TransactionUtil.getHost(),
+    )
+      .catch((err) => {
+        throw err;
+      })
+      .then((block) => block);
 
-    await this.appendTests(block.id, createDto.tests).catch(err => {
+    await this.appendTests(block.id, createDto.tests).catch((err) => {
       throw err;
     });
 
@@ -98,44 +102,49 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
     await this.testBlockProvider.removeAllRelations(0, blocks);
 
+    return await Promise.all(
+      blocks.map(async (id) => {
+        const block = await BlockModel.findOne({
+          where: {
+            id,
+          },
+        });
+        if (!block) throw new ModelNotFoundException(BlockModel, id);
 
-    return await Promise.all(blocks.map(async id => {
-      const block = await BlockModel.findOne({
-        where: {
-          id
-        }
-      });
-      if (!block)
-        throw new ModelNotFoundException(BlockModel, id)
+        await ResultModel.update(
+          {
+            block_title: block.name,
+          },
+          {
+            where: {
+              block_id: id,
+            },
+            ...TransactionUtil.getHost(),
+          },
+        );
 
-      await ResultModel.update({
-        block_title: block.name
-      }, {
-        where: {
-          block_id: id
-        },
-        ...TransactionUtil.getHost()
-      });
-
-      await BlockModel.destroy({
-        where: {
-          id
-        },
-        ...TransactionUtil.getHost()
+        await BlockModel.destroy({
+          where: {
+            id,
+          },
+          ...TransactionUtil.getHost(),
+        });
+      }),
+    )
+      .then(() => {
+        if (!isPropagate) TransactionUtil.commit();
+        return true;
       })
-    })).then(() => {
-      if (!isPropagate)
-        TransactionUtil.commit();
-      return true;
-    }).catch(err => {
-      if (!isPropagate)
-        TransactionUtil.rollback();
-      throw err;
-    })
+      .catch((err) => {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw err;
+      });
   }
 
-  async update(blockId: number, updateDto: BlockUpdateDto): Promise<BlockModel> {
-
+  async update(
+    blockId: number,
+    updateDto: BlockUpdateDto,
+  ): Promise<BlockModel> {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
@@ -145,30 +154,34 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     const block = await BlockModel.findOne({
       where: {
         id: blockId,
-      }
+      },
     });
     if (!block) {
-      if (!isPropagate)
-        await TransactionUtil.rollback();
+      if (!isPropagate) await TransactionUtil.rollback();
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
-    await block.update({
-      ...updateDto
-    }, {
-      ...TransactionUtil.getHost()
-    })
-
-    await ResultModel.update({
-      block_title: block.name
-    },{
-      where: {
-        block_id: blockId
+    await block.update(
+      {
+        ...updateDto,
       },
-      ...TransactionUtil.getHost()
-    }).then(() => {
-      if (!isPropagate)
-        TransactionUtil.commit();
+      {
+        ...TransactionUtil.getHost(),
+      },
+    );
+
+    await ResultModel.update(
+      {
+        block_title: block.name,
+      },
+      {
+        where: {
+          block_id: blockId,
+        },
+        ...TransactionUtil.getHost(),
+      },
+    ).then(() => {
+      if (!isPropagate) TransactionUtil.commit();
     });
 
 
@@ -181,14 +194,13 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
   async includes(blockId: number): Promise<TestModel[]> {
     const blocks = await this.getAll({
-      id: blockId
+      id: blockId,
     });
     const ids = [];
     const tests: TestModel[] = [];
-    blocks.map(el => {
-      el.tests.map(test => {
-        if (!ids.includes(test.id))
-          tests.push(test);
+    blocks.forEach((el) => {
+      el.tests.forEach((test) => {
+        if (!ids.includes(test.id)) tests.push(test);
       });
     });
     return tests;
@@ -199,80 +211,83 @@ export class BlockProvider extends BaseProvider<BlockModel>{
   }
 
   async appendTests(blockId: number, tests: number[]): Promise<boolean> {
-    const relation = (await this.testBlockProvider.getTests(blockId));
-    tests = tests.filter(el => {
-      if (relation.includes(el))
-        throw new HttpException("Double record", 409);
-      else
-        return true;
+    const relation = await this.testBlockProvider.getTests(blockId);
+    tests = tests.filter((el) => {
+      if (relation.includes(el)) throw new HttpException('Double record', 409);
+      else return true;
     });
-    return !!(await this.testBlockProvider.create(this.createTestBlockDto(blockId, tests)));
+    const testsModels = await TestModel.findAll({
+      where: {
+        id: tests,
+      },
+    });
+    return !!(await this.testBlockProvider.create(
+      this.createTestBlockDto(blockId, testsModels),
+    ));
   }
 
-  async copyToCompany(blocks: number[], companyId: any): Promise<BlockModel[]> | never {
-
+  async copyToCompany(
+    blocks: number[],
+    companyId: any,
+  ): Promise<BlockModel[]> | never {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-    return await Promise.all(blocks.map(async (blockId: number) => {
+    return await Promise.all(
+      blocks.map(async (blockId: number) => {
+        const block = await this.getOne(blockId, true);
+        if (!block) throw new ModelNotFoundException(BlockModel, blockId);
 
-      const block = await this.getOne(blockId, true);
-      if (!block)
-        throw new ModelNotFoundException(BlockModel, blockId);
-
-      return await this.createModel({
-        name: block.name,
-        company_id: companyId,
-        time: block.time,
-        tests: await this.testBlockProvider.getTests(blockId)
-      })
-        .catch(err => {
-          throw err;
+        return await this.createModel({
+          name: block.name,
+          company_id: companyId,
+          time: block.time,
+          tests: await this.testBlockProvider.getTests(blockId),
         })
-        .then(data => data);
-
-    })).catch(err => {
-      if (!isPropagate)
-        TransactionUtil.rollback();
-      throw err;
-    }).then(async data => {
-      if (!isPropagate)
-        await TransactionUtil.commit();
-      return await this.getAll({ id: data.map(el => el.id) });
-    });
-
+          .catch((err) => {
+            throw err;
+          })
+          .then((data) => data);
+      }),
+    )
+      .catch((err) => {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw err;
+      })
+      .then(async (data) => {
+        if (!isPropagate) await TransactionUtil.commit();
+        return await this.getAll({ id: data.map((el) => el.id) });
+      });
   }
 
   async createBlockHash(blockId: number, week: number) {
     const blockModel = await BlockModel.findOne({
       where: {
-        id: blockId
-      }
+        id: blockId,
+      },
     });
 
-    if (!blockModel)
-      throw new ModelNotFoundException(BlockModel, blockId)
+    if (!blockModel) throw new ModelNotFoundException(BlockModel, blockId);
 
     return this.authService.createBlockToken(blockModel, week);
   }
 
-  async createLinks({ blockId, week, companyId }: { blockId: number, week: number, companyId: number }, jetBotId: number): Promise<{
-    link: string,
-    linkdb: string
-  }> {
+  async createLinks(
+      { blockId, week, companyId }: { blockId: number, week: number, companyId: number },
+      jetBotId: number): Promise<{ link: string, linkdb: string }> {
     const blockModel = await BlockModel.findOne({
       where: {
-        id: blockId
-      }
+        id: blockId,
+      },
     });
 
     let userModel = await UserModel.findOne({
       where: {
-        jetBotId
-      }
+        jetBotId,
+      },
     });
 
     if (!userModel) {
@@ -292,11 +307,15 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     }
   }
 
-  private createTestBlockDto(blockId: number, tests: number[]): TestBlockCreateDto[] {
-    return tests.map(el => {
+  private createTestBlockDto(
+    blockId: number,
+    tests: TestModel[],
+  ): TestBlockCreateDto[] {
+    return tests.map((el) => {
       return {
         block_id: blockId,
-        test_id: el
+        test_id: el.id,
+        count: el.type_id < 6,
       };
     });
   }

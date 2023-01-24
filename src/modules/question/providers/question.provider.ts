@@ -18,22 +18,22 @@ export class QuestionProvider extends BaseProvider<QuestionModel> {
 
   async add(questions: QuestionDto[], testModel: TestModel): Promise<boolean> {
     let records = [];
-    questions.map(el => {
+    questions.forEach((el) => {
       const { answers, ...data } = el;
       records.push({
         test_id: testModel.id,
         type_id: testModel.type_id,
         value: JSON.stringify(el.answers),
         ...data,
-        id: null
+        id: null,
       });
     });
     console.log(records);
-    records = records.map(el => {
+    records = records.map((el) => {
       return {
         ...el,
-        id: null
-      }
+        id: null,
+      };
     });
     console.log(records);
     await QuestionModel.bulkCreate(records, TransactionUtil.getHost());
@@ -43,17 +43,17 @@ export class QuestionProvider extends BaseProvider<QuestionModel> {
   async removeByTest(testId: number): Promise<void> {
     await QuestionModel.destroy({
       where: {
-        test_id: testId
+        test_id: testId,
       },
-      ...TransactionUtil.getHost()
+      ...TransactionUtil.getHost(),
     });
   }
 
   async getAll(ids: number[]): Promise<QuestionModel[]> {
     return super.getAll({
       where: {
-        id: ids
-      }
+        id: ids,
+      },
     });
   }
 }

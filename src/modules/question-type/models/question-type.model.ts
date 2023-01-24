@@ -1,4 +1,9 @@
-import { AutoIncrement, Column, PrimaryKey, Table } from "sequelize-typescript";
+import {
+  AutoIncrement,
+  Column,
+  PrimaryKey,
+  Table,
+} from 'sequelize-typescript';
 import { BaseModel } from "../../base/base.provider";
 
 @Table

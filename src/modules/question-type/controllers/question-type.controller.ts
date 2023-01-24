@@ -6,12 +6,12 @@ import { QuestionTypeModel } from "../models/question-type.model";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
-@Controller("question-type")
+@Controller('question-type')
 export class QuestionTypeController {
   constructor(
-    @Inject(QuestionTypeProvider) private questionTypeProvider: QuestionTypeProvider
-  ) {
-  }
+    @Inject(QuestionTypeProvider)
+    private questionTypeProvider: QuestionTypeProvider,
+  ) {}
 
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)

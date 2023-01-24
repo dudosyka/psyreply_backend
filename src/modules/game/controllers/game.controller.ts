@@ -9,10 +9,7 @@ import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter
 @UseGuards(JwtAuthGuard, UserBlockGuard)
 @Controller('game')
 export class GameController {
-  constructor(
-    @Inject(GameProvider) private gameProvider: GameProvider
-  ) {
-  }
+  constructor(@Inject(GameProvider) private gameProvider: GameProvider) {}
 
   @Post()
   @HttpCode(ResponseStatus.CREATED)

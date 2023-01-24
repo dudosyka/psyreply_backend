@@ -14,12 +14,12 @@ export class CompanyModel extends BaseModel {
   @Column
   name: string;
 
-  @BelongsToMany(() => BlockModel, () => BlockModel, "company_id", "id")
+  @BelongsToMany(() => BlockModel, () => BlockModel, 'company_id', 'id')
   blocks: BlockModel[];
 
-  @BelongsToMany(() => UserModel, () => UserModel, "company_id", "id")
+  @BelongsToMany(() => UserModel, () => UserModel, 'company_id', 'id')
   users: UserModel[];
 
-  @BelongsToMany(() => GroupModel, () => GroupModel, "company_id", "id")
+  @BelongsToMany(() => GroupModel, () => GroupModel, 'company_id', 'id')
   groups: GroupModel[];
 }
