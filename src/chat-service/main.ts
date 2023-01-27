@@ -49,7 +49,7 @@ sequelize.addModels([
 BotModel.findAll().then(bots => {
   bots.map(bot => {
     const tl = new TelegramListener(bot.token, sequelize);
-
+    console.log(bot.name, "processing...")
     tl.launch();
   })
 })

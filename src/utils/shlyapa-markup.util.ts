@@ -24,26 +24,35 @@ export type Parsed = {
 
 @Injectable()
 export class ShlyapaMarkupUtil {
-  static get_formula_body = /\[(.*)\]\/(\d+)/;
-  static validate_pattern = /^\[(\+((\$\d+)|(\(((\d+)|(\$\d+))[+*-]\$\d+\))|(\(\-?\$\d+\))))+\]\/\d+$/
-  static parse_pattern = /((\$\d+)|(\(((\d+)|(\$\d+))[+*-]\$\d+\))|(\(\-?\$\d+\)))/
-  private static parse_item = /(\\d+)|(\\$\\d+)/gm;
-  private static parse_var_id = /\d+/gm;
-  private static parse_operation = /\+\*\-/gm;
+  static get_formula_body = new RegExp('\\[(.*)\\]\\/(\\d+)');
+  static validate_pattern = new RegExp(
+    '^\\[(\\+((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\))))+\\]\\/\\d+$',
+  );
+  static parse_pattern =
+    '((\\$\\d+)|(\\(((\\d+)|(\\$\\d+))[+*-]\\$\\d+\\))|(\\(\\-?\\$\\d+\\)))';
+  private static parse_item = new RegExp('(\\d+)|(\\$\\d+)', 'gm');
+  private static parse_var_id = new RegExp('\\d+', 'gm');
+  private static parse_operation = new RegExp('[+*-]', 'gm');
 
   public parse(markup: string): Parsed {
+    // console.log(markup);
     const regex = new RegExp(ShlyapaMarkupUtil.parse_pattern, 'gm');
 
     const body = markup.match(ShlyapaMarkupUtil.get_formula_body);
 
+    console.log(body);
+
     const m = body[1].match(regex).map((el) => {
+      // console.log(el)
       let res: ShlyapaMarkup = { item: null, sum: null, composition: null };
       //Cut ( ) if exists
       if (el[0] == '(') {
         el = el.substring(1, el.length - 1);
       }
+      console.log(el)
       const item = el.match(ShlyapaMarkupUtil.parse_item);
       const sign = el.match(ShlyapaMarkupUtil.parse_operation);
+      console.log(item, sign);
       //if we get operand without scope just get id and sign and add them to res
       if (item.length == 1) {
         res.item = this.getOperand(el, item[0]);
