@@ -20,6 +20,7 @@ import { DatabaseErrorFilter } from "./filters/database-error.filter";
 import { BcryptUtil } from "./utils/bcrypt.util";
 import { GameModule } from "./modules/game/game.module";
 import { ValidationExceptionFilter } from "./filters/validation-exception.filter";
+import { BotModule } from "./modules/bot/bot.module";
 
 let db_conf: any = mainConf.db.dev;
 if (mainConf.isDev == ProjectState.TEST_PROD)
@@ -46,6 +47,7 @@ else if (mainConf.isDev == ProjectState.PROD)
     CompanyModule,
     LoggerModule,
     GameModule,
+    BotModule
   ],
   controllers: [AppController],
   providers: [

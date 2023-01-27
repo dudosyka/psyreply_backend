@@ -1,13 +1,15 @@
 import {
   AutoIncrement,
-  BelongsTo,
-  Column,
+  BelongsTo, BelongsToMany,
+  Column, DataType,
   PrimaryKey,
   Table
 } from "sequelize-typescript";
 import { CompanyModel } from "../../company/models/company.model";
 import { GroupModel } from "../../company/models/group.model";
 import { BaseModel } from "../../base/base.provider";
+import { MessageModel } from "../../bot/models/message.model";
+import { UserMessageModel } from "../../bot/models/user-message.model";
 
 @Table
 export class UserModel extends BaseModel {
@@ -16,7 +18,9 @@ export class UserModel extends BaseModel {
   @Column
   id: number;
 
-  @Column
+  @Column({
+    type: DataType.BIGINT
+  })
   jetBotId: number;
 
   @Column
@@ -48,4 +52,7 @@ export class UserModel extends BaseModel {
 
   @BelongsTo(() => GroupModel, 'group_id')
   group: GroupModel;
+
+  @BelongsToMany(() => MessageModel, () => UserMessageModel, 'user_id', 'message_id')
+  messages: MessageModel[]
 }

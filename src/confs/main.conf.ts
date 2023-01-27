@@ -8,7 +8,7 @@ export enum ProjectState {
 }
 
 export default {
-  isDev: ProjectState.TEST_PROD,
+  isDev: ProjectState.DEV,
   jwtConstants: {
     secret: 'SECRET_KEY',
   },
@@ -23,6 +23,6 @@ export default {
     min: 111111,
   },
   devPort: 8080,
-  testProdPort: 8084,
+  testProdPort: 8085,
   prodPort: 8082,
 };

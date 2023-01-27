@@ -51,6 +51,7 @@
     "sequelize": "^6.25.3",
     "sequelize-cli": "^6.5.2",
     "sequelize-typescript": "^2.1.5",
+    "telegraf-ts": "^3.89.1",
     "windows-1251": "^3.0.4"
   },
   "devDependencies": {
