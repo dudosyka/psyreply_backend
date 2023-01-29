@@ -28,9 +28,9 @@ export class BaseExceptionFilter {
   async sendResponse(response: Response, status: number, body: any) {
     if (TransactionUtil.isSet()) {
       await TransactionUtil.rollback();
-      return ResponseFilter.response(body, status);
+      response.status(status).send(ResponseFilter.response(body, status));
     } else {
-      return ResponseFilter.response(body, status);
+      response.status(status).send(ResponseFilter.response(body, status));
     }
   }
 }
