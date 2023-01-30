@@ -1,5 +1,6 @@
 import { BaseModel } from "../../base/base.provider";
-import { AutoIncrement, Column, PrimaryKey, Table } from "sequelize-typescript";
+import { AutoIncrement, BelongsTo, Column, PrimaryKey, Table } from "sequelize-typescript";
+import { MessageModel } from "./message.model";
 
 @Table
 export class UserMessageModel extends BaseModel {
@@ -13,6 +14,9 @@ export class UserMessageModel extends BaseModel {
 
   @Column
   message_id: number
+
+  @BelongsTo(() => MessageModel, 'message_id')
+  message: MessageModel
 
   @Column
   recipient_id: number

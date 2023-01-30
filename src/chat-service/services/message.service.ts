@@ -44,9 +44,15 @@ export class MessageService {
       content: JSON.stringify(content)
     }, {
       transaction
+    }).catch(err => {
+      transaction.rollback();
+      throw err;
     });
 
-    await userService.appendMessage(messageModel);
+    await userService.appendMessage(messageModel).catch(err => {
+      transaction.rollback();
+      throw err;
+    });
 
     await transaction.commit()
   }

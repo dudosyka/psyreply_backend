@@ -34,6 +34,7 @@ export class UserService {
       }, {
         transaction: this.transaction
       })
+      return this.userModel;
     }
 
     this.userModel = model;
