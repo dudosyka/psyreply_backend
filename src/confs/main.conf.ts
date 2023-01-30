@@ -1,4 +1,4 @@
-import { default as dbConf } from './db.conf';
+import dbConf from './db.conf';
 import * as mailerConf from './mailer.conf';
 
 export enum ProjectState {

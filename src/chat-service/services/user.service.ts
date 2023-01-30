@@ -42,11 +42,16 @@ export class UserService {
   }
 
   async appendMessage(messageModel: MessageModel) {
+    await UserService.appendMessageStatic(messageModel, this.userModel.id, this.transaction);
+  }
+
+  static async appendMessageStatic(messageModel: MessageModel, user_id: number, transaction: Transaction, recipient_id: number = null) {
     await UserMessageModel.create({
-      user_id: this.userModel.id,
-      message_id: messageModel.id
+      user_id,
+      message_id: messageModel.id,
+      recipient_id,
     }, {
-      transaction: this.transaction
+      transaction
     })
   }
 }

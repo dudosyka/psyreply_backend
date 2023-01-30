@@ -13,4 +13,7 @@ export class UserMessageModel extends BaseModel {
 
   @Column
   message_id: number
+
+  @Column
+  recipient_id: number
 }
