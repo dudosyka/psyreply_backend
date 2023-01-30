@@ -19,7 +19,8 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "deploy": "sh ./uploadProd.sh"
+    "deploy": "sh ./uploadProd.sh",
+    "deploy-test": "sh ./uploadTestProd.sh"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.8.1",
@@ -30,7 +31,6 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^8.0.0",
     "@nestjs/sequelize": "^9.0.0",
-    "@nestjs/swagger": "^6.1.3",
     "@types/iconv": "^3.0.1",
     "axios": "^1.2.0",
     "bcrypt": "^5.1.0",
@@ -51,6 +51,7 @@
     "sequelize": "^6.25.3",
     "sequelize-cli": "^6.5.2",
     "sequelize-typescript": "^2.1.5",
+    "telegraf-ts": "^3.89.1",
     "windows-1251": "^3.0.4"
   },
   "devDependencies": {

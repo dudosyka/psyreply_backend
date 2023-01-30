@@ -1,4 +1,4 @@
-import { HttpException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, HttpException, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { BlockModel } from "../models/block.model";
 import { BlockCreateDto } from "../dtos/block-create.dto";
@@ -16,6 +16,10 @@ import { AuthService } from "../../user/providers/auth.service";
 import { UserModel } from "../../user/models/user.model";
 import { QuestionModel } from "../../question/models/question.model";
 import { BaseProvider } from "../../base/base.provider";
+import { BlockGroupStatOutputDto } from "../../result/dto/block-stat-output.dto";
+import { GroupModel } from "../../company/models/group.model";
+import { GroupBlockStatModel } from "../../result/models/group-block-stat.model";
+import mainConf, { ProjectState } from "../../../confs/main.conf";
 
 @Injectable()
 export class BlockProvider extends BaseProvider<BlockModel>{
@@ -302,8 +306,15 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
     const linkdb = await this.authService.assignUserByUserBlock(userModel.id)
 
+    let clientUrl = 'http://localhost:8080/'
+    if (mainConf.isDev == ProjectState.TEST_PROD) {
+      clientUrl = 'https://client.beta.psyreply.com/'
+    } else if (mainConf.isDev == ProjectState.PROD) {
+      clientUrl = 'https://client.psyreply.com/'
+    }
+
     return {
-      link, linkdb
+      link: `${clientUrl}${link}`, linkdb: `${clientUrl}${linkdb}`
     }
   }
 
@@ -317,6 +328,132 @@ export class BlockProvider extends BaseProvider<BlockModel>{
         test_id: el.id,
         count: el.type_id < 6,
       };
+    });
+  }
+
+  async saveStat(blockId: number, week: number, groupId: number = 0, resultIds: number[] = []): Promise<BlockGroupStatOutputDto[]> {
+
+    let isPropagate = true;
+    if (!TransactionUtil.isSet()) {
+      isPropagate = false;
+      TransactionUtil.setHost(await this.sequelize.transaction());
+    }
+
+    const blockModel = await super.getOne({
+      where: {
+        id: blockId
+      },
+      include: [ { model: CompanyModel, include: [{model: GroupModel, ...(groupId == 0 ? {} : { where: { id: groupId } })}] } ]
+    });
+
+    if (!blockModel.company) throw new BadRequestException("Block must be in company");
+
+    const companyModel = blockModel.company;
+    const groups = companyModel.groups;
+
+    const groupsByIds: { [key: string]: GroupModel } = groups.reduce((r,a) => {
+      r[a.id] = r[a.id] || []
+      r[a.id].push(a)
+      return r;
+    }, Object.create(null));
+
+    const userIdsByGroup = (await UserModel.findAll({
+      where: {
+        group_id: groups.map(el => el.id),
+      }
+    })).reduce((r, a) => {
+      r[a.group_id] = r[a.group_id] || [];
+      r[a.group_id].push(a.id);
+      return r;
+    }, Object.create(null));
+
+    let resultQuery: {
+      block_id: number,
+      week: number,
+      company_id: number,
+      approved: boolean
+      id?: number[]
+    } = {
+      block_id: blockId,
+      week,
+      company_id: blockModel.company_id,
+      approved: true,
+    }
+
+    if (resultIds.length)
+      resultQuery.id = resultIds;
+
+    console.log(resultQuery);
+
+    const results = (await ResultModel.findAll({
+      where: {
+        ...resultQuery
+      },
+      include: [ UserModel ]
+    }));
+
+    const resultsByUserId: { [key: string]: ResultModel[] } = results.reduce((r, a) => {
+      r[a.user_id] = r[a.user_id] || []
+      r[a.user_id].push(a);
+      return r;
+    }, Object.create(null));
+
+    return await Promise.all(Object.keys(userIdsByGroup).map(async el => {
+      const groupId = parseInt(el);
+      const userIds = userIdsByGroup[el];
+      const maxAmountOfUsers = userIds.length;
+      let realAmountOfUsers = 0;
+      let metrics = {};
+      userIds.forEach(userId => {
+        if (resultsByUserId[userId]) {
+          realAmountOfUsers++;
+          const result = resultsByUserId[userId][0];
+          const data = JSON.parse(result.data);
+          data.forEach(el => {
+            if (metrics[el.metric_id])
+              metrics[el.metric_id] += parseInt(el.value);
+            else
+              metrics[el.metric_id] = parseInt(el.value);
+          });
+        }
+      });
+
+      metrics = Object.keys(metrics).map(id => {
+        const value = Math.round(metrics[id] / realAmountOfUsers);
+        return {
+          metric_id: id,
+          value
+        };
+      });
+
+      const percent = Math.round(realAmountOfUsers / maxAmountOfUsers * 100);
+      const group_result = metrics;
+      const group = groupsByIds[groupId];
+
+      await GroupBlockStatModel.create({
+        data: JSON.stringify(group_result),
+        percent,
+        week,
+        company_id: companyModel.id,
+        group_id: groupId,
+        block_id: blockModel.id
+      }, TransactionUtil.getHost()).catch(err => {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw err;
+      })
+
+
+      return {
+        group,
+        group_result,
+        percent
+      };
+
+    })).catch(err => {
+      throw err;
+    }).then(data => {
+      if (!isPropagate) TransactionUtil.commit()
+      return data;
     });
   }
 }

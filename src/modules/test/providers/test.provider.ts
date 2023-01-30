@@ -221,7 +221,11 @@ export class TestProvider extends BaseProvider<TestModel> {
         test_id: test.test_id,
       },
     });
+
+
+    if (!testBlockModel) throw new ModelNotFoundException(TestBlockModel, null);
     if (!testBlockModel.count) return null;
+
     const testModel = await this.getOne(test.test_id);
     // If we get a game, return null
     //In TestPassDto we have real questions ids (which are in `id` column)

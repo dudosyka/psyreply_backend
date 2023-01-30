@@ -9,6 +9,8 @@ import { GroupModel } from "../models/group.model";
 import { GroupCreateDto } from "../dtos/group-create.dto";
 import { GroupUpdateDto } from "../dtos/group-update.dto";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
+import { CompanyStatDto } from "../dtos/company-stat.dto";
+import { GroupBlockStatModel } from "../../result/models/group-block-stat.model";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('company')
@@ -101,5 +103,32 @@ export class CompanyController {
   public async appendUser(@Param('groupId') groupId: number, @Param('userId') userId: number): Promise<ResponseFilter<null>> {
     await this.companyProvider.appendUser(groupId, userId);
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+  }
+
+  @Get('/stat/:companyId/:groupId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getStat(
+    @Param("companyId") companyId: number,
+    @Param("groupId") groupId: number
+  ): Promise<ResponseFilter<CompanyStatDto>> {
+    return ResponseFilter.response<CompanyStatDto>(await this.companyProvider.getStat(companyId, groupId), ResponseStatus.SUCCESS);
+  }
+
+  @Patch('/stat/:statId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async updateStat(
+    @Param("statId") statId: number,
+    @Body("update") updateDto: { metric_id: number, value: number }[]
+  ): Promise<ResponseFilter<GroupBlockStatModel>> {
+      return ResponseFilter.response<GroupBlockStatModel>(await this.companyProvider.updateStat(statId, updateDto), ResponseStatus.SUCCESS);
+  }
+
+  @Delete('/stat/:statId')
+  @HttpCode(ResponseStatus.NO_CONTENT)
+  public async removeStatRow(
+    @Param('statId') statId: number,
+  ): Promise<ResponseFilter<null>> {
+    await this.companyProvider.removeStatRow(statId);
+    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT)
   }
 }

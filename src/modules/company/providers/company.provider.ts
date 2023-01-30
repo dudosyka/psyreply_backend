@@ -15,6 +15,8 @@ import { GroupCreateDto } from "../dtos/group-create.dto";
 import { GroupUpdateDto } from "../dtos/group-update.dto";
 import { Op } from "sequelize";
 import { BaseProvider } from "../../base/base.provider";
+import { CompanyStatDto } from "../dtos/company-stat.dto";
+import { GroupBlockStatModel } from "../../result/models/group-block-stat.model";
 
 @Injectable()
 export class CompanyProvider extends BaseProvider<CompanyModel> {
@@ -379,5 +381,46 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
       });
 
     return true;
+  }
+
+  async getStat(companyId: number, groupId: number): Promise<CompanyStatDto> {
+    const statModels = await GroupBlockStatModel.findAll({
+      where: {
+        company_id: companyId,
+        group_id: groupId
+      }
+    });
+
+    return statModels.reduce((r, a) => {
+      r[a.week] = r[a.week] || []
+      r[a.week].push(a);
+      return r;
+    }, Object.create(null))
+  }
+
+  async updateStat(statId: number, updateDto: { metric_id: number, value: number }[]): Promise<GroupBlockStatModel> {
+    const model = await GroupBlockStatModel.findOne({
+      where: {
+        id: statId
+      }
+    });
+
+    if (!model) throw new ModelNotFoundException(GroupBlockStatModel, statId);
+
+    console.log(updateDto);
+
+    await model.update({
+      data: JSON.stringify(updateDto)
+    });
+
+    return model;
+  }
+
+  async removeStatRow(statId: number) {
+    await GroupBlockStatModel.destroy({
+      where: {
+        id: statId
+      }
+    });
   }
 }

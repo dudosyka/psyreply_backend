@@ -16,10 +16,13 @@ import { JwtUtil } from '../../utils/jwt.util';
 import { AuthController } from './controllers/auth.controller';
 import { CompanyModule } from '../company/company.module';
 import { UserProvider } from './providers/user.provider';
+import { UserMessageModel } from "../bot/models/user-message.model";
+import { MessageModel } from "../bot/models/message.model";
+import { MessageTypeModel } from "../bot/models/message-type.model";
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([UserModel]),
+    SequelizeModule.forFeature([UserModel, UserMessageModel, MessageModel, MessageTypeModel]),
     PassportModule,
     JwtModule.register({
       secret: mainConf.jwtConstants.secret,

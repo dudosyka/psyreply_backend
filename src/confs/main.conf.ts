@@ -1,4 +1,4 @@
-import * as dbConf from './db.conf';
+import { default as dbConf } from './db.conf';
 import * as mailerConf from './mailer.conf';
 
 export enum ProjectState {
@@ -23,5 +23,6 @@ export default {
     min: 111111,
   },
   devPort: 8080,
+  testProdPort: 8085,
   prodPort: 8082,
 };
