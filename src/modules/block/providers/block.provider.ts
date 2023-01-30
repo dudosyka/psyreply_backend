@@ -19,6 +19,7 @@ import { BaseProvider } from "../../base/base.provider";
 import { BlockGroupStatOutputDto } from "../../result/dto/block-stat-output.dto";
 import { GroupModel } from "../../company/models/group.model";
 import { GroupBlockStatModel } from "../../result/models/group-block-stat.model";
+import mainConf, { ProjectState } from "../../../confs/main.conf";
 
 @Injectable()
 export class BlockProvider extends BaseProvider<BlockModel>{
@@ -305,8 +306,15 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
     const linkdb = await this.authService.assignUserByUserBlock(userModel.id)
 
+    let clientUrl = 'http://localhost:8080/'
+    if (mainConf.isDev == ProjectState.TEST_PROD) {
+      clientUrl = 'https://client.beta.psyreply.com/'
+    } else if (mainConf.isDev == ProjectState.PROD) {
+      clientUrl = 'https://client.psyreply.com/'
+    }
+
     return {
-      link, linkdb
+      link: `${clientUrl}${link}`, linkdb: `${clientUrl}${link}`
     }
   }
 
