@@ -314,7 +314,7 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     }
 
     return {
-      link: `${clientUrl}${link}`, linkdb: `${clientUrl}${linkdb}`
+      link: `${clientUrl}test/${link}`, linkdb: `${clientUrl}results/${linkdb}`
     }
   }
 
