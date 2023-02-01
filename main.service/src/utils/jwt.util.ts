@@ -19,6 +19,7 @@ export class JwtUtil {
         sub: user.id,
         isAdmin: user.isAdmin,
         tokenType: TokenTypeEnum.ADMIN,
+        companyId: user.company_id
       },
       { expiresIn: '30d' },
     );

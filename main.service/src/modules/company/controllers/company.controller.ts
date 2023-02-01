@@ -1,6 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
-import { AdminGuard } from "../../../guards/admin.guard";
 import { CompanyProvider } from "../providers/company.provider";
 import { CompanyModel } from "../models/company.model";
 import { CompanyCreateDto } from "../dtos/company-create.dto";
@@ -11,8 +10,9 @@ import { GroupUpdateDto } from "../dtos/group-update.dto";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 import { CompanyStatDto } from "../dtos/company-stat.dto";
 import { GroupBlockStatModel } from "../../result/models/group-block-stat.model";
+import { SuperAdminGuard } from "../../../guards/super.admin.guard";
 
-@UseGuards(JwtAuthGuard, AdminGuard)
+@UseGuards(JwtAuthGuard, SuperAdminGuard)
 @Controller('company')
 export class CompanyController {
   constructor(

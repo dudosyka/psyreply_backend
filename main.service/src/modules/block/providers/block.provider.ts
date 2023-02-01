@@ -1,4 +1,4 @@
-import { BadRequestException, HttpException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, HttpException, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { BlockModel } from "../models/block.model";
 import { BlockCreateDto } from "../dtos/block-create.dto";
@@ -56,13 +56,19 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     });
   }
 
-  async getOne(blockId: number,  rawData: boolean = false): Promise<BlockModel> {
-    return super.getOne({
-      where: {
-        id: blockId,
-      },
+  async getOne(blockId: number,  rawData: boolean = false, requesterCompany: number = null): Promise<BlockModel> {
+    const where: any = {
+      id: blockId,
+    };
+    const model = await super.getOne({
+      where,
       include: rawData ? [] : [{ model: TestModel, include: [QuestionModel] }],
     });
+
+    if (model.company_id != requesterCompany && requesterCompany)
+      throw new ForbiddenException()
+
+    return model;
   }
 
   async createModel(createDto: BlockCreateDto): Promise<BlockModel> {
@@ -96,7 +102,7 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     return block;
   }
 
-  async remove(blocks: number[]): Promise<boolean> {
+  async remove(blocks: number[], requesterCompany: number = null): Promise<boolean> {
 
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
@@ -108,12 +114,18 @@ export class BlockProvider extends BaseProvider<BlockModel>{
 
     return await Promise.all(
       blocks.map(async (id) => {
+        const where: any = {
+          id,
+        };
+
         const block = await BlockModel.findOne({
-          where: {
-            id,
-          },
+          where
         });
+
         if (!block) throw new ModelNotFoundException(BlockModel, id);
+
+        if (block.company_id != requesterCompany && requesterCompany)
+          throw new ForbiddenException();
 
         await ResultModel.update(
           {
@@ -148,6 +160,7 @@ export class BlockProvider extends BaseProvider<BlockModel>{
   async update(
     blockId: number,
     updateDto: BlockUpdateDto,
+    requesterCompany: number | null
   ): Promise<BlockModel> {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
@@ -164,6 +177,9 @@ export class BlockProvider extends BaseProvider<BlockModel>{
       if (!isPropagate) await TransactionUtil.rollback();
       throw new ModelNotFoundException(BlockModel, blockId);
     }
+
+    if (block.company_id != requesterCompany && requesterCompany)
+      throw new ForbiddenException();
 
     await block.update(
       {
@@ -267,7 +283,7 @@ export class BlockProvider extends BaseProvider<BlockModel>{
       });
   }
 
-  async createBlockHash(blockId: number, week: number) {
+  async createBlockHash(blockId: number, week: number, requesterCompany: number | null = null) {
     const blockModel = await BlockModel.findOne({
       where: {
         id: blockId,
@@ -275,6 +291,9 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     });
 
     if (!blockModel) throw new ModelNotFoundException(BlockModel, blockId);
+
+    if (blockModel.company_id != requesterCompany && requesterCompany)
+      throw new ForbiddenException();
 
     return this.authService.createBlockToken(blockModel, week);
   }
@@ -331,7 +350,7 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     });
   }
 
-  async saveStat(blockId: number, week: number, groupId: number = 0, resultIds: number[] = []): Promise<BlockGroupStatOutputDto[]> {
+  async saveStat(blockId: number, week: number, requesterCompany: number | null = null, groupId: number = 0, resultIds: number[] = []): Promise<BlockGroupStatOutputDto[]> {
 
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
@@ -347,6 +366,9 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     });
 
     if (!blockModel.company) throw new BadRequestException("Block must be in company");
+
+    if (blockModel.company_id != requesterCompany && requesterCompany)
+      throw new ForbiddenException();
 
     const companyModel = blockModel.company;
     const groups = companyModel.groups;

@@ -21,6 +21,7 @@ import { AdminGuard } from "../../../guards/admin.guard";
 import { DashboardGuard } from "../../../guards/dashboard.guard";
 import { UserBlockGuard } from "../../../guards/user-block.guard";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
+import { SuperAdminGuard } from "../../../guards/super.admin.guard";
 
 @UseGuards(JwtAuthGuard)
 @Controller('result')
@@ -37,7 +38,21 @@ export class ResultController {
   @UseGuards(AdminGuard)
   @Post("/all")
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getAll(@Body() filters: ResultFitlerDto): Promise<ResponseFilter<ResultModel[]>> {
+  public async getAll(
+    @Body() filters: ResultFitlerDto,
+    @Req() req,
+  ): Promise<ResponseFilter<ResultModel[]>> {
+    filters.filters.company_id = req.user.companyId;
+    return ResponseFilter.response<ResultModel[]>(await this.resultProvider.getResults(filters), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(SuperAdminGuard)
+  @Post("/super/all")
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async superGetAll(
+    @Body() filters: ResultFitlerDto,
+    @Req() req,
+  ): Promise<ResponseFilter<ResultModel[]>> {
     return ResponseFilter.response<ResultModel[]>(await this.resultProvider.getResults(filters), ResponseStatus.SUCCESS);
   }
 
@@ -58,7 +73,14 @@ export class ResultController {
   @UseGuards(AdminGuard)
   @Patch(":resultId")
   @HttpCode(ResponseStatus.SUCCESS)
-  public async update(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto): Promise<ResponseFilter<ResultModel>> {
+  public async update(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto, @Req() req): Promise<ResponseFilter<ResultModel>> {
+    return ResponseFilter.response<ResultModel>(await this.resultProvider.update(resultId, updateDto, req.user.companyId), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(SuperAdminGuard)
+  @Patch("/super/:resultId")
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async superUpdate(@Param("resultId") resultId: number, @Body() updateDto: ResultUpdateDto): Promise<ResponseFilter<ResultModel>> {
     return ResponseFilter.response<ResultModel>(await this.resultProvider.update(resultId, updateDto), ResponseStatus.SUCCESS);
   }
 }

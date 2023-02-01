@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { TestProvider } from "../../test/providers/test.provider";
 import { BlockProvider } from "../../block/providers/block.provider";
 import { Sequelize } from "sequelize-typescript";
@@ -201,6 +201,7 @@ export class ResultProvider extends BaseProvider<ResultModel> {
   public async update(
     resultId: number,
     updateDto: ResultUpdateDto,
+    requesterCompany: number | null = null
   ): Promise<ResultModel> {
     const resModel = await ResultModel.findOne({
       where: {
@@ -209,6 +210,9 @@ export class ResultProvider extends BaseProvider<ResultModel> {
     });
 
     if (!resModel) throw new ModelNotFoundException(ResultModel, resultId);
+
+    if (resModel.company_id != requesterCompany && requesterCompany)
+      throw new ForbiddenException();
 
     if (updateDto.newData) resModel.data = JSON.stringify(updateDto.newData);
     if (updateDto.approved != null) resModel.approved = updateDto.approved;

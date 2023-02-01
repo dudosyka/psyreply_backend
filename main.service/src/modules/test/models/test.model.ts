@@ -4,6 +4,7 @@ import { QuestionTypeModel } from "../../question-type/models/question-type.mode
 import { MetricModel } from "../../metric/models/metric.model";
 import { QuestionModel } from "../../question/models/question.model";
 import { BaseModel } from "../../base/base.provider";
+import { CompanyModel } from "../../company/models/company.model";
 
 @Table
 export class TestModel extends BaseModel {
@@ -17,6 +18,12 @@ export class TestModel extends BaseModel {
 
   @BelongsTo(() => UserModel, 'author_id')
   author: UserModel;
+
+  @Column
+  company_id: number;
+
+  @BelongsTo(() => CompanyModel,  'company_id')
+  company: CompanyModel
 
   @Column
   type_id: number;

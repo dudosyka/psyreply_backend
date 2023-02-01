@@ -48,13 +48,6 @@ export class MessageService {
       transaction.rollback();
       throw err;
     });
-
-    // await userService.appendMessage(messageModel).catch(err => {
-    //   transaction.rollback();
-    //   throw err;
-    // });
-    //
-    // await transaction.commit()
   }
 
   public async editMessage(): Promise<void> {

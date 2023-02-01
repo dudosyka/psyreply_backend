@@ -56,4 +56,6 @@ export class TestCreateDto {
   @ValidateNested({ each: true })
   @Type(() => QuestionDto)
   questions: QuestionDto[];
+
+  company_id: number
 }

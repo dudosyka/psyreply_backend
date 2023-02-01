@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { TestModel } from "../models/test.model";
 import { TestCreateDto } from "../dtos/test-create.dto";
@@ -17,7 +17,6 @@ import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 import { BaseProvider } from "../../base/base.provider";
 import { TestBlockModel } from "../../test-block/models/test-block.model";
-import { TestBlockModule } from "../../test-block/test-block.module";
 
 @Injectable()
 export class TestProvider extends BaseProvider<TestModel> {
@@ -45,6 +44,7 @@ export class TestProvider extends BaseProvider<TestModel> {
         type_id: test.type,
         formula: test.formula,
         metric_id: test.metric,
+        company_id: test.company_id
       },
       TransactionUtil.getHost(),
     );
@@ -70,20 +70,32 @@ export class TestProvider extends BaseProvider<TestModel> {
     return testModel;
   }
 
-  async remove(testId: number): Promise<boolean> {
+  async remove(filter: { testId: number, editorCompany: number | null }): Promise<boolean> {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-    await this.questionProvider.removeByTest(testId);
-    await this.blockProvider.excludeTestFromAll(testId);
+    const testModel = await TestModel.findOne({
+      where: {
+        id: filter.testId
+      }
+    });
+
+    if (!testModel)
+      throw new ModelNotFoundException(TestModel,filter.testId)
+
+    if (testModel.company_id != filter.editorCompany && filter.editorCompany)
+      throw new ForbiddenException();
+
+    await this.questionProvider.removeByTest(filter.testId);
+    await this.blockProvider.excludeTestFromAll(filter.testId);
 
     return (
       (await TestModel.destroy({
         where: {
-          id: testId,
+          id: filter.testId,
         },
         ...TransactionUtil.getHost(),
       })
@@ -94,12 +106,12 @@ export class TestProvider extends BaseProvider<TestModel> {
         .then((res) => {
           if (!isPropagate) TransactionUtil.commit();
           if (res > 0) return res;
-          else throw new ModelNotFoundException(TestModel, testId);
+          else throw new ModelNotFoundException(TestModel, filter.testId);
         })) > 0
     );
   }
 
-  async update(testUpdate: TestUpdateDto): Promise<TestModel> {
+  async update(testUpdate: TestUpdateDto, editorCompany: number | null): Promise<TestModel> {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
@@ -118,6 +130,9 @@ export class TestProvider extends BaseProvider<TestModel> {
     });
 
     if (!testModel) throw new ModelNotFoundException(TestModel, testUpdate.id);
+
+    if (testModel.company_id != editorCompany && editorCompany)
+      throw new ForbiddenException();
 
     const { questions, ...onUpdate } = testUpdate;
     await testModel.update({
@@ -208,11 +223,16 @@ export class TestProvider extends BaseProvider<TestModel> {
     });
   }
 
-  async getOne(testId: number): Promise<TestModel> {
-    return super.getOne({
+  async getOne(testId: number, requesterCompany: number | null = null): Promise<TestModel> {
+    const model = await super.getOne({
       where: { id: testId },
       include: [QuestionTypeModel, MetricModel, QuestionModel],
     });
+
+    if (model.company_id != requesterCompany && requesterCompany && model.company_id)
+      throw new ForbiddenException()
+
+    return model;
   }
 
   async pass(test: TestPassDto, blockId: number): Promise<TestResultDto> {
