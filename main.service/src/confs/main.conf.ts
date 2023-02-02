@@ -25,4 +25,5 @@ export default {
   devPort: 8080,
   testProdPort: 8085,
   prodPort: 8082,
+  microservicePort: 8084
 };

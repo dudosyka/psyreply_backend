@@ -16,7 +16,7 @@ async function bootstrap() {
     port = mainConf.prodPort
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.TCP,
-    options: { retryAttempts: 5, retryDelay: 3000, port: 8085 },
+    options: { retryAttempts: 5, retryDelay: 3000, port: mainConf.microservicePort },
   });
 
   await app.startAllMicroservices();
