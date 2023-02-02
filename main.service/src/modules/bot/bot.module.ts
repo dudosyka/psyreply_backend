@@ -12,6 +12,7 @@ import { UserModule } from "../user/user.module";
 import { UserProvider } from "../user/providers/user.provider";
 import { BotController } from "./controllers/bot.controller";
 import { LoggerModule } from "../logger/logger.module";
+import mainConf from "../../confs/main.conf";
 
 @Module({
   imports: [
@@ -26,7 +27,7 @@ import { LoggerModule } from "../logger/logger.module";
       name: "SERVICE",
       transport: Transport.TCP,
       options: {
-        port: 3000
+        port: mainConf.tgServicePort
       }
     }]),
     UserModule,
