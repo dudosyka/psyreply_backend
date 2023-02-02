@@ -1,6 +1,6 @@
 import { forwardRef, Inject, Injectable } from "@nestjs/common";
 import { ClientProxy } from "@nestjs/microservices";
-import { Document, PhotoSize, TelegrafContext, Video } from "telegraf-ts";
+import { TelegrafContext } from "telegraf-ts";
 import { ChatGateway } from "../../chat/providers/chat.gateway";
 import { BotModel } from "../models/bot.model";
 import { MessageModel } from "../models/message.model";
@@ -24,13 +24,9 @@ export class BotProvider {
   ) {
   }
 
-  private processMedia(media: PhotoSize | Video | Document, ctx: TelegrafContext): Promise<string[]> {
-    return ctx.telegram.getFileLink(media.file_id).then(url => [url])
-  }
-
   //Get a message from microservice (tg bot) than emit it to socket
   async newMessage(
-    data: { ctx: TelegrafContext }
+    data: { ctx: TelegrafContext, message_type: number, attachments: string[] }
   ) {
     if (!TransactionUtil.isSet())
       TransactionUtil.setHost(await this.sequelize.transaction())
@@ -46,19 +42,8 @@ export class BotProvider {
       throw err;
     });
 
-    let message_type = 1; //Text is default
-    let attachments = [];
-
-    if (data.ctx.updateSubTypes.includes('photo')) {
-      message_type = 2; //Photo type
-      attachments = await this.processMedia(data.ctx.update.message.photo[data.ctx.update.message.photo.length - 1], data.ctx);
-    } else if (data.ctx.updateSubTypes.includes('video')) {
-      message_type = 3;
-      attachments = await this.processMedia(data.ctx.update.message.video, data.ctx);
-    } else if (data.ctx.updateSubTypes.includes('document')) {
-      message_type = 4;
-      attachments = await this.processMedia(data.ctx.update.message.document, data.ctx);
-    }
+    let message_type = data.message_type; //Text is default
+    let attachments = data.attachments;
 
     const content: ContentDto = {
       attachments,

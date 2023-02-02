@@ -7,7 +7,7 @@ import { QuestionModule } from '../question/question.module';
 import { BlockModule } from '../block/block.module';
 import { ShlyapaMarkupUtil } from '../../utils/shlyapa-markup.util';
 import { MulterModule } from "@nestjs/platform-express";
-import { MulterConfigModule } from "./providers/multer-config.module";
+import { MulterConfigModule } from "../../confs/multer-config.module";
 
 @Module({
   imports: [

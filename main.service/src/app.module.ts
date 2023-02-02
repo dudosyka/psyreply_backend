@@ -25,6 +25,7 @@ import { BotModule } from "./modules/bot/bot.module";
 import { ConfigModule } from "@nestjs/config";
 import mailerConf from "./confs/mailer.conf";
 import dbConf from "./confs/db.conf";
+import { FilesModule } from "./modules/files/files.module";
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import dbConf from "./confs/db.conf";
     GameModule,
     ChatModule,
     BotModule,
+    FilesModule
   ],
   controllers: [AppController],
   providers: [

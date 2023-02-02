@@ -14,7 +14,7 @@ export class BotController {
 
   @EventPattern('newMessage')
   async newMessage(
-    data: { ctx: TelegrafContext }
+    data: { ctx: TelegrafContext, message_type: number, attachments: string[] }
   ) {
       await this.botProvider.newMessage(data).catch(err => {
         throw err;
