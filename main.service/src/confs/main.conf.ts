@@ -1,5 +1,4 @@
-import dbConf from './db.conf';
-import * as mailerConf from './mailer.conf';
+import { registerAs } from "@nestjs/config";
 
 export enum ProjectState {
   DEV,
@@ -7,24 +6,23 @@ export enum ProjectState {
   PROD,
 }
 
-export default {
-  isDev: ProjectState.DEV,
-  jwtConstants: {
-    secret: 'SECRET_KEY',
-  },
-  db: {
-    ...dbConf,
-  },
-  mailer: {
-    ...mailerConf,
-  },
-  emailCode: {
-    max: 999999,
-    min: 111111,
-  },
-  devPort: 8080,
-  testProdPort: 8085,
-  prodPort: 8082,
-  microservicePort: 8084,
-  tgServicePort: 8086
-};
+export default registerAs('main', () => {
+
+  const envIsDev = process.env.PROJECT_STATE;
+  let isDev = ProjectState.DEV
+  if (envIsDev == "1")
+    isDev = ProjectState.TEST_PROD
+  else if (envIsDev == "2")
+    isDev = ProjectState.PROD
+
+  return {
+    isDev,
+    jwtSecret: process.env.JWT_SECRET,
+    emailCodeMax: 999999,
+    emailCodeMin: 111111,
+    port: parseInt(process.env.MAIN_PORT),
+    microservicePort: parseInt(process.env.MAIN_MICROSERVICE_PORT),
+    tgMicroservicePort: parseInt(process.env.TG_MICROSERVICE_PORT),
+    distributionMicroservicePort: parseInt(process.env.DISTRIBUTION_MICROSERVICE_PORT)
+  }
+});

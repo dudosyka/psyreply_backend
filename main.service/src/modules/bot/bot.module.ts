@@ -27,7 +27,7 @@ import mainConf from "../../confs/main.conf";
       name: "SERVICE",
       transport: Transport.TCP,
       options: {
-        port: mainConf.tgServicePort
+        port: mainConf().tgMicroservicePort
       }
     }]),
     UserModule,

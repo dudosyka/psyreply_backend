@@ -14,7 +14,7 @@ export class AuthController {
   @Post("/")
   @HttpCode(ResponseStatus.SUCCESS)
   public async firstStep(@Body() credentials: AuthInputDto): Promise<ResponseFilter<AuthOutputDto | TokenOutputDto>> {
-    if (credentials.email == 'shut_up_and_let_me_in' && mainConf.isDev != ProjectState.PROD) {
+    if (credentials.email == 'shut_up_and_let_me_in' && mainConf().isDev != ProjectState.PROD) {
       return ResponseFilter.response<TokenOutputDto>(await this.authService.superLogin(), ResponseStatus.SUCCESS)
     }
     return ResponseFilter.response<AuthOutputDto>(await this.authService.firstStep(credentials.email, credentials.password), ResponseStatus.SUCCESS);

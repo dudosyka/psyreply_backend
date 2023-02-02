@@ -2,7 +2,7 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { SequelizeModule } from "@nestjs/sequelize";
-import mainConf, { ProjectState } from "./confs/main.conf";
+import mainConf from "./confs/main.conf";
 import { UserModule } from "./modules/user/user.module";
 import { TestModule } from "./modules/test/test.module";
 import { ResultModule } from "./modules/result/result.module";
@@ -22,18 +22,20 @@ import { GameModule } from "./modules/game/game.module";
 import { ValidationExceptionFilter } from "./filters/validation-exception.filter";
 import { ChatModule } from "./modules/chat/chat.module";
 import { BotModule } from "./modules/bot/bot.module";
-
-let db_conf: any = mainConf.db.dev;
-if (mainConf.isDev == ProjectState.TEST_PROD)
-  db_conf = mainConf.db.test_prod;
-else if (mainConf.isDev == ProjectState.PROD)
-  db_conf = mainConf.db.prod;
+import { ConfigModule } from "@nestjs/config";
+import mailerConf from "./confs/mailer.conf";
+import dbConf from "./confs/db.conf";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: ['../.env'],
+      load: [mailerConf, dbConf, mainConf],
+      isGlobal: true
+    }),
     SequelizeModule.forRoot({
       dialect: 'mysql',
-      ...db_conf,
+      ...dbConf(),
       autoLoadModels: true,
       synchronize: true,
     }),

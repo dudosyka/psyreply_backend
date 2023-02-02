@@ -1,21 +1,22 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './controllers/app.controller';
-import { AppProvider } from './providers/app.provider';
+import { Module } from "@nestjs/common";
+import { AppController } from "./controllers/app.controller";
+import { AppProvider } from "./providers/app.provider";
 import { SequelizeModule } from "@nestjs/sequelize";
-import mainConf, { ProjectState } from "./confs/main.conf";
+import mainConf from "./confs/main.conf";
 import { BotModel } from "./models/bot.model";
 import { ClientsModule, Transport } from "@nestjs/microservices";
-
-let db_conf: any = mainConf.db.dev;
-if (mainConf.isDev == ProjectState.TEST_PROD)
-  db_conf = mainConf.db.test_prod;
-else if (mainConf.isDev == ProjectState.PROD)
-  db_conf = mainConf.db.prod;
+import { ConfigModule } from "@nestjs/config";
+import dbConf from "./confs/db.conf";
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      envFilePath: ['../.env'],
+      load: [dbConf, mainConf],
+      isGlobal: true
+    }),
     SequelizeModule.forRoot({
-      ...db_conf,
+      ...dbConf(),
       dialect: "mysql",
       autoLoadModels: true,
       synchronize: true,
@@ -27,7 +28,7 @@ else if (mainConf.isDev == ProjectState.PROD)
       name: "BOT_SERVICE",
       transport: Transport.TCP,
       options: {
-        port: mainConf.mainAppPort,
+        port: mainConf().microservicePort,
       }
     }])
   ],

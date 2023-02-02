@@ -326,9 +326,9 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     const linkdb = await this.authService.assignUserByUserBlock(userModel.id)
 
     let clientUrl = 'http://localhost:8080/'
-    if (mainConf.isDev == ProjectState.TEST_PROD) {
+    if (mainConf().isDev == ProjectState.TEST_PROD) {
       clientUrl = 'https://client.beta.psyreply.com/'
-    } else if (mainConf.isDev == ProjectState.PROD) {
+    } else if (mainConf().isDev == ProjectState.PROD) {
       clientUrl = 'https://client.psyreply.com/'
     }
 

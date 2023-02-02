@@ -17,7 +17,7 @@ import mainConf from '../../confs/main.conf';
     SequelizeModule.forFeature([BlockModel, UserModel]),
     TestBlockModule,
     JwtModule.register({
-      secret: mainConf.jwtConstants.secret,
+      secret: mainConf().jwtSecret,
       signOptions: { expiresIn: '100d' },
     }),
   ],

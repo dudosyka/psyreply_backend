@@ -3,14 +3,17 @@ import { UserModel } from '../modules/user/models/user.model';
 import { TokenTypeEnum } from './token.type.enum';
 import { Injectable } from '@nestjs/common';
 import { BlockModel } from '../modules/block/models/block.model';
-import mainConf from "../confs/main.conf";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class JwtUtil {
-  constructor(private jwtService: JwtService) {}
+  constructor(
+    private jwtService: JwtService,
+    private configService: ConfigService
+  ) {}
 
   public verify(token: string) {
-    return this.jwtService.verify(token, { secret: mainConf.jwtConstants.secret });
+    return this.jwtService.verify(token, { secret: this.configService.get('main.jwtSecret') });
   }
 
   public signAdmin(user: UserModel): string {

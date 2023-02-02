@@ -25,13 +25,13 @@ import { MessageTypeModel } from "../bot/models/message-type.model";
     SequelizeModule.forFeature([UserModel, UserMessageModel, MessageModel, MessageTypeModel]),
     PassportModule,
     JwtModule.register({
-      secret: mainConf.jwtConstants.secret,
+      secret: mainConf().jwtSecret,
       signOptions: { expiresIn: '100d' },
     }),
     MailerModule.forRoot({
-      transport: mailerConf.transporterOptions,
+      transport: mailerConf().transporterOptions,
       defaults: {
-        from: mailerConf.sendOptions.from,
+        from: mailerConf().sendOptions.from,
       },
     }),
     CompanyModule,

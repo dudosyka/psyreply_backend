@@ -18,7 +18,7 @@ export class AppController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Post('/hash/str')
   createHashStr(@Body('str') str: string) {
-    if (mainConf.isDev != ProjectState.PROD) {
+    if (mainConf().isDev != ProjectState.PROD) {
       return this.bcryptUtil.hash(str);
     } else {
       throw new ForbiddenException();

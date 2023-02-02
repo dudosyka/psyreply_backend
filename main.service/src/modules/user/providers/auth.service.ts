@@ -90,9 +90,9 @@ export class AuthService {
   genCode(user: UserModel): Promise<UserModel> {
     return new Promise<UserModel>((resolve, reject) => {
       const code = Math.round(
-        mainConf.emailCode.min -
+        mainConf().emailCodeMin -
           0.5 +
-          Math.random() * (mainConf.emailCode.max - mainConf.emailCode.min + 1),
+          Math.random() * (mainConf().emailCodeMax - mainConf().emailCodeMin + 1),
       );
       user.emailCode = code.toString();
       user

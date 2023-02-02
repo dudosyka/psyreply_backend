@@ -1,11 +1,12 @@
 {
-  "name": "tgbot.service",
+  "name": "distribution.service",
   "version": "0.0.1",
   "description": "",
   "author": "",
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",
@@ -32,9 +33,7 @@
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.2.0",
     "sequelize": "^6.28.0",
-    "sequelize-typescript": "^2.1.5",
-    "telegraf": "^4.11.2",
-    "telegraf-ts": "^3.89.1"
+    "sequelize-typescript": "^2.1.5"
   },
   "devDependencies": {
     "@nestjs/cli": "^9.0.0",
