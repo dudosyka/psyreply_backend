@@ -10,9 +10,11 @@ import { FailedAuthorizationException } from '../../../exceptions/failed-authori
 import { Op } from 'sequelize';
 import { BlockModel } from '../../block/models/block.model';
 import { ModelNotFoundException } from '../../../exceptions/model-not-found.exception';
+import { AuthInputDto } from "../dtos/auth/auth-input.dto";
 
 @Injectable()
 export class AuthService {
+  user: UserModel;
   constructor(
     @InjectModel(UserModel) private userModel: UserModel,
     @Inject(BcryptUtil) private bcrypt: BcryptUtil,
@@ -100,7 +102,7 @@ export class AuthService {
     });
   }
 
-  async firstStep(email: string, password: string): Promise<AuthOutputDto> {
+  async firstStep(email: string, password: string, sendConfirm: boolean = true): Promise<AuthOutputDto> {
     let user = await UserModel.findOne({
       where: {
         [Op.or]: [{ email }, { login: email }],
@@ -116,7 +118,9 @@ export class AuthService {
 
     if (!passwordCompare) throw new FailedAuthorizationException(true, false);
 
-    await this.mailer.sendUserConfirmation(await this.genCode(user));
+    if (sendConfirm) await this.mailer.sendUserConfirmation(await this.genCode(user));
+
+    this.user = user;
 
     return {
       status: true,
@@ -145,5 +149,10 @@ export class AuthService {
       coins: 0,
       company_id: companyId,
     });
+  }
+
+  async loginDashboard(credentials: AuthInputDto) {
+    await this.firstStep(credentials.email, credentials.password, false);
+    return this.login(this.user);
   }
 }

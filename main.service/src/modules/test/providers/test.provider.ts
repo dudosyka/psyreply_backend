@@ -1,4 +1,4 @@
-import { ForbiddenException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, ForbiddenException, Inject, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/sequelize";
 import { TestModel } from "../models/test.model";
 import { TestCreateDto } from "../dtos/test-create.dto";
@@ -17,6 +17,8 @@ import { TransactionUtil } from "../../../utils/TransactionUtil";
 import { ModelNotFoundException } from "../../../exceptions/model-not-found.exception";
 import { BaseProvider } from "../../base/base.provider";
 import { TestBlockModel } from "../../test-block/models/test-block.model";
+import * as fs from "fs";
+import * as path from "path";
 
 @Injectable()
 export class TestProvider extends BaseProvider<TestModel> {
@@ -338,5 +340,52 @@ export class TestProvider extends BaseProvider<TestModel> {
     return allTests.filter((test) => {
       return !tests.includes(test.id);
     });
+  }
+
+  async export(testId: number, companyId: number | null = null): Promise<string> {
+    const model = await TestModel.findOne({
+      where: {
+        id: testId
+      },
+      include: [QuestionModel]
+    });
+
+    if (!model) throw new ModelNotFoundException(TestModel, testId);
+
+    if (model.company_id != companyId && companyId) throw new ForbiddenException();
+
+    return model.toJSON();
+  }
+
+  async importTest(file: Express.Multer.File, companyId: number | null = null): Promise<TestModel> {
+    TransactionUtil.setHost(await this.sequelize.transaction())
+
+    const data = JSON.parse(fs.readFileSync(path.join(process.cwd(), 'upload', file.filename)).toString());
+    if (!data.body) throw new BadRequestException();
+    const { questions, ...testData } = data.body;
+    testData.id = null;
+    testData.company_id = companyId;
+    const testModel = await TestModel.create({
+      ...testData
+    }, TransactionUtil.getHost()).catch(err => {
+      TransactionUtil.rollback();
+      throw new BadRequestException(err);
+    });
+
+    testModel.questions = await Promise.all(questions.map(async el => {
+      const model = el.QuestionModel;
+      model.id = null;
+      model.test_id = testModel.id;
+      return await QuestionModel.create({
+        ...model
+      }, TransactionUtil.getHost()).catch(err => {
+        TransactionUtil.rollback();
+        throw new BadRequestException(err);
+      });
+    }))
+
+    await TransactionUtil.commit();
+
+    return testModel;
   }
 }

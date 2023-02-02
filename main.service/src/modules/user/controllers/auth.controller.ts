@@ -20,12 +20,18 @@ export class AuthController {
     return ResponseFilter.response<AuthOutputDto>(await this.authService.firstStep(credentials.email, credentials.password), ResponseStatus.SUCCESS);
   }
 
-  // $2b$10$yCg8bueBdAb5GUwpGNN3QOGKk2zIwEOSuV1zMVF.TaEEbVTK35eDm
-
   @UseGuards(LocalAuthGuard)
   @Post("/code")
   @HttpCode(ResponseStatus.SUCCESS)
   public async secondStep(@Request() req, @Body("code") code: string): Promise<ResponseFilter<TokenOutputDto>> {
     return ResponseFilter.response<TokenOutputDto>(await this.authService.login(req.user), ResponseStatus.SUCCESS);
+  }
+
+  @Post("/dash")
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async loginDashboard(
+    @Body() credentials: AuthInputDto
+  ): Promise<ResponseFilter<TokenOutputDto>> {
+    return ResponseFilter.response<TokenOutputDto>(await this.authService.loginDashboard(credentials), ResponseStatus.SUCCESS);
   }
 }

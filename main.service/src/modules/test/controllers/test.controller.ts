@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, Inject, Param, Patch, Post, Req, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpCode,
+  Inject,
+  Param,
+  Patch,
+  Post,
+  Req, UploadedFile,
+  UseGuards,
+  UseInterceptors
+} from "@nestjs/common";
 import { TestProvider } from "../providers/test.provider";
 import { JwtAuthGuard } from "../../../guards/jwt-auth.guard";
 import { AdminGuard } from "../../../guards/admin.guard";
@@ -9,6 +22,7 @@ import { TestFilterDto } from "../dtos/test-filter.dto";
 import { SearchFilter } from "../../../filters/search.filter";
 import { ResponseFilter, ResponseStatus } from "../../../filters/response.filter";
 import { SuperAdminGuard } from "../../../guards/super.admin.guard";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('test')
@@ -97,5 +111,47 @@ export class TestController {
   public async removeFromBlock(@Body("tests") tests: number[], @Param("blockId") blockId: number): Promise<ResponseFilter<null>> {
     await this.testProvider.removeFromBlock(tests, blockId);
     return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+  }
+
+  @Get("/export/:testId")
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async exportTest(
+    @Param('testId') testId: number,
+    @Req() req
+  ): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(await this.testProvider.export(testId, req.user.companyId), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(SuperAdminGuard)
+  @Get("/super/export/:testId")
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async superExportTest(
+    @Param('testId') testId: number,
+    @Req() req
+  ): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(await this.testProvider.export(testId), ResponseStatus.SUCCESS);
+  }
+
+  @Post("/import")
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async importTest(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('testId') testId: number,
+    @Req() req
+  ): Promise<ResponseFilter<TestModel>> {
+    return ResponseFilter.response<TestModel>(await this.testProvider.importTest(file, req.user.companyId), ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(SuperAdminGuard)
+  @Post("/super/import")
+  @UseInterceptors(FileInterceptor('file'))
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async superImportTest(
+    @UploadedFile() file: Express.Multer.File,
+    @Param('testId') testId: number,
+    @Req() req
+  ): Promise<ResponseFilter<TestModel>> {
+    return ResponseFilter.response<TestModel>(await this.testProvider.importTest(file), ResponseStatus.SUCCESS);
   }
 }
