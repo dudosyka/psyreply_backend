@@ -288,11 +288,15 @@ export class BlockProvider extends BaseProvider<BlockModel>{
       },
     });
 
+    console.log(jetBotId)
+
     let userModel = await UserModel.findOne({
       where: {
         jetBotId,
       },
     });
+
+    console.log(companyId);
 
     if (!userModel) {
       userModel = await this.authService.createUser(jetBotId, companyId);
@@ -301,6 +305,8 @@ export class BlockProvider extends BaseProvider<BlockModel>{
     if (!blockModel) {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
+
+    console.log(userModel)
 
     const link = await this.authService.createUserBlockToken(userModel, week, blockModel);
 
