@@ -30,7 +30,7 @@ import { FilesModule } from "./modules/files/files.module";
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['../.env'],
+      envFilePath: ['../.env', '.env'],
       load: [mailerConf, dbConf, mainConf],
       isGlobal: true
     }),
