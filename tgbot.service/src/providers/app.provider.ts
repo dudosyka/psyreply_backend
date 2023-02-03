@@ -71,9 +71,9 @@ export class AppProvider implements OnApplicationBootstrap {
     // await this.botModels[0].botInstance.telegram.sendVideo(828522413, 'BAACAgIAAxkBAAP6Y9w88qiZ30d25-YQEzZZiIhXcuIAAkMnAAJsM-FKMh6phlQmnK0tBA')
     // await this.botModels[0].botInstance.telegram.sendDocument(828522413, 'BQACAgIAAxkBAAP9Y9w9AAE0OJBwJ790RDGO4aeJriA7AAJEJwACbDPhSoB1FNC-DhCZLQQ')
 
-    await this.botModels[0].botInstance.telegram.sendPhoto(828522413, 'http://localhost:8080/files/stream/1');
-    // await this.botModels[0].botInstance.telegram.sendVideo(828522413, 'BAACAgIAAxkBAAP6Y9w88qiZ30d25-YQEzZZiIhXcuIAAkMnAAJsM-FKMh6phlQmnK0tBA')
-    // await this.botModels[0].botInstance.telegram.sendDocument(828522413, 'BQACAgIAAxkBAAP9Y9w9AAE0OJBwJ790RDGO4aeJriA7AAJEJwACbDPhSoB1FNC-DhCZLQQ')
+    // await this.botModels[0].botInstance.telegram.sendPhoto(828522413, 'https://game.psyreply.com/3aE8lz4MtjI.jpg1675383380109.jpg');
+    // await this.botModels[0].botInstance.telegram.sendVideo(828522413, { source: fs.createReadStream(path.join(process.cwd(), '../main.service', 'upload', 'video.mp4')) });
+    // await this.botModels[0].botInstance.telegram.sendDocument(828522413, { filename: 'video.mp4', source: fs.createReadStream(path.join(process.cwd(), '../main.service', 'upload', 'video.mp4')) });
 
     this.botService.emit('newMessage', { ctx: ctx, message_type, attachments }).subscribe(r => {
       console.log(r);
