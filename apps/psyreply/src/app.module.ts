@@ -29,7 +29,7 @@ import { FilesModule } from '@app/application/modules/files/files.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: ['../.env', '.env'],
+      envFilePath: ['../.env', '.env', '/root/api.beta/.env'],
       load: [mailerConf, dbConf, mainConf],
       isGlobal: true,
     }),
