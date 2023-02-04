@@ -59,9 +59,11 @@ export class ValidationExceptionFilter
       Object.keys(exception.getResponse()).forEach((el) => {
         if (el == 'message') message = exception.getResponse()[el];
       });
-      err = message.map((el) => {
-        return this.formatString(el);
-      });
+      if (message.map)
+        err = message.map((el) => {
+          return this.formatString(el);
+        });
+      else err = message;
     }
 
     this.sendResponse(response, exception.getStatus(), {

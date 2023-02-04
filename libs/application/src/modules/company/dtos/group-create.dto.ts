@@ -12,7 +12,7 @@ export class GroupCreateDto {
     {},
     {
       each: true,
-      message: 'must be array of INT',
+      message: 'users must be array of INT',
     },
   )
   users: number[];

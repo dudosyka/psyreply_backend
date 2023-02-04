@@ -394,6 +394,24 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
     return true;
   }
 
+  async getAvailableGroups(
+    companyId: number,
+    sharedGroups: number[],
+  ): Promise<GroupModel[]> {
+    const company = await super.getOne({
+      where: {
+        id: companyId,
+      },
+      include: [GroupModel],
+    });
+
+    if (sharedGroups[0] == 0) return company.groups;
+
+    return company.groups.filter((group) => {
+      return sharedGroups.includes(group.id);
+    });
+  }
+
   async getStat(
     companyId: number,
     groupId: number,
@@ -447,7 +465,7 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
 
   async shareStat(
     companyId,
-    groupId: number,
+    groups: number[],
     sharedGroups: number[],
   ): Promise<string> {
     //shareGroups[0] === 0 will mean that the user is admin of dashboard (not from a share link)
@@ -461,15 +479,15 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
 
     if (!company) throw new ModelNotFoundException(CompanyModel, companyId);
 
-    const groups = await GroupModel.findAll({
+    const groupModels = await GroupModel.findAll({
       where: {
-        id: [groupId, ...sharedGroups],
+        id: groups,
       },
     });
 
-    if (groups.length != sharedGroups.length + 1)
+    if (groups.length != groupModels.length)
       throw new ModelNotFoundException(GroupModel, null);
 
-    return this.authProvider.createShareDashboardToken(sharedGroups, companyId);
+    return this.authProvider.createShareDashboardToken(groups, companyId);
   }
 }

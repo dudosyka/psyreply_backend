@@ -97,9 +97,9 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async appendBlocks(
     @Param('companyId') id: number,
-    @Body('tests') tests: number[],
+    @Body('tests') blocks: number[],
   ): Promise<ResponseFilter<null>> {
-    await this.companyProvider.appendBlocks(id, tests);
+    await this.companyProvider.appendBlocks(id, blocks);
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
@@ -186,23 +186,29 @@ export class CompanyController {
   }
 
   @UseGuards(DashboardAdminGuard)
-  @Get('/stat/share/check')
+  @Get('/stat/groups')
   @HttpCode(ResponseStatus.SUCCESS)
-  public checkToken(): ResponseFilter<void> {
-    return ResponseFilter.response<void>(null, ResponseStatus.SUCCESS);
+  public async checkToken(@Req() req): Promise<ResponseFilter<GroupModel[]>> {
+    return ResponseFilter.response<GroupModel[]>(
+      await this.companyProvider.getAvailableGroups(
+        req.user.companyId,
+        req.user.sharedGroups,
+      ),
+      ResponseStatus.SUCCESS,
+    );
   }
 
   @UseGuards(DashboardAdminGuard)
-  @Get('/stat/share/:groupId')
+  @Post('/stat/share')
   @HttpCode(ResponseStatus.SUCCESS)
   public async shareStat(
     @Req() req,
-    @Param('groupId') groupId: number,
+    @Body('groups') groups: number[],
   ): Promise<ResponseFilter<string>> {
     return ResponseFilter.response<string>(
       await this.companyProvider.shareStat(
         req.user.companyId,
-        groupId,
+        groups,
         req.user.sharedGroups,
       ),
       ResponseStatus.SUCCESS,
