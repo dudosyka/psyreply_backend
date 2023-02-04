@@ -43,7 +43,13 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
         ...createDto,
       },
       TransactionUtil.getHost(),
-    );
+    ).then((res) => {
+      if (!res) {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw new Error('Company creation failed');
+      }
+      return res;
+    });
 
     await this.addBlocks(company.id, inputBlocks).catch(async (err) => {
       if (!isPropagate) await TransactionUtil.rollback();
@@ -223,7 +229,13 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
         company_id: createDto.company_id,
       },
       TransactionUtil.getHost(),
-    );
+    ).then((res) => {
+      if (!res) {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw new Error('Group creation failed');
+      }
+      return res;
+    });
 
     await this.appendUsersArray(group, createDto.users)
       .then(() => {

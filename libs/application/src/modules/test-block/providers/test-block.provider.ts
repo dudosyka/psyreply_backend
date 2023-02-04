@@ -21,12 +21,16 @@ export class TestBlockProvider {
     createDto.forEach((el) => records.push({ ...el }));
     return await Promise.all(
       records.map(async (record) => {
-        return await TestBlockModel.create(
-          record,
-          TransactionUtil.getHost(),
-        ).catch(() => {
-          throw new ModelNotFoundException(TestModel, record.test_id);
-        });
+        return await TestBlockModel.create(record, TransactionUtil.getHost())
+          .then((res) => {
+            if (!res) {
+              throw new Error('Test Block creation failed');
+            }
+            return res;
+          })
+          .catch(() => {
+            throw new ModelNotFoundException(TestModel, record.test_id);
+          });
       }),
     )
       .then((res) => res)

@@ -64,10 +64,18 @@ export class BotProvider {
         content: JSON.stringify(content),
       },
       TransactionUtil.getHost(),
-    ).catch((err) => {
-      TransactionUtil.rollback();
-      throw err;
-    });
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('Message creation failed');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
+        throw err;
+      });
 
     await this.userProvider
       .appendMessage(messageModel, userModel.id)

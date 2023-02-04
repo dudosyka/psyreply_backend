@@ -58,7 +58,13 @@ export class TestProvider extends BaseProvider<TestModel> {
         company_id: test.company_id,
       },
       TransactionUtil.getHost(),
-    );
+    ).then((res) => {
+      if (!res) {
+        if (!isPropagate) TransactionUtil.rollback();
+        throw new Error('Test creation failed!');
+      }
+      return res;
+    });
 
     await this.questionProvider
       .add(test.questions, testModel)
@@ -401,10 +407,18 @@ export class TestProvider extends BaseProvider<TestModel> {
         ...testData,
       },
       TransactionUtil.getHost(),
-    ).catch((err) => {
-      TransactionUtil.rollback();
-      throw new BadRequestException(err);
-    });
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('Test creation failed!');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
+        throw new BadRequestException(err);
+      });
 
     testModel.questions = await Promise.all(
       questions.map(async (el) => {
