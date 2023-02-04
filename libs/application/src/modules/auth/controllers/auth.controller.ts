@@ -8,19 +8,19 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { LocalAuthGuard } from '../../../guards/local-auth.guard';
-import { AuthService } from '../providers/auth.service';
-import { AuthOutputDto } from '../dtos/auth/auth-output.dto';
-import { AuthInputDto } from '../dtos/auth/auth-input.dto';
+import { AuthOutputDto } from '../dtos/auth-output.dto';
+import { AuthInputDto } from '../dtos/auth-input.dto';
 import mainConf, { ProjectState } from '../../../config/main.conf';
-import { TokenOutputDto } from '../dtos/auth/token-output.dto';
+import { TokenOutputDto } from '../dtos/token-output.dto';
 import {
   ResponseFilter,
   ResponseStatus,
 } from '../../../filters/response.filter';
+import { AuthProvider } from '../providers/auth.provider';
 
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject(AuthService) private authService: AuthService) {}
+  constructor(@Inject(AuthProvider) private authProvider: AuthProvider) {}
 
   @Post('/')
   @HttpCode(ResponseStatus.SUCCESS)
@@ -32,12 +32,15 @@ export class AuthController {
       mainConf().isDev != ProjectState.PROD
     ) {
       return ResponseFilter.response<TokenOutputDto>(
-        await this.authService.superLogin(),
+        await this.authProvider.superLogin(),
         ResponseStatus.SUCCESS,
       );
     }
     return ResponseFilter.response<AuthOutputDto>(
-      await this.authService.firstStep(credentials.email, credentials.password),
+      await this.authProvider.firstStep(
+        credentials.email,
+        credentials.password,
+      ),
       ResponseStatus.SUCCESS,
     );
   }
@@ -49,7 +52,7 @@ export class AuthController {
     @Request() req,
   ): Promise<ResponseFilter<TokenOutputDto>> {
     return ResponseFilter.response<TokenOutputDto>(
-      await this.authService.login(req.user),
+      await this.authProvider.login(req.user),
       ResponseStatus.SUCCESS,
     );
   }
@@ -60,7 +63,7 @@ export class AuthController {
     @Body() credentials: AuthInputDto,
   ): Promise<ResponseFilter<TokenOutputDto>> {
     return ResponseFilter.response<TokenOutputDto>(
-      await this.authService.loginDashboard(credentials),
+      await this.authProvider.loginDashboard(credentials),
       ResponseStatus.SUCCESS,
     );
   }

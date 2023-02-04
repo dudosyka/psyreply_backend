@@ -21,6 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     blockId?: number;
     week?: number;
     companyId?: number;
+    sharedGroups?: number[];
   }) {
     return {
       id: payload.sub,
@@ -29,6 +30,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       blockId: payload.blockId,
       companyId: payload.companyId,
       week: payload.week,
+      sharedGroups: payload.sharedGroups,
     };
   }
 }

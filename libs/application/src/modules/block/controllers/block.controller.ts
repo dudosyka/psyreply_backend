@@ -21,7 +21,7 @@ import { BlockUpdateDto } from '../dtos/block-update.dto';
 import { SearchFilter } from '../../../filters/search.filter';
 import { BlockGuard } from '../../../guards/block.guard';
 import { UserBlockGuard } from '../../../guards/user-block.guard';
-import { AuthService } from '../../user/providers/auth.service';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import {
   ResponseFilter,
   ResponseStatus,
@@ -34,7 +34,7 @@ import { SuperAdminGuard } from '../../../guards/super.admin.guard';
 export class BlockController {
   constructor(
     @Inject(BlockProvider) private blockProvider: BlockProvider,
-    @Inject(AuthService) private authService: AuthService,
+    @Inject(AuthProvider) private authProvider: AuthProvider,
   ) {}
 
   @UseGuards(AdminGuard)

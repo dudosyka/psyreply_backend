@@ -8,6 +8,7 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -25,14 +26,17 @@ import {
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
 import { SuperAdminGuard } from '../../../guards/super.admin.guard';
+import { AdminGuard } from '@app/application/guards/admin.guard';
+import { DashboardAdminGuard } from '@app/application/guards/dashboard-admin.guard';
 
-@UseGuards(JwtAuthGuard, SuperAdminGuard)
+@UseGuards(JwtAuthGuard)
 @Controller('company')
 export class CompanyController {
   constructor(
     @Inject(CompanyProvider) private companyProvider: CompanyProvider,
   ) {}
 
+  @UseGuards(SuperAdminGuard)
   @Post()
   @HttpCode(ResponseStatus.CREATED)
   public async create(
@@ -44,6 +48,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(SuperAdminGuard)
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)
   public async getAll(): Promise<ResponseFilter<CompanyModel[]>> {
@@ -64,6 +69,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(SuperAdminGuard)
   @Patch(':companyId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async update(
@@ -76,6 +82,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(SuperAdminGuard)
   @Delete(':companyId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async delete(
@@ -85,6 +92,7 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
+  @UseGuards(SuperAdminGuard)
   @Post(':companyId/append')
   @HttpCode(ResponseStatus.SUCCESS)
   public async appendBlocks(
@@ -95,6 +103,7 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
+  @UseGuards(AdminGuard)
   @Post(':companyId/group')
   @HttpCode(ResponseStatus.SUCCESS)
   public async createGroup(
@@ -108,6 +117,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Get(':companyId/group')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getGroups(
@@ -119,6 +129,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Get('group/:groupId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getGroup(
@@ -130,6 +141,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(AdminGuard)
   @Delete('group/:groupId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async removeGroup(
@@ -139,6 +151,7 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
+  @UseGuards(AdminGuard)
   @Patch('group/:groupId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async updateGroup(
@@ -150,6 +163,7 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
+  @UseGuards(AdminGuard)
   @Delete('group/:groupId/user')
   @HttpCode(ResponseStatus.SUCCESS)
   public async removeUserFromGroup(
@@ -160,6 +174,7 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
+  @UseGuards(AdminGuard)
   @Post('group/:groupId/user/:userId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async appendUser(
@@ -170,18 +185,48 @@ export class CompanyController {
     return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
-  @Get('/stat/:companyId/:groupId')
+  @UseGuards(DashboardAdminGuard)
+  @Get('/stat/share/check')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getStat(
-    @Param('companyId') companyId: number,
+  public checkToken(): ResponseFilter<void> {
+    return ResponseFilter.response<void>(null, ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(DashboardAdminGuard)
+  @Get('/stat/share/:groupId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async shareStat(
+    @Req() req,
     @Param('groupId') groupId: number,
-  ): Promise<ResponseFilter<CompanyStatDto>> {
-    return ResponseFilter.response<CompanyStatDto>(
-      await this.companyProvider.getStat(companyId, groupId),
+  ): Promise<ResponseFilter<string>> {
+    return ResponseFilter.response<string>(
+      await this.companyProvider.shareStat(
+        req.user.companyId,
+        groupId,
+        req.user.sharedGroups,
+      ),
       ResponseStatus.SUCCESS,
     );
   }
 
+  @UseGuards(DashboardAdminGuard)
+  @Get('/stat/:groupId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getStat(
+    @Req() req,
+    @Param('groupId') groupId: number,
+  ): Promise<ResponseFilter<CompanyStatDto>> {
+    return ResponseFilter.response<CompanyStatDto>(
+      await this.companyProvider.getStat(
+        req.user.companyId,
+        groupId,
+        req.user.sharedGroup,
+      ),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(SuperAdminGuard)
   @Patch('/stat/:statId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async updateStat(
@@ -194,6 +239,7 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(SuperAdminGuard)
   @Delete('/stat/:statId')
   @HttpCode(ResponseStatus.NO_CONTENT)
   public async removeStatRow(

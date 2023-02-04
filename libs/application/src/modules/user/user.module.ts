@@ -2,23 +2,13 @@ import { Module } from '@nestjs/common';
 import { UserController } from './controllers/user.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModel } from './models/user.model';
-import { PassportModule } from '@nestjs/passport';
-import { LocalStrategy } from '@app/application/strategies/local.strategy';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtStrategy } from '@app/application/strategies/jwt.strategy';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { AuthService } from './providers/auth.service';
-import { BcryptUtil } from '@app/application/utils/bcrypt.util';
-import { MailerUtil } from '@app/application/utils/mailer.util';
-import { JwtUtil } from '@app/application/utils/jwt.util';
-import { AuthController } from './controllers/auth.controller';
+import { AuthModule } from '@app/application/modules/auth/auth.module';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { CompanyModule } from '../company/company.module';
 import { UserProvider } from './providers/user.provider';
 import { UserMessageModel } from '../bot/models/user-message.model';
 import { MessageModel } from '../bot/models/message.model';
 import { MessageTypeModel } from '../bot/models/message-type.model';
-import { JwtOptionsModule } from './providers/jwt.options.module';
-import { MailerOptionsModule } from './providers/mailer.options.module';
 
 @Module({
   imports: [
@@ -28,34 +18,11 @@ import { MailerOptionsModule } from './providers/mailer.options.module';
       MessageModel,
       MessageTypeModel,
     ]),
-    PassportModule,
-    JwtModule.registerAsync({
-      useClass: JwtOptionsModule,
-    }),
-    MailerModule.forRootAsync({
-      useClass: MailerOptionsModule,
-    }),
+    AuthModule,
     CompanyModule,
   ],
-  providers: [
-    AuthService,
-    UserProvider,
-    LocalStrategy,
-    JwtStrategy,
-    BcryptUtil,
-    MailerUtil,
-    JwtUtil,
-  ],
-  controllers: [UserController, AuthController],
-  exports: [
-    CompanyModule,
-    AuthService,
-    UserProvider,
-    LocalStrategy,
-    JwtStrategy,
-    BcryptUtil,
-    MailerUtil,
-    JwtUtil,
-  ],
+  providers: [AuthProvider, UserProvider],
+  controllers: [UserController],
+  exports: [CompanyModule, AuthProvider, UserProvider],
 })
 export class UserModule {}

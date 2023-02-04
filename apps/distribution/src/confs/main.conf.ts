@@ -23,5 +23,6 @@ export default registerAs('main', () => {
     distributionMicroservicePort: parseInt(
       process.env.DISTRIBUTION_MICROSERVICE_PORT,
     ),
+    authMicroservicePort: parseInt(process.env.AUTH_MICROSERVICE_PORT),
   };
 });

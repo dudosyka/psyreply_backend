@@ -59,4 +59,25 @@ export class JwtUtil {
       tokenType: TokenTypeEnum.DASHBOARD,
     });
   }
+
+  public shareDashboard(sharedGroups: number[], companyId: number) {
+    return this.jwtService.sign(
+      {
+        sharedGroups,
+        companyId,
+        tokenType: TokenTypeEnum.DASHBOARD_ADMIN,
+      },
+      {
+        expiresIn: '2d',
+      },
+    );
+  }
+
+  public signDashboard(companyId: number) {
+    return this.jwtService.sign({
+      sharedGroups: [0],
+      companyId,
+      tokenType: TokenTypeEnum.DASHBOARD_ADMIN,
+    });
+  }
 }

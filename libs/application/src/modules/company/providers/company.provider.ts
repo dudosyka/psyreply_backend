@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 import { CompanyModel } from '../models/company.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { BlockProvider } from '../../block/providers/block.provider';
@@ -17,12 +17,15 @@ import { Op } from 'sequelize';
 import { BaseProvider } from '../../base/base.provider';
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 
 @Injectable()
 export class CompanyProvider extends BaseProvider<CompanyModel> {
   constructor(
     @InjectModel(CompanyModel) private companyModel: CompanyModel,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
+
+    @Inject(AuthProvider) private authProvider: AuthProvider,
     private sequelize: Sequelize,
   ) {
     super(CompanyModel);
@@ -391,7 +394,14 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
     return true;
   }
 
-  async getStat(companyId: number, groupId: number): Promise<CompanyStatDto> {
+  async getStat(
+    companyId: number,
+    groupId: number,
+    sharedGroups: number[],
+  ): Promise<CompanyStatDto> {
+    if (sharedGroups[0] !== 0 && !sharedGroups.includes(groupId))
+      throw new ForbiddenException();
+
     const statModels = await GroupBlockStatModel.findAll({
       where: {
         company_id: companyId,
@@ -433,5 +443,33 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
         id: statId,
       },
     });
+  }
+
+  async shareStat(
+    companyId,
+    groupId: number,
+    sharedGroups: number[],
+  ): Promise<string> {
+    //shareGroups[0] === 0 will mean that the user is admin of dashboard (not from a share link)
+    if (sharedGroups[0] !== 0) throw new ForbiddenException();
+
+    const company = await CompanyModel.findOne({
+      where: {
+        id: companyId,
+      },
+    });
+
+    if (!company) throw new ModelNotFoundException(CompanyModel, companyId);
+
+    const groups = await GroupModel.findAll({
+      where: {
+        id: [groupId, ...sharedGroups],
+      },
+    });
+
+    if (groups.length != sharedGroups.length + 1)
+      throw new ModelNotFoundException(GroupModel, null);
+
+    return this.authProvider.createShareDashboardToken(sharedGroups, companyId);
   }
 }

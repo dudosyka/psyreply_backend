@@ -18,7 +18,7 @@ import { ModelNotFoundException } from '../../../exceptions/model-not-found.exce
 import { TransactionUtil } from '../../../utils/TransactionUtil';
 import { ResultModel } from '../../result/models/result.model';
 import { CompanyModel } from '../../company/models/company.model';
-import { AuthService } from '../../user/providers/auth.service';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { UserModel } from '../../user/models/user.model';
 import { QuestionModel } from '../../question/models/question.model';
 import { BaseProvider } from '../../base/base.provider';
@@ -33,7 +33,7 @@ export class BlockProvider extends BaseProvider<BlockModel> {
   constructor(
     @InjectModel(BlockModel) private blockModel: BlockModel,
     @Inject(TestBlockProvider) private testBlockProvider: TestBlockProvider,
-    @Inject(AuthService) private authService: AuthService,
+    @Inject(AuthProvider) private authProvider: AuthProvider,
     private sequelize: Sequelize,
     private configService: ConfigService,
   ) {
@@ -318,7 +318,7 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     if (blockModel.company_id != requesterCompany && requesterCompany)
       throw new ForbiddenException();
 
-    return this.authService.createBlockToken(blockModel, week);
+    return this.authProvider.createBlockToken(blockModel, week);
   }
 
   async createLinks(
@@ -342,20 +342,20 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     });
 
     if (!userModel) {
-      userModel = await this.authService.createUser(jetBotId, companyId);
+      userModel = await this.authProvider.createUser(jetBotId, companyId);
     }
 
     if (!blockModel) {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
-    const link = await this.authService.createUserBlockToken(
+    const link = await this.authProvider.createUserBlockToken(
       userModel,
       week,
       blockModel,
     );
 
-    const linkdb = await this.authService.assignUserByUserBlock(userModel.id);
+    const linkdb = await this.authProvider.assignUserByUserBlock(userModel.id);
 
     let clientUrl = 'http://localhost:8080/';
     if (this.configService.get('main.isDev') == ProjectState.TEST_PROD) {

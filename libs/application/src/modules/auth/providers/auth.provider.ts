@@ -1,19 +1,19 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { UserModel } from '../models/user.model';
-import { BcryptUtil } from '../../../utils/bcrypt.util';
-import { AuthOutputDto } from '../dtos/auth/auth-output.dto';
+import { UserModel } from '@app/application/modules/user/models/user.model';
+import { BcryptUtil } from '@app/application/utils/bcrypt.util';
+import { AuthOutputDto } from '@app/application/modules/user/dtos/auth/auth-output.dto';
 import { MailerUtil } from '@app/application/utils/mailer.util';
-import mainConf from '../../../config/main.conf';
-import { JwtUtil } from '../../../utils/jwt.util';
-import { FailedAuthorizationException } from '../../../exceptions/failed-authorization.exception';
+import mainConf from '@app/application/config/main.conf';
+import { JwtUtil } from '@app/application/utils/jwt.util';
+import { FailedAuthorizationException } from '@app/application/exceptions/failed-authorization.exception';
 import { Op } from 'sequelize';
-import { BlockModel } from '../../block/models/block.model';
-import { ModelNotFoundException } from '../../../exceptions/model-not-found.exception';
-import { AuthInputDto } from '../dtos/auth/auth-input.dto';
+import { BlockModel } from '@app/application/modules/block/models/block.model';
+import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
+import { AuthInputDto } from '@app/application/modules/user/dtos/auth/auth-input.dto';
 
 @Injectable()
-export class AuthService {
+export class AuthProvider {
   user: UserModel;
   constructor(
     @InjectModel(UserModel) private userModel: UserModel,
@@ -52,6 +52,17 @@ export class AuthService {
     block: BlockModel,
   ): Promise<string> {
     return this.jwt.signUserBlock(user, week, block);
+  }
+
+  async createShareDashboardToken(
+    sharedGroups: number[],
+    companyId: number,
+  ): Promise<string> {
+    return this.jwt.shareDashboard(sharedGroups, companyId);
+  }
+
+  async signDashboard(companyId: number): Promise<string> {
+    return this.jwt.signDashboard(companyId);
   }
 
   async assignUser(
@@ -159,6 +170,6 @@ export class AuthService {
 
   async loginDashboard(credentials: AuthInputDto) {
     await this.firstStep(credentials.email, credentials.password, false);
-    return this.login(this.user);
+    return { token: await this.signDashboard(this.user.company_id) };
   }
 }

@@ -5,13 +5,16 @@ import { CompanyProvider } from './providers/company.provider';
 import { CompanyController } from './controllers/company.controller';
 import { BlockModule } from '../block/block.module';
 import { GroupModel } from './models/group.model';
+import { AuthModule } from '@app/application/modules/auth/auth.module';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 
 @Module({
   imports: [
     SequelizeModule.forFeature([GroupModel, CompanyModel]),
     BlockModule,
+    AuthModule,
   ],
-  providers: [CompanyProvider],
+  providers: [CompanyProvider, AuthProvider],
   controllers: [CompanyController],
   exports: [CompanyProvider, SequelizeModule.forFeature([CompanyModel])],
 })

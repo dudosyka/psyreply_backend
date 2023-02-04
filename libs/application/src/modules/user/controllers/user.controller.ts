@@ -13,7 +13,7 @@ import {
 import { JwtAuthGuard } from '@app/application/guards/jwt-auth.guard';
 import { AdminGuard } from '@app/application/guards/admin.guard';
 import { UserProvider } from '../providers/user.provider';
-import { AuthService } from '../providers/auth.service';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { UserBlockGuard } from '@app/application/guards/user-block.guard';
 import { UserFilterDto } from '../dtos/user-filter.dto';
 import { UserModel } from '../models/user.model';
@@ -27,7 +27,7 @@ import {
 export class UserController {
   constructor(
     @Inject(UserProvider) private userProvider: UserProvider,
-    @Inject(AuthService) private authService: AuthService,
+    @Inject(AuthProvider) private authProvider: AuthProvider,
   ) {}
 
   @UseGuards(JwtAuthGuard)
@@ -56,7 +56,7 @@ export class UserController {
     @Param('jbId') userId: number,
   ): Promise<ResponseFilter<string>> {
     return ResponseFilter.response<string>(
-      `https://client.psyreply.com/results/${await this.authService.assignUser(
+      `https://client.psyreply.com/results/${await this.authProvider.assignUser(
         userId,
       )}`,
       ResponseStatus.SUCCESS,
@@ -71,7 +71,7 @@ export class UserController {
   ): Promise<ResponseFilter<{ linkdb: string }>> {
     return ResponseFilter.response<{ linkdb: string }>(
       {
-        linkdb: `https://client.psyreply.com/results/${await this.authService.assignUser(
+        linkdb: `https://client.psyreply.com/results/${await this.authProvider.assignUser(
           jetBotId,
         )}`,
       },
@@ -86,7 +86,7 @@ export class UserController {
     @Req() req,
   ): Promise<ResponseFilter<string>> {
     return ResponseFilter.response<string>(
-      `https://client.psyreply.com/results/${await this.authService.assignUserByUserBlock(
+      `https://client.psyreply.com/results/${await this.authProvider.assignUserByUserBlock(
         req.user.id,
       )}`,
       ResponseStatus.SUCCESS,

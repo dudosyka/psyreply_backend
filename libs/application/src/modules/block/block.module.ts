@@ -4,29 +4,22 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { BlockModel } from './models/block.model';
 import { BlockProvider } from './providers/block.provider';
 import { TestBlockModule } from '../test-block/test-block.module';
-import { AuthService } from '../user/providers/auth.service';
-import { UserModel } from '../user/models/user.model';
-import { BcryptUtil } from '../../utils/bcrypt.util';
-import { MailerUtil } from '../../utils/mailer.util';
-import { JwtUtil } from '../../utils/jwt.util';
-import { JwtModule } from '@nestjs/jwt';
-import { JwtOptionsModule } from '@app/application/modules/user/providers/jwt.options.module';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
+import { AuthModule } from '@app/application/modules/auth/auth.module';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([BlockModel, UserModel]),
+    SequelizeModule.forFeature([BlockModel]),
     TestBlockModule,
-    JwtModule.registerAsync({
-      useClass: JwtOptionsModule,
-    }),
+    AuthModule,
   ],
   controllers: [BlockController],
-  providers: [BlockProvider, AuthService, BcryptUtil, MailerUtil, JwtUtil],
+  providers: [BlockProvider, AuthProvider],
   exports: [
     TestBlockModule,
     BlockProvider,
     SequelizeModule.forFeature([BlockModel]),
-    AuthService,
+    AuthProvider,
   ],
 })
 export class BlockModule {}

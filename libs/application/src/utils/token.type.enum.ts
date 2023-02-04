@@ -3,4 +3,6 @@ export enum TokenTypeEnum {
   BLOCK,
   USER_BLOCK,
   DASHBOARD,
+  DASHBOARD_SHARE,
+  DASHBOARD_ADMIN,
 }
