@@ -25,7 +25,8 @@ import { BaseProvider } from '../../base/base.provider';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
 import { GroupModel } from '../../company/models/group.model';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
-import mainConf, { ProjectState } from '../../../config/main.conf';
+import { ProjectState } from '../../../config/main.conf';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class BlockProvider extends BaseProvider<BlockModel> {
@@ -34,6 +35,7 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     @Inject(TestBlockProvider) private testBlockProvider: TestBlockProvider,
     @Inject(AuthService) private authService: AuthService,
     private sequelize: Sequelize,
+    private configService: ConfigService,
   ) {
     super(BlockModel);
   }
@@ -356,9 +358,9 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     const linkdb = await this.authService.assignUserByUserBlock(userModel.id);
 
     let clientUrl = 'http://localhost:8080/';
-    if (mainConf().isDev == ProjectState.TEST_PROD) {
+    if (this.configService.get('main.isDev') == ProjectState.TEST_PROD) {
       clientUrl = 'https://client.beta.psyreply.com/';
-    } else if (mainConf().isDev == ProjectState.PROD) {
+    } else if (this.configService.get('main.isDev') == ProjectState.PROD) {
       clientUrl = 'https://client.psyreply.com/';
     }
 
