@@ -417,6 +417,7 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
     groupId: number,
     sharedGroups: number[],
   ): Promise<CompanyStatDto> {
+    console.log(sharedGroups, groupId);
     if (sharedGroups[0] !== 0 && !sharedGroups.includes(groupId))
       throw new ForbiddenException();
 

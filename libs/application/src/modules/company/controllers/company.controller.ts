@@ -220,13 +220,13 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getStat(
     @Req() req,
-    @Param('groupId') groupId: number,
+    @Param('groupId') groupId: string,
   ): Promise<ResponseFilter<CompanyStatDto>> {
     return ResponseFilter.response<CompanyStatDto>(
       await this.companyProvider.getStat(
         req.user.companyId,
-        groupId,
-        req.user.sharedGroup,
+        parseInt(groupId),
+        req.user.sharedGroups,
       ),
       ResponseStatus.SUCCESS,
     );
