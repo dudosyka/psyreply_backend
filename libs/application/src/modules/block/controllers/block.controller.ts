@@ -28,6 +28,7 @@ import {
 } from '../../../filters/response.filter';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
 import { SuperAdminGuard } from '../../../guards/super.admin.guard';
+import { GroupBlockStatModel } from '@app/application/modules/result/models/group-block-stat.model';
 
 @UseGuards(JwtAuthGuard)
 @Controller('block')
@@ -236,7 +237,7 @@ export class BlockController {
     @Param('blockId') blockId: number,
     @Param('week') week: number,
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week, req.user.companyId),
       ResponseStatus.SUCCESS,
@@ -249,7 +250,7 @@ export class BlockController {
   public async superSaveStat(
     @Param('blockId') blockId: number,
     @Param('week') week: number,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week),
       ResponseStatus.SUCCESS,
@@ -264,7 +265,7 @@ export class BlockController {
     @Param('week') week: number,
     @Param('groupId') groupId: number,
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
@@ -283,7 +284,7 @@ export class BlockController {
     @Param('blockId') blockId: number,
     @Param('week') week: number,
     @Param('groupId') groupId: number,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week, null, groupId),
       ResponseStatus.SUCCESS,
@@ -299,7 +300,7 @@ export class BlockController {
     @Param('groupId') groupId: number,
     @Body('resultIds') resultIds: number[],
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
@@ -320,7 +321,7 @@ export class BlockController {
     @Param('week') week: number,
     @Param('groupId') groupId: number,
     @Body('resultIds') resultIds: number[],
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto>> {
+  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
     return ResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
@@ -329,6 +330,19 @@ export class BlockController {
         groupId,
         resultIds,
       ),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(AdminGuard)
+  @Get('/:blockId/stat/exists/:week')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async checkStatExists(
+    @Param('blockId') blockId: number,
+    @Param('week') week: number,
+  ): Promise<ResponseFilter<GroupBlockStatModel[]>> {
+    return ResponseFilter.response<GroupBlockStatModel[]>(
+      await this.blockProvider.checkStatExists(blockId, week),
       ResponseStatus.SUCCESS,
     );
   }

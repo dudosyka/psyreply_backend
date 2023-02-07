@@ -507,20 +507,41 @@ export class BlockProvider extends BaseProvider<BlockModel> {
         const group_result = metrics;
         const group = groupsByIds[groupId];
 
-        await GroupBlockStatModel.create(
-          {
-            data: JSON.stringify(group_result),
-            percent,
+        const groupStatModel = await GroupBlockStatModel.findOne({
+          where: {
             week,
             company_id: companyModel.id,
             group_id: groupId,
             block_id: blockModel.id,
           },
-          TransactionUtil.getHost(),
-        ).catch((err) => {
-          if (!isPropagate) TransactionUtil.rollback();
-          throw err;
         });
+
+        if (!groupStatModel) {
+          await GroupBlockStatModel.create(
+            {
+              data: JSON.stringify(group_result),
+              percent,
+              week,
+              company_id: companyModel.id,
+              group_id: groupId,
+              block_id: blockModel.id,
+            },
+            TransactionUtil.getHost(),
+          ).catch((err) => {
+            if (!isPropagate) TransactionUtil.rollback();
+            throw err;
+          });
+        } else {
+          await groupStatModel
+            .update({
+              data: JSON.stringify(group_result),
+              percent,
+            })
+            .catch((err) => {
+              if (!isPropagate) TransactionUtil.rollback();
+              throw err;
+            });
+        }
 
         return {
           group,
@@ -536,5 +557,23 @@ export class BlockProvider extends BaseProvider<BlockModel> {
         if (!isPropagate) TransactionUtil.commit();
         return data;
       });
+  }
+
+  async checkStatExists(
+    blockId: number,
+    week: number,
+  ): Promise<GroupBlockStatModel[]> {
+    await super.getOne({
+      where: {
+        id: blockId,
+      },
+    });
+
+    return await GroupBlockStatModel.findAll({
+      where: {
+        block_id: blockId,
+        week,
+      },
+    });
   }
 }

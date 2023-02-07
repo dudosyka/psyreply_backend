@@ -428,11 +428,35 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
       },
     });
 
-    return statModels.reduce((r, a) => {
+    const metricsToWeek: any = {};
+
+    statModels.forEach((el) => {
+      const data: { metric_id: number; value: number }[] = JSON.parse(el.data);
+      data.forEach((item) => {
+        if (metricsToWeek[item.metric_id]) {
+          metricsToWeek[item.metric_id].push({
+            week: el.week,
+            date: el.createdAt,
+            value: item.value,
+          });
+        } else {
+          metricsToWeek[item.metric_id] = [
+            { week: el.week, value: item.value, data: el.createdAt },
+          ];
+        }
+      });
+    });
+
+    const statsWeekly = statModels.reduce((r, a) => {
       r[a.week] = r[a.week] || [];
       r[a.week].push(a);
       return r;
     }, Object.create(null));
+
+    return {
+      metricsToWeek,
+      statsWeekly,
+    };
   }
 
   async updateStat(

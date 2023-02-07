@@ -1,3 +1,4 @@
 export class CompanyStatDto {
-  [week: string]: any;
+  statsWeekly: { [week: string]: any }[];
+  metricsToWeek: any;
 }
