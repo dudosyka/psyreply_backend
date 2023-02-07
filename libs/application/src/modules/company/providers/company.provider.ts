@@ -412,40 +412,91 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
     });
   }
 
-  async getStat(
+  private processStat(
+    statModels: GroupBlockStatModel[],
+    availableMetrics = [],
+  ) {
+    const metricsToWeek = {};
+    statModels.forEach((el) => {
+      const data: { metric_id: string; value: number }[] = JSON.parse(el.data);
+      data.forEach((item) => {
+        if (
+          (availableMetrics.length &&
+            availableMetrics.includes(parseInt(item.metric_id))) ||
+          !availableMetrics.length
+        )
+          if (metricsToWeek[item.metric_id]) {
+            metricsToWeek[item.metric_id].push({
+              week: el.week,
+              date: el.createdAt,
+              value: item.value,
+            });
+          } else {
+            metricsToWeek[item.metric_id] = [
+              { week: el.week, value: item.value, data: el.createdAt },
+            ];
+          }
+      });
+    });
+    return metricsToWeek;
+  }
+
+  async getStatAll(
     companyId: number,
     groupId: number,
     sharedGroups: number[],
   ): Promise<CompanyStatDto> {
-    console.log(sharedGroups, groupId);
     if (sharedGroups[0] !== 0 && !sharedGroups.includes(groupId))
       throw new ForbiddenException();
 
     const statModels = await GroupBlockStatModel.findAll({
       where: {
         company_id: companyId,
-        group_id: groupId,
+        group_id: groupId ? groupId : null,
       },
     });
 
-    const metricsToWeek: any = {};
+    const metricsToWeek: any = this.processStat(statModels);
 
-    statModels.forEach((el) => {
-      const data: { metric_id: number; value: number }[] = JSON.parse(el.data);
-      data.forEach((item) => {
-        if (metricsToWeek[item.metric_id]) {
-          metricsToWeek[item.metric_id].push({
-            week: el.week,
-            date: el.createdAt,
-            value: item.value,
-          });
-        } else {
-          metricsToWeek[item.metric_id] = [
-            { week: el.week, value: item.value, data: el.createdAt },
-          ];
-        }
-      });
+    const statsWeekly = statModels.reduce((r, a) => {
+      r[a.week] = r[a.week] || [];
+      r[a.week].push(a);
+      return r;
+    }, Object.create(null));
+
+    return {
+      metricsToWeek,
+      statsWeekly,
+    };
+  }
+
+  async getStatPart(
+    companyId: number,
+    groupId: number,
+    sharedGroups: number[],
+  ): Promise<CompanyStatDto> {
+    if (sharedGroups[0] !== 0 && !sharedGroups.includes(groupId))
+      throw new ForbiddenException();
+
+    const statModels = await GroupBlockStatModel.findAll({
+      where: {
+        company_id: companyId,
+        group_id: groupId ? groupId : null,
+      },
     });
+
+    const lastModel = await GroupBlockStatModel.findOne({
+      where: {
+        company_id: companyId,
+        group_id: groupId ? groupId : null,
+      },
+    });
+
+    const metrics = JSON.parse(lastModel.data).map((el) =>
+      parseInt(el.metric_id),
+    );
+
+    const metricsToWeek = this.processStat(statModels, metrics);
 
     const statsWeekly = statModels.reduce((r, a) => {
       r[a.week] = r[a.week] || [];

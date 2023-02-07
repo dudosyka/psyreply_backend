@@ -16,6 +16,11 @@ import { AuthProvider } from '@app/application/modules/auth/providers/auth.provi
   ],
   providers: [CompanyProvider, AuthProvider],
   controllers: [CompanyController],
-  exports: [CompanyProvider, SequelizeModule.forFeature([CompanyModel])],
+  exports: [
+    AuthModule,
+    BlockModule,
+    CompanyProvider,
+    SequelizeModule.forFeature([CompanyModel, GroupModel]),
+  ],
 })
 export class CompanyModule {}

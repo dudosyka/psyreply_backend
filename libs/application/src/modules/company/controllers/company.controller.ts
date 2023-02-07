@@ -223,7 +223,24 @@ export class CompanyController {
     @Param('groupId') groupId: string,
   ): Promise<ResponseFilter<CompanyStatDto>> {
     return ResponseFilter.response<CompanyStatDto>(
-      await this.companyProvider.getStat(
+      await this.companyProvider.getStatPart(
+        req.user.companyId,
+        parseInt(groupId),
+        req.user.sharedGroups,
+      ),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(DashboardAdminGuard)
+  @Get('/stat/:groupId/all')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getStatAll(
+    @Req() req,
+    @Param('groupId') groupId: string,
+  ): Promise<ResponseFilter<CompanyStatDto>> {
+    return ResponseFilter.response<CompanyStatDto>(
+      await this.companyProvider.getStatAll(
         req.user.companyId,
         parseInt(groupId),
         req.user.sharedGroups,

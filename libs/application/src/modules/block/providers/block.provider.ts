@@ -473,7 +473,16 @@ export class BlockProvider extends BaseProvider<BlockModel> {
       Object.create(null),
     );
 
-    return await Promise.all(
+    const companyMaxAmountOfUsers = (
+      await UserModel.findAll({
+        where: {
+          company_id: companyModel.id,
+        },
+      })
+    ).length;
+    let companyRealAmountOfUsers = 0;
+    let companyMetrics = {};
+    const result = await Promise.all(
       Object.keys(userIdsByGroup).map(async (el) => {
         const groupId = parseInt(el);
         const userIds = userIdsByGroup[el];
@@ -483,12 +492,16 @@ export class BlockProvider extends BaseProvider<BlockModel> {
         userIds.forEach((userId) => {
           if (resultsByUserId[userId]) {
             realAmountOfUsers++;
+            companyRealAmountOfUsers++;
             const result = resultsByUserId[userId][0];
             const data = JSON.parse(result.data);
             data.forEach((el) => {
               if (metrics[el.metric_id])
                 metrics[el.metric_id] += parseInt(el.value);
               else metrics[el.metric_id] = parseInt(el.value);
+              if (companyMetrics[el.metric_id])
+                companyMetrics[el.metric_id] += parseInt(el.value);
+              else companyMetrics[el.metric_id] = parseInt(el.value);
             });
           }
         });
@@ -557,6 +570,44 @@ export class BlockProvider extends BaseProvider<BlockModel> {
         if (!isPropagate) TransactionUtil.commit();
         return data;
       });
+
+    companyMetrics = Object.keys(companyMetrics).map((id) => {
+      const value = Math.round(companyMetrics[id] / companyRealAmountOfUsers);
+      return {
+        metric_id: id,
+        value,
+      };
+    });
+
+    const percent = Math.round(
+      (companyRealAmountOfUsers / companyMaxAmountOfUsers) * 100,
+    );
+
+    const companyGroupStatModel = await GroupBlockStatModel.findOne({
+      where: {
+        week,
+        company_id: companyModel.id,
+        group_id: null,
+        block_id: blockModel.id,
+      },
+    });
+
+    if (!companyGroupStatModel)
+      await GroupBlockStatModel.create({
+        week,
+        company_id: companyModel.id,
+        group_id: null,
+        block_id: blockModel.id,
+        percent,
+        data: JSON.stringify(companyMetrics),
+      });
+    else
+      companyGroupStatModel.update({
+        percent,
+        data: JSON.stringify(companyMetrics),
+      });
+
+    return result;
   }
 
   async checkStatExists(
