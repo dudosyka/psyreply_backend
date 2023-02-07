@@ -433,7 +433,7 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
             });
           } else {
             metricsToWeek[item.metric_id] = [
-              { week: el.week, value: item.value, data: el.createdAt },
+              { week: el.week, value: item.value, date: el.createdAt },
             ];
           }
       });
