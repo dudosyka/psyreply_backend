@@ -186,6 +186,18 @@ export class CompanyController {
   }
 
   @UseGuards(DashboardAdminGuard)
+  @Get('/dash/get')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getCurCompany(
+    @Req() req,
+  ): Promise<ResponseFilter<CompanyModel>> {
+    return ResponseFilter.response(
+      await this.companyProvider.getOneSimple(req.user.companyId),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(DashboardAdminGuard)
   @Get('/stat/groups')
   @HttpCode(ResponseStatus.SUCCESS)
   public async checkToken(@Req() req): Promise<ResponseFilter<GroupModel[]>> {

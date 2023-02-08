@@ -20,6 +20,9 @@ export class CompanyModel extends BaseModel {
   @Column
   name: string;
 
+  @Column
+  logo: string;
+
   @BelongsToMany(() => BlockModel, () => BlockModel, 'company_id', 'id')
   blocks: BlockModel[];
 

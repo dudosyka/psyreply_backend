@@ -78,6 +78,14 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
     });
   }
 
+  public async getOneSimple(id: number) {
+    return await super.getOne({
+      where: {
+        id,
+      },
+    });
+  }
+
   public getAll(): Promise<CompanyModel[]> {
     return super.getAll({
       include: [BlockModel, UserModel],
