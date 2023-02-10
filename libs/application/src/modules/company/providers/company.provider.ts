@@ -464,6 +464,10 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
       },
     });
 
+    if (statModels.length <= 0) {
+      throw new ModelNotFoundException(GroupBlockStatModel, null);
+    }
+
     const metricsToWeek: any = this.processStat(statModels);
 
     const statsWeekly = statModels.reduce((r, a) => {
@@ -493,11 +497,16 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
       },
     });
 
+    if (statModels.length <= 0) {
+      throw new ModelNotFoundException(GroupBlockStatModel, null);
+    }
+
     const lastModel = await GroupBlockStatModel.findOne({
       where: {
         company_id: companyId,
         group_id: groupId ? groupId : null,
       },
+      order: [['id', 'DESC']],
     });
 
     const metrics = JSON.parse(lastModel.data).map((el) =>
