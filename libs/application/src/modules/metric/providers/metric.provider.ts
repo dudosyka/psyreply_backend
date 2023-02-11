@@ -10,14 +10,16 @@ export class MetricProvider extends BaseProvider<MetricModel> {
     super(MetricModel);
   }
 
-  getAll(): Promise<MetricModel[]> {
-    return MetricModel.findAll();
-  }
-
   async create(createDto: CreateMetricDto): Promise<MetricModel> {
     return await MetricModel.create({
       ...createDto,
-      description: 'Тестовое описание метрики',
+    });
+  }
+
+  async markRemove(query): Promise<void> {
+    const metric = await this.getOne(query);
+    metric.update({
+      deleted: true,
     });
   }
 }

@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
+  Param,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -31,6 +33,19 @@ export class MetricController {
     );
   }
 
+  @Get('/available')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getNotRemove(): Promise<ResponseFilter<MetricModel[]>> {
+    return ResponseFilter.response<MetricModel[]>(
+      await this.metricProvider.getAll({
+        where: {
+          deleted: false,
+        },
+      }),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
   @Post()
   @HttpCode(ResponseStatus.CREATED)
   public async create(
@@ -40,5 +55,11 @@ export class MetricController {
       await this.metricProvider.create(createDto),
       ResponseStatus.CREATED,
     );
+  }
+
+  @Delete(':id')
+  @HttpCode(ResponseStatus.NO_CONTENT)
+  removeMetric(@Param('id') id: number) {
+    this.metricProvider.markRemove({ where: { id } });
   }
 }

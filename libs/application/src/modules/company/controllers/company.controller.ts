@@ -58,6 +58,19 @@ export class CompanyController {
     );
   }
 
+  @UseGuards(AdminGuard)
+  @Get('group')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getGroups(
+    @Param('companyId') companyId: number,
+    @Req() req,
+  ): Promise<ResponseFilter<GroupModel[]>> {
+    return ResponseFilter.response<GroupModel[]>(
+      await this.companyProvider.getGroups(req.user.companyId),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
   @Get(':companyId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getOne(
@@ -113,18 +126,6 @@ export class CompanyController {
     groupCreateDto.company_id = companyId;
     return ResponseFilter.response<GroupModel>(
       await this.companyProvider.createGroup(groupCreateDto),
-      ResponseStatus.SUCCESS,
-    );
-  }
-
-  @UseGuards(AdminGuard)
-  @Get(':companyId/group')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async getGroups(
-    @Param('companyId') companyId: number,
-  ): Promise<ResponseFilter<GroupModel[]>> {
-    return ResponseFilter.response<GroupModel[]>(
-      await this.companyProvider.getGroups(companyId),
       ResponseStatus.SUCCESS,
     );
   }

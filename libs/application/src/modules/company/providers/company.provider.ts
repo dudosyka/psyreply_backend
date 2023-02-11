@@ -262,18 +262,15 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
   }
 
   async getGroups(companyId: number): Promise<GroupModel[]> | never {
-    const companyModel = CompanyModel.findOne({
+    const companyModel = await super.getOne({
       where: {
         id: companyId,
       },
     });
 
-    if (!companyModel)
-      throw new ModelNotFoundException(CompanyModel, companyId);
-
     return await GroupModel.findAll({
       where: {
-        company_id: companyId,
+        company_id: companyModel.id,
       },
       include: [CompanyModel, UserModel],
     });
