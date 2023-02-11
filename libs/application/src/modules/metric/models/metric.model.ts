@@ -10,4 +10,7 @@ export class MetricModel extends BaseModel {
 
   @Column
   name: string;
+
+  @Column
+  description: string;
 }

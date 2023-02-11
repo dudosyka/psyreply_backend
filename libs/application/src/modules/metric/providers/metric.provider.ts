@@ -17,6 +17,7 @@ export class MetricProvider extends BaseProvider<MetricModel> {
   async create(createDto: CreateMetricDto): Promise<MetricModel> {
     return await MetricModel.create({
       ...createDto,
+      description: 'Тестовое описание метрики',
     });
   }
 }
