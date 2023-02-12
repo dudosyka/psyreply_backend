@@ -39,7 +39,8 @@ export class TestController {
     @Body() filter: SearchFilter<TestFilterDto>,
     @Req() req,
   ): Promise<ResponseFilter<TestModel[]>> {
-    filter.filters.company_id = req.user.companyId;
+    if (!filter.filters.company_id)
+      filter.filters.company_id = [req.user.companyId, null];
     return ResponseFilter.response<TestModel[]>(
       await this.testProvider.getAll(filter.filters),
       ResponseStatus.SUCCESS,

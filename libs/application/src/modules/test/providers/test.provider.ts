@@ -28,6 +28,7 @@ import { BaseProvider } from '../../base/base.provider';
 import { TestBlockModel } from '../../test-block/models/test-block.model';
 import * as fs from 'fs';
 import * as path from 'path';
+import { Op } from 'sequelize';
 
 @Injectable()
 export class TestProvider extends BaseProvider<TestModel> {
@@ -235,7 +236,22 @@ export class TestProvider extends BaseProvider<TestModel> {
     if (filters.except_block)
       return await this.getExceptBlock(filters.except_block);
 
-    const { block_id, except_block, ...filter } = filters;
+    const { company_id, block_id, except_block, ...filter } = filters;
+
+    if (typeof company_id === 'object') {
+      if (company_id.includes(null)) {
+        filter[Op.or] = [
+          {
+            company_id: company_id.slice(company_id.indexOf(null) - 1, 1),
+          },
+          {
+            company_id: {
+              [Op.is]: null,
+            },
+          },
+        ];
+      }
+    } else filter['company_id'] = company_id;
 
     return super.getAll({
       where: {
