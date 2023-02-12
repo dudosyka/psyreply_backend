@@ -11,6 +11,14 @@ import { Op } from 'sequelize';
 import { BlockModel } from '@app/application/modules/block/models/block.model';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 import { AuthInputDto } from '@app/application/modules/user/dtos/auth/auth-input.dto';
+import { RepassOutputDto } from '@app/application/modules/auth/dtos/repass-output.dto';
+import { SignupInputDto } from '@app/application/modules/auth/dtos/signup-input.dto';
+import { DoubleRecordException } from '@app/application/exceptions/double-record.exception';
+import { TokenOutputDto } from '@app/application/modules/auth/dtos/token-output.dto';
+import { CompanyModel } from '@app/application/modules/company/models/company.model';
+import { TransactionUtil } from '@app/application/utils/TransactionUtil';
+import { Sequelize } from 'sequelize-typescript';
+import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-email-output.dto';
 
 @Injectable()
 export class AuthProvider {
@@ -20,6 +28,7 @@ export class AuthProvider {
     @Inject(BcryptUtil) private bcrypt: BcryptUtil,
     @Inject(MailerUtil) private mailer: MailerUtil,
     @Inject(JwtUtil) private jwt: JwtUtil,
+    private sequelize: Sequelize,
   ) {}
 
   async validateCode(code: string): Promise<any> {
@@ -36,7 +45,7 @@ export class AuthProvider {
     }
   }
 
-  async login(user: UserModel) {
+  async login(user: UserModel): Promise<TokenOutputDto> {
     return {
       token: this.jwt.signAdmin(user),
     };
@@ -171,5 +180,140 @@ export class AuthProvider {
   async loginDashboard(credentials: AuthInputDto) {
     await this.firstStep(credentials.email, credentials.password, false);
     return { token: await this.signDashboard(this.user.company_id) };
+  }
+
+  async signup(
+    signupData: SignupInputDto,
+    file: Express.Multer.File,
+  ): Promise<TokenOutputDto> {
+    TransactionUtil.setHost(await this.sequelize.transaction());
+
+    const checkUnique = await UserModel.findOne({
+      where: {
+        [Op.or]: [{ email: signupData.email }, { login: signupData.login }],
+      },
+    });
+
+    if (checkUnique) throw new DoubleRecordException(UserModel);
+
+    const company = await CompanyModel.create(
+      {
+        name: signupData.companyName,
+        logo: file.filename,
+      },
+      TransactionUtil.getHost(),
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('Company model creation failed!');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
+        throw err;
+      });
+
+    const user = await UserModel.create(
+      {
+        jetBotId: null,
+        login: signupData.login,
+        hash: await this.bcrypt.hash(signupData.password),
+        email: signupData.email,
+        isAdmin: 1,
+        company_id: company.id,
+      },
+      TransactionUtil.getHost(),
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('User model creation failed!');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
+        throw err;
+      });
+
+    await TransactionUtil.commit();
+
+    return await this.login(user);
+  }
+
+  async repassFirst(login: string): Promise<RepassOutputDto> {
+    const checkExists = await UserModel.findOne({
+      where: {
+        [Op.or]: [{ email: login }, { login }],
+      },
+    });
+
+    if (!checkExists) throw new ModelNotFoundException(UserModel, null);
+
+    await this.mailer.sendUserConfirmation(checkExists);
+
+    return {
+      success: true,
+    };
+  }
+
+  async repassSecond(
+    emailCode: string,
+    newPassword: string,
+  ): Promise<TokenOutputDto> {
+    const user = await UserModel.findOne({
+      where: {
+        emailCode,
+      },
+    });
+
+    if (!user) throw new ModelNotFoundException(UserModel, null);
+
+    await user.update({
+      hash: await this.bcrypt.hash(newPassword),
+    });
+
+    return await this.login(user);
+  }
+
+  async changeEmailFirst(id: number): Promise<ChangeEmailOutputDto> {
+    const checkExists = await UserModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!checkExists) throw new ModelNotFoundException(UserModel, null);
+
+    await this.mailer.sendUserConfirmation(checkExists);
+
+    return { success: true };
+  }
+
+  async changeEmailSecond(
+    newEmail: string,
+    emailCode: string,
+  ): Promise<ChangeEmailOutputDto> {
+    const user = await UserModel.findOne({
+      where: {
+        emailCode,
+      },
+    });
+
+    const checkExists = await UserModel.findOne({
+      where: {
+        [Op.or]: [{ email: newEmail }],
+      },
+    });
+
+    if (!checkExists) throw new ModelNotFoundException(UserModel, null);
+
+    await user.update({
+      email: newEmail,
+    });
+
+    return { success: true };
   }
 }
