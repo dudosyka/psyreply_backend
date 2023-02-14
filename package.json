@@ -6,32 +6,36 @@
   "private": true,
   "license": "UNLICENSED",
   "scripts": {
-    "prebuild": "rimraf dist",
     "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start --watch",
+    "format": "prettier --write \"apps/**/*.ts\" \"libs/**/*.ts\"",
+    "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
-    "start:prod": "node dist/main",
+    "start:prod": "node dist/apps/psyreply2/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json",
-    "deploy": "sh ./uploadProd.sh",
-    "deploy-test": "sh ./uploadTestProd.sh"
+    "test:e2e": "jest --config ./main/jest-e2e.json",
+    "deploy": "sh uploadProd.sh",
+    "deploy-test": "sh uploadTestProd.sh"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^1.8.1",
-    "@nestjs/common": "^8.0.0",
-    "@nestjs/core": "^8.0.0",
-    "@nestjs/jwt": "^9.0.0",
+    "@nestjs/common": "^9.2.1",
+    "@nestjs/config": "^2.3.0",
+    "@nestjs/core": "^9.2.1",
+    "@nestjs/jwt": "^10.0.1",
     "@nestjs/mapped-types": "^1.2.0",
+    "@nestjs/microservices": "^9.2.1",
     "@nestjs/passport": "^9.0.0",
-    "@nestjs/platform-express": "^8.0.0",
+    "@nestjs/platform-express": "^9.2.1",
+    "@nestjs/platform-socket.io": "^9.2.1",
     "@nestjs/sequelize": "^9.0.0",
+    "@nestjs/websockets": "^9.2.1",
     "@types/iconv": "^3.0.1",
+    "@types/multer": "^1.4.7",
     "axios": "^1.2.0",
     "bcrypt": "^5.1.0",
     "cheerio": "^1.0.0-rc.12",
@@ -51,13 +55,14 @@
     "sequelize": "^6.25.3",
     "sequelize-cli": "^6.5.2",
     "sequelize-typescript": "^2.1.5",
+    "socketio": "^1.0.0",
     "telegraf-ts": "^3.89.1",
     "windows-1251": "^3.0.4"
   },
   "devDependencies": {
-    "@nestjs/cli": "^8.0.0",
-    "@nestjs/schematics": "^8.0.0",
-    "@nestjs/testing": "^8.0.0",
+    "@nestjs/cli": "^9.1.9",
+    "@nestjs/schematics": "^9.0.4",
+    "@nestjs/testing": "^9.2.1",
     "@types/express": "^4.17.13",
     "@types/jest": "^27.0.1",
     "@types/node": "^16.0.0",
@@ -88,7 +93,7 @@
       "json",
       "ts"
     ],
-    "rootDir": "src",
+    "rootDir": ".",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
@@ -96,7 +101,25 @@
     "collectCoverageFrom": [
       "**/*.(t|j)s"
     ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
+    "coverageDirectory": "./coverage",
+    "testEnvironment": "node",
+    "roots": [
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/db-models(|/.*)$": "<rootDir>/libs/db-models/src/$1",
+      "^@app/models(|/.*)$": "<rootDir>/libs/models/src/$1",
+      "^@app/dtos(|/.*)$": "<rootDir>/libs/dtos/src/$1",
+      "^@app/modules(|/.*)$": "<rootDir>/libs/modules/src/$1",
+      "^@app/config(|/.*)$": "<rootDir>/libs/config/src/$1",
+      "^@app/exceptions(|/.*)$": "<rootDir>/libs/exceptions/src/$1",
+      "^@app/filters(|/.*)$": "<rootDir>/libs/filters/src/$1",
+      "^@app/guards(|/.*)$": "<rootDir>/libs/guards/src/$1",
+      "^@app/strategies(|/.*)$": "<rootDir>/libs/strategies/src/$1",
+      "^@app/utils(|/.*)$": "<rootDir>/libs/utils/src/$1",
+      "^@utils/utils(|/.*)$": "<rootDir>/libs/utils/src/$1",
+      "^@app/application(|/.*)$": "<rootDir>/libs/application/src/$1"
+    }
   }
 }

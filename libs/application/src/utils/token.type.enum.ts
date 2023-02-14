@@ -1,0 +1,8 @@
+export enum TokenTypeEnum {
+  ADMIN,
+  BLOCK,
+  USER_BLOCK,
+  DASHBOARD,
+  DASHBOARD_SHARE,
+  DASHBOARD_ADMIN,
+}

@@ -1,4 +1,48 @@
 {
   "collection": "@nestjs/schematics",
-  "sourceRoot": "src"
+  "sourceRoot": "apps/psyreply/src",
+  "monorepo": true,
+  "root": "apps/psyreply",
+  "compilerOptions": {
+    "webpack": true,
+    "tsConfigPath": "apps/psyreply/tsconfig.app.json"
+  },
+  "projects": {
+    "psyreply": {
+      "type": "application",
+      "root": "apps/psyreply",
+      "entryFile": "main",
+      "sourceRoot": "apps/psyreply/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/psyreply/tsconfig.app.json"
+      }
+    },
+    "tgbot": {
+      "type": "application",
+      "root": "apps/tgbot",
+      "entryFile": "main",
+      "sourceRoot": "apps/tgbot/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/tgbot/tsconfig.app.json"
+      }
+    },
+    "distribution": {
+      "type": "application",
+      "root": "apps/distribution",
+      "entryFile": "main",
+      "sourceRoot": "apps/distribution/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/distribution/tsconfig.app.json"
+      }
+    },
+    "application": {
+      "type": "library",
+      "root": "libs/application",
+      "entryFile": "index",
+      "sourceRoot": "libs/application/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/application/tsconfig.lib.json"
+      }
+    }
+  }
 }

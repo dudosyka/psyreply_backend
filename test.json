@@ -1,0 +1,88 @@
+{
+  "body": {
+    "id": 99,
+    "title": "QA/UI/UX \"Один из многих\"",
+    "company_id": 82,
+    "type_id": 1,
+    "formula": "[+$1+$2+$3]/14",
+    "createdAt": "2023-01-10T22:16:30.000Z",
+    "updatedAt": "2023-01-17T10:41:49.000Z",
+    "author_id": 3,
+    "metric_id": 4,
+    "questions": [
+      {
+        "id": 956,
+        "title": "1",
+        "type_id": 1,
+        "test_id": 99,
+        "relative_id": 1,
+        "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4}]",
+        "coins": 1,
+        "picture": null,
+        "createdAt": "2023-01-10T22:48:15.000Z",
+        "updatedAt": "2023-01-10T22:48:15.000Z",
+        "QuestionModel": {
+          "id": 956,
+          "title": "1",
+          "type_id": 1,
+          "test_id": 99,
+          "relative_id": 1,
+          "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4}]",
+          "coins": 1,
+          "picture": null,
+          "createdAt": "2023-01-10T22:48:15.000Z",
+          "updatedAt": "2023-01-10T22:48:15.000Z"
+        }
+      },
+      {
+        "id": 957,
+        "title": "2",
+        "type_id": 1,
+        "test_id": 99,
+        "relative_id": 2,
+        "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4},{\"id\":5,\"title\":\"5\",\"value\":5}]",
+        "coins": 1,
+        "picture": null,
+        "createdAt": "2023-01-10T22:48:15.000Z",
+        "updatedAt": "2023-01-10T22:48:15.000Z",
+        "QuestionModel": {
+          "id": 957,
+          "title": "2",
+          "type_id": 1,
+          "test_id": 99,
+          "relative_id": 2,
+          "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4},{\"id\":5,\"title\":\"5\",\"value\":5}]",
+          "coins": 1,
+          "picture": null,
+          "createdAt": "2023-01-10T22:48:15.000Z",
+          "updatedAt": "2023-01-10T22:48:15.000Z"
+        }
+      },
+      {
+        "id": 958,
+        "title": "3",
+        "type_id": 1,
+        "test_id": 99,
+        "relative_id": 3,
+        "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4},{\"id\":5,\"title\":\"5\",\"value\":5}]",
+        "coins": 1,
+        "picture": null,
+        "createdAt": "2023-01-10T22:48:15.000Z",
+        "updatedAt": "2023-01-10T22:48:15.000Z",
+        "QuestionModel": {
+          "id": 958,
+          "title": "3",
+          "type_id": 1,
+          "test_id": 99,
+          "relative_id": 3,
+          "value": "[{\"id\":1,\"title\":\"1\",\"value\":1},{\"id\":2,\"title\":\"2\",\"value\":2},{\"id\":3,\"title\":\"3\",\"value\":3},{\"id\":4,\"title\":\"4\",\"value\":4},{\"id\":5,\"title\":\"5\",\"value\":5}]",
+          "coins": 1,
+          "picture": null,
+          "createdAt": "2023-01-10T22:48:15.000Z",
+          "updatedAt": "2023-01-10T22:48:15.000Z"
+        }
+      }
+    ]
+  },
+  "status": 200
+}
