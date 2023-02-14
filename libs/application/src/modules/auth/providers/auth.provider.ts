@@ -154,14 +154,22 @@ export class AuthProvider {
     };
   }
 
-  async superLogin() {
-    return this.login(
-      await UserModel.findOne({
-        where: {
-          id: 1,
-        },
-      }),
-    );
+  async superLogin(userId: number = null, companyId: number = null) {
+    if (!userId)
+      return this.login(
+        await UserModel.findOne({
+          where: {
+            login: 'dudosyka',
+          },
+        }),
+      );
+    const user = await UserModel.findOne({
+      where: {
+        id: userId,
+      },
+    });
+    user.company_id = companyId;
+    return await this.login(user);
   }
 
   public async createUser(
@@ -315,5 +323,10 @@ export class AuthProvider {
     });
 
     return { success: true };
+  }
+
+  async checkIsSuper(user): Promise<boolean> {
+    console.log(user);
+    return false;
   }
 }

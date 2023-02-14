@@ -88,7 +88,7 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
 
   public getAll(): Promise<CompanyModel[]> {
     return super.getAll({
-      include: [BlockModel, UserModel],
+      include: [],
     });
   }
 

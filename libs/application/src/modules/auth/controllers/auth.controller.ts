@@ -1,8 +1,10 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Inject,
+  Param,
   Post,
   Req,
   Request,
@@ -26,6 +28,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '@app/application/guards/jwt-auth.guard';
 import { AdminGuard } from '@app/application/guards/admin.guard';
 import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-email-output.dto';
+import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -134,6 +137,27 @@ export class AuthController {
   ): Promise<ResponseFilter<ChangeEmailOutputDto>> {
     return ResponseFilter.response(
       await this.authProvider.changeEmailSecond(email, code),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
+  @Get('super/check')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async checkIsSuper(): Promise<ResponseFilter<boolean>> {
+    //It will return true if SuperAdminGuard approve request.
+    return ResponseFilter.response(true, ResponseStatus.SUCCESS);
+  }
+
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
+  @Post('super/auth/:companyId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async superLogin(
+    @Req() req,
+    @Param('companyId') companyId: string,
+  ): Promise<ResponseFilter<TokenOutputDto>> {
+    return ResponseFilter.response(
+      await this.authProvider.superLogin(req.user.id, parseInt(companyId)),
       ResponseStatus.SUCCESS,
     );
   }
