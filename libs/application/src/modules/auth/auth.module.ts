@@ -13,6 +13,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtOptionsModule } from '@app/application/modules/auth/providers/jwt.options.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerOptionsModule } from '@app/application/modules/auth/providers/mailer.options.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { MulterConfigModule } from '@app/application/config/multer-config.module';
 
 @Module({
   imports: [
@@ -23,6 +25,9 @@ import { MailerOptionsModule } from '@app/application/modules/auth/providers/mai
     }),
     MailerModule.forRootAsync({
       useClass: MailerOptionsModule,
+    }),
+    MulterModule.registerAsync({
+      useClass: MulterConfigModule,
     }),
   ],
   providers: [

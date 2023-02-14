@@ -82,7 +82,7 @@ export class AuthController {
   @UseInterceptors(FileInterceptor('file'))
   public async signUp(
     @Body() signupData: SignupInputDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile('file') file: Express.Multer.File,
   ): Promise<ResponseFilter<TokenOutputDto>> {
     return ResponseFilter.response<TokenOutputDto>(
       await this.authProvider.signup(signupData, file),
