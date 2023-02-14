@@ -28,8 +28,11 @@ export class UserProvider extends BaseProvider<UserModel> {
     return await this.companyProvider.appendUser(userId, companyId);
   }
 
-  public async getAll({ filters }: UserFilterDto): Promise<UserModel[]> {
-    const { except_group_id, ...filter } = filters;
+  public async getAll(
+    { filters }: UserFilterDto,
+    companyId: number = null,
+  ): Promise<UserModel[]> {
+    const { byCompany, except_group_id, ...filter } = filters;
     let where: any = {
       ...filter,
     };
@@ -40,6 +43,10 @@ export class UserProvider extends BaseProvider<UserModel> {
         },
         ...filter,
       };
+    }
+
+    if (filters.byCompany) {
+      where['company_id'] = companyId;
     }
 
     return super.getAll({

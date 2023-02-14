@@ -44,7 +44,7 @@ export class UserController {
     @Body() filter: UserFilterDto,
   ): Promise<ResponseFilter<UserModel[]>> {
     return ResponseFilter.response<UserModel[]>(
-      await this.userProvider.getAll(filter),
+      await this.userProvider.getAll(filter, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
   }
