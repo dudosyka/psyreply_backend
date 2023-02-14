@@ -117,13 +117,13 @@ export class CompanyController {
   }
 
   @UseGuards(AdminGuard)
-  @Post(':companyId/group')
+  @Post('create/group')
   @HttpCode(ResponseStatus.SUCCESS)
   public async createGroup(
-    @Param('companyId') companyId: number,
+    @Req() req,
     @Body() groupCreateDto: GroupCreateDto,
   ): Promise<ResponseFilter<GroupModel>> {
-    groupCreateDto.company_id = companyId;
+    groupCreateDto.company_id = req.user.companyId;
     return ResponseFilter.response<GroupModel>(
       await this.companyProvider.createGroup(groupCreateDto),
       ResponseStatus.SUCCESS,
