@@ -2,6 +2,7 @@ import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { BotModel } from '../models/bot.model';
 import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
+import mainConf from '@app/application/config/main.conf';
 
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
@@ -11,7 +12,7 @@ export class TelegramProvider implements OnApplicationBootstrap {
       bots.forEach((bot) => {
         const botInstance = new Telegraf(bot.token, {
           telegram: {
-            apiRoot: 'http://0.0.0.0:8081',
+            apiRoot: `http://0.0.0.0:${mainConf().telegramServerPort}`,
           },
         });
         botInstance.on('message', (ctx) => this.onMessage(ctx));

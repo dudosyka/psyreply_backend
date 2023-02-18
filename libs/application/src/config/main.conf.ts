@@ -18,6 +18,7 @@ export default registerAs('main', () => {
     emailCodeMax: 999999,
     emailCodeMin: 111111,
     port: parseInt(process.env.MAIN_PORT),
+    telegramServerPort: parseInt(process.env.TELEGRAM_SERVER_PORT),
     microservicePort: parseInt(process.env.MAIN_MICROSERVICE_PORT),
     tgMicroservicePort: parseInt(process.env.TG_MICROSERVICE_PORT),
     distributionMicroservicePort: parseInt(
