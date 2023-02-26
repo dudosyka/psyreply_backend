@@ -251,7 +251,7 @@ export class TestProvider extends BaseProvider<TestModel> {
           },
         ];
       }
-    } else filter['company_id'] = company_id;
+    } else if (company_id) filter['company_id'] = company_id;
 
     return super.getAll({
       where: {
