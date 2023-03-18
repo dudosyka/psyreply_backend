@@ -7,9 +7,10 @@ import { JwtService } from '@nestjs/jwt';
 import { BotModule } from '../bot/bot.module';
 import { ChatController } from '@app/application/modules/chat/controllers/chat.controller';
 import { ChatNotesProvider } from '@app/application/modules/chat/providers/chat-notes.provider';
+import { LoggerModule } from '@app/application/modules/logger/logger.module';
 
 @Module({
-  imports: [forwardRef(() => BotModule)],
+  imports: [forwardRef(() => BotModule), LoggerModule],
   providers: [
     ChatNotesProvider,
     ChatProvider,

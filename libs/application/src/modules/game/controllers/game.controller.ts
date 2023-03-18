@@ -15,9 +15,9 @@ import { GameResultModel } from '../models/game-result.model';
 import { GameProvider } from '../providers/game.provider';
 import { GameResultCreateDto } from '../dtos/game-result-create.dto';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 
 @UseGuards(JwtAuthGuard, UserBlockGuard)
 @Controller('game')
@@ -29,9 +29,9 @@ export class GameController {
   public async save(
     @Req() { user },
     @Body() createDto: GameResultCreateDto,
-  ): Promise<ResponseFilter<GameResultModel>> {
+  ): Promise<HttpResponseFilter<GameResultModel>> {
     createDto.user_id = user.id;
-    return ResponseFilter.response<GameResultModel>(
+    return HttpResponseFilter.response<GameResultModel>(
       await this.gameProvider.save(createDto),
       ResponseStatus.CREATED,
     );
@@ -42,8 +42,8 @@ export class GameController {
   public async getByMetric(
     @Req() { user },
     @Param('metricId') metricId: number,
-  ): Promise<ResponseFilter<GameResultModel[]>> {
-    return ResponseFilter.response<GameResultModel[]>(
+  ): Promise<HttpResponseFilter<GameResultModel[]>> {
+    return HttpResponseFilter.response<GameResultModel[]>(
       await this.gameProvider.getAll({ userId: user.id, metricId }),
       ResponseStatus.SUCCESS,
     );

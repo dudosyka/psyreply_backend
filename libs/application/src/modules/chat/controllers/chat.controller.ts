@@ -12,9 +12,9 @@ import {
 import { JwtAuthGuard } from '@app/application/guards/jwt-auth.guard';
 import { AdminGuard } from '@app/application/guards/admin.guard';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '@app/application/filters/response.filter';
+} from '@app/application/filters/http-response.filter';
 import { BotUserInfoOutputDto } from '@app/application/modules/chat/dto/bot-user-info-output.dto';
 import { ChatProvider } from '@app/application/modules/chat/providers/chat.provider';
 import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
@@ -28,8 +28,8 @@ export class ChatController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getBotUserInfo(
     @Param('botUserId') botUserId: number,
-  ): Promise<ResponseFilter<BotUserInfoOutputDto>> {
-    return ResponseFilter.response<BotUserInfoOutputDto>(
+  ): Promise<HttpResponseFilter<BotUserInfoOutputDto>> {
+    return HttpResponseFilter.response<BotUserInfoOutputDto>(
       await this.chatProvider.getChatInfo(botUserId),
       ResponseStatus.SUCCESS,
     );
@@ -40,8 +40,8 @@ export class ChatController {
   public async createNote(
     @Param('botUserId') botUserId: number,
     @Body() createDto: UserNoteCreateDto,
-  ): Promise<ResponseFilter<UserNoteModel>> {
-    return ResponseFilter.response<UserNoteModel>(
+  ): Promise<HttpResponseFilter<UserNoteModel>> {
+    return HttpResponseFilter.response<UserNoteModel>(
       await this.chatProvider.createNote(botUserId, createDto),
       ResponseStatus.CREATED,
     );

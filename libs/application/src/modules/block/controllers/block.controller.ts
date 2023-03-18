@@ -23,9 +23,9 @@ import { BlockGuard } from '../../../guards/block.guard';
 import { UserBlockGuard } from '../../../guards/user-block.guard';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
 import { SuperAdminGuard } from '../../../guards/super.admin.guard';
 import { GroupBlockStatModel } from '@app/application/modules/result/models/group-block-stat.model';
@@ -44,9 +44,9 @@ export class BlockController {
   public async getAll(
     @Body() filter: SearchFilter<BlockFilterDto>,
     @Req() req,
-  ): Promise<ResponseFilter<BlockModel[]>> {
+  ): Promise<HttpResponseFilter<BlockModel[]>> {
     filter.filters.company_id = req.user.companyId;
-    return ResponseFilter.response<BlockModel[]>(
+    return HttpResponseFilter.response<BlockModel[]>(
       await this.blockProvider.getAll(filter.filters),
       ResponseStatus.SUCCESS,
     );
@@ -57,8 +57,8 @@ export class BlockController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async superGetAll(
     @Body() filter: SearchFilter<BlockFilterDto>,
-  ): Promise<ResponseFilter<BlockModel[]>> {
-    return ResponseFilter.response<BlockModel[]>(
+  ): Promise<HttpResponseFilter<BlockModel[]>> {
+    return HttpResponseFilter.response<BlockModel[]>(
       await this.blockProvider.getAll(filter.filters),
       ResponseStatus.SUCCESS,
     );
@@ -71,8 +71,8 @@ export class BlockController {
     @Body('blockId') blockId: number,
     @Body('week') week: number,
     @Req() req,
-  ): Promise<ResponseFilter<string>> {
-    return ResponseFilter.response<string>(
+  ): Promise<HttpResponseFilter<string>> {
+    return HttpResponseFilter.response<string>(
       await this.blockProvider.createBlockHash(
         blockId,
         week,
@@ -88,8 +88,8 @@ export class BlockController {
   public async superCreateBlockToken(
     @Body('blockId') blockId: number,
     @Body('week') week: number,
-  ): Promise<ResponseFilter<string>> {
-    return ResponseFilter.response<string>(
+  ): Promise<HttpResponseFilter<string>> {
+    return HttpResponseFilter.response<string>(
       await this.blockProvider.createBlockHash(blockId, week),
       ResponseStatus.CREATED,
     );
@@ -101,8 +101,8 @@ export class BlockController {
   public async assignUserToBlockToken(
     @Req() req,
     @Param('jetBotId') jetBotId: number,
-  ): Promise<ResponseFilter<{ link: string; linkdb: string }>> {
-    return ResponseFilter.response<{ link: string; linkdb: string }>(
+  ): Promise<HttpResponseFilter<{ link: string; linkdb: string }>> {
+    return HttpResponseFilter.response<{ link: string; linkdb: string }>(
       await this.blockProvider.createLinks(req.user, jetBotId),
       ResponseStatus.SUCCESS,
     );
@@ -111,8 +111,8 @@ export class BlockController {
   @UseGuards(UserBlockGuard)
   @Get('user')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getOneUser(@Req() req): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  public async getOneUser(@Req() req): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.getOne(req.user.blockId),
       ResponseStatus.SUCCESS,
     );
@@ -124,8 +124,8 @@ export class BlockController {
   public async getOne(
     @Param('blockId') blockId: number,
     @Req() req,
-  ): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  ): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.getOne(blockId, null, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -136,8 +136,8 @@ export class BlockController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async superGetOne(
     @Param('blockId') blockId: number,
-  ): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  ): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.getOne(blockId),
       ResponseStatus.SUCCESS,
     );
@@ -149,9 +149,9 @@ export class BlockController {
   public async create(
     @Body() createDto: BlockCreateDto,
     @Req() req,
-  ): Promise<ResponseFilter<BlockModel>> {
+  ): Promise<HttpResponseFilter<BlockModel>> {
     createDto.company_id = req.user.companyId;
-    return ResponseFilter.response<BlockModel>(
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.createModel(createDto),
       ResponseStatus.CREATED,
     );
@@ -162,8 +162,8 @@ export class BlockController {
   @HttpCode(ResponseStatus.CREATED)
   public async superCreate(
     @Body() createDto: BlockCreateDto,
-  ): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  ): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.createModel(createDto),
       ResponseStatus.CREATED,
     );
@@ -175,9 +175,9 @@ export class BlockController {
   public async remove(
     @Body('blocks') blocks: number[],
     @Req() req,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.blockProvider.remove(blocks, req.user.companyId);
-    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 
   @UseGuards(SuperAdminGuard)
@@ -185,9 +185,9 @@ export class BlockController {
   @HttpCode(ResponseStatus.NO_CONTENT)
   public async superRemove(
     @Body('blocks') blocks: number[],
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.blockProvider.remove(blocks);
-    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 
   @UseGuards(AdminGuard)
@@ -197,8 +197,8 @@ export class BlockController {
     @Param('blockId') blockId: number,
     @Body() updateDto: BlockUpdateDto,
     @Req() req,
-  ): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  ): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.update(blockId, updateDto, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -210,8 +210,8 @@ export class BlockController {
   public async updateSuper(
     @Param('blockId') blockId: number,
     @Body() updateDto: BlockUpdateDto,
-  ): Promise<ResponseFilter<BlockModel>> {
-    return ResponseFilter.response<BlockModel>(
+  ): Promise<HttpResponseFilter<BlockModel>> {
+    return HttpResponseFilter.response<BlockModel>(
       await this.blockProvider.update(blockId, updateDto, null),
       ResponseStatus.SUCCESS,
     );
@@ -223,8 +223,8 @@ export class BlockController {
   public async copyToCompany(
     @Body('blocks') blocks: number[],
     @Param('companyId') companyId: number,
-  ): Promise<ResponseFilter<BlockModel[] | void>> {
-    return ResponseFilter.response<BlockModel[] | void>(
+  ): Promise<HttpResponseFilter<BlockModel[] | void>> {
+    return HttpResponseFilter.response<BlockModel[] | void>(
       await this.blockProvider.copyToCompany(blocks, companyId),
       ResponseStatus.SUCCESS,
     );
@@ -237,8 +237,8 @@ export class BlockController {
     @Param('blockId') blockId: number,
     @Param('week') week: number,
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -250,8 +250,8 @@ export class BlockController {
   public async superSaveStat(
     @Param('blockId') blockId: number,
     @Param('week') week: number,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week),
       ResponseStatus.SUCCESS,
     );
@@ -265,8 +265,8 @@ export class BlockController {
     @Param('week') week: number,
     @Param('groupId') groupId: number,
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
         week,
@@ -284,8 +284,8 @@ export class BlockController {
     @Param('blockId') blockId: number,
     @Param('week') week: number,
     @Param('groupId') groupId: number,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(blockId, week, null, groupId),
       ResponseStatus.SUCCESS,
     );
@@ -300,8 +300,8 @@ export class BlockController {
     @Param('groupId') groupId: number,
     @Body('resultIds') resultIds: number[],
     @Req() req,
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
         week,
@@ -321,8 +321,8 @@ export class BlockController {
     @Param('week') week: number,
     @Param('groupId') groupId: number,
     @Body('resultIds') resultIds: number[],
-  ): Promise<ResponseFilter<BlockGroupStatOutputDto[]>> {
-    return ResponseFilter.response<BlockGroupStatOutputDto[]>(
+  ): Promise<HttpResponseFilter<BlockGroupStatOutputDto[]>> {
+    return HttpResponseFilter.response<BlockGroupStatOutputDto[]>(
       await this.blockProvider.saveStat(
         blockId,
         week,
@@ -340,8 +340,8 @@ export class BlockController {
   public async checkStatExists(
     @Param('blockId') blockId: number,
     @Param('week') week: number,
-  ): Promise<ResponseFilter<GroupBlockStatModel[]>> {
-    return ResponseFilter.response<GroupBlockStatModel[]>(
+  ): Promise<HttpResponseFilter<GroupBlockStatModel[]>> {
+    return HttpResponseFilter.response<GroupBlockStatModel[]>(
       await this.blockProvider.checkStatExists(blockId, week),
       ResponseStatus.SUCCESS,
     );

@@ -21,9 +21,9 @@ import { AdminGuard } from '@app/application/guards/admin.guard';
 import { DashboardGuard } from '@app/application/guards/dashboard.guard';
 import { UserBlockGuard } from '@app/application/guards/user-block.guard';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
 
 @UseGuards(JwtAuthGuard)
@@ -38,8 +38,8 @@ export class ResultController {
     @Req() req,
     @Param('blockId') blockId: number,
     @Body() createDto: ResultCreateDto,
-  ): Promise<ResponseFilter<ResultModel>> {
-    return ResponseFilter.response<ResultModel>(
+  ): Promise<HttpResponseFilter<ResultModel>> {
+    return HttpResponseFilter.response<ResultModel>(
       await this.resultProvider.pass(
         req.user.id,
         req.user.blockId,
@@ -56,9 +56,9 @@ export class ResultController {
   public async getAll(
     @Body() filters: ResultFitlerDto,
     @Req() req,
-  ): Promise<ResponseFilter<ResultModel[]>> {
+  ): Promise<HttpResponseFilter<ResultModel[]>> {
     filters.filters.company_id = req.user.companyId;
-    return ResponseFilter.response<ResultModel[]>(
+    return HttpResponseFilter.response<ResultModel[]>(
       await this.resultProvider.getResults(filters),
       ResponseStatus.SUCCESS,
     );
@@ -69,8 +69,8 @@ export class ResultController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async superGetAll(
     @Body() filters: ResultFitlerDto,
-  ): Promise<ResponseFilter<ResultModel[]>> {
-    return ResponseFilter.response<ResultModel[]>(
+  ): Promise<HttpResponseFilter<ResultModel[]>> {
+    return HttpResponseFilter.response<ResultModel[]>(
       await this.resultProvider.getResults(filters),
       ResponseStatus.SUCCESS,
     );
@@ -81,8 +81,8 @@ export class ResultController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getLast(
     @Req() req,
-  ): Promise<ResponseFilter<ResultClientOutputDto>> {
-    return ResponseFilter.response<ResultClientOutputDto>(
+  ): Promise<HttpResponseFilter<ResultClientOutputDto>> {
+    return HttpResponseFilter.response<ResultClientOutputDto>(
       await this.resultProvider.getResultsClient(req.user.id, true),
       ResponseStatus.SUCCESS,
     );
@@ -93,8 +93,8 @@ export class ResultController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getUserResults(
     @Req() req,
-  ): Promise<ResponseFilter<ResultClientOutputDto>> {
-    return ResponseFilter.response<ResultClientOutputDto>(
+  ): Promise<HttpResponseFilter<ResultClientOutputDto>> {
+    return HttpResponseFilter.response<ResultClientOutputDto>(
       await this.resultProvider.getResultsClient(req.user.id),
       ResponseStatus.SUCCESS,
     );
@@ -107,8 +107,8 @@ export class ResultController {
     @Param('resultId') resultId: number,
     @Body() updateDto: ResultUpdateDto,
     @Req() req,
-  ): Promise<ResponseFilter<ResultModel>> {
-    return ResponseFilter.response<ResultModel>(
+  ): Promise<HttpResponseFilter<ResultModel>> {
+    return HttpResponseFilter.response<ResultModel>(
       await this.resultProvider.update(resultId, updateDto, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -120,8 +120,8 @@ export class ResultController {
   public async superUpdate(
     @Param('resultId') resultId: number,
     @Body() updateDto: ResultUpdateDto,
-  ): Promise<ResponseFilter<ResultModel>> {
-    return ResponseFilter.response<ResultModel>(
+  ): Promise<HttpResponseFilter<ResultModel>> {
+    return HttpResponseFilter.response<ResultModel>(
       await this.resultProvider.update(resultId, updateDto),
       ResponseStatus.SUCCESS,
     );

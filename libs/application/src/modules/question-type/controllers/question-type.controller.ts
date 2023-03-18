@@ -4,9 +4,9 @@ import { AdminGuard } from '@app/application/guards/admin.guard';
 import { QuestionTypeProvider } from '../providers/question-type.provider';
 import { QuestionTypeModel } from '../models/question-type.model';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('question-type')
@@ -18,8 +18,8 @@ export class QuestionTypeController {
 
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getAll(): Promise<ResponseFilter<QuestionTypeModel[]>> {
-    return ResponseFilter.response<QuestionTypeModel[]>(
+  public async getAll(): Promise<HttpResponseFilter<QuestionTypeModel[]>> {
+    return HttpResponseFilter.response<QuestionTypeModel[]>(
       await this.questionTypeProvider.getAll(),
       ResponseStatus.SUCCESS,
     );

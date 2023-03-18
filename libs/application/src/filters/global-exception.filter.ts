@@ -1,9 +1,9 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
-import { BaseExceptionFilter } from './base-exception.filter';
+import { BaseHttpExceptionFilter } from './base-http-exception.filter';
 
 @Catch(Error)
 export class GlobalExceptionFilter
-  extends BaseExceptionFilter
+  extends BaseHttpExceptionFilter
   implements ExceptionFilter
 {
   catch(exception: Error, host: ArgumentsHost) {

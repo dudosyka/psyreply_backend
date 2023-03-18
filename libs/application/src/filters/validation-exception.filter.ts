@@ -4,20 +4,20 @@ import {
   Catch,
   ExceptionFilter,
 } from '@nestjs/common';
-import { BaseExceptionFilter } from './base-exception.filter';
+import { BaseHttpExceptionFilter } from './base-http-exception.filter';
 
 @Catch(BadRequestException)
 export class ValidationExceptionFilter
-  extends BaseExceptionFilter
+  extends BaseHttpExceptionFilter
   implements ExceptionFilter
 {
-  private formatObject(key, value) {
+  static formatObject(key, value) {
     console.log(key);
     const arrKey = key.split('.');
     if (arrKey.length == 1) return { [key]: value };
     else {
       return {
-        [arrKey[arrKey.length - 1]]: this.formatObject(
+        [arrKey[arrKey.length - 1]]: ValidationExceptionFilter.formatObject(
           arrKey.filter((el, key) => key != arrKey.length - 1).join('.'),
           value,
         ),
@@ -25,7 +25,7 @@ export class ValidationExceptionFilter
     }
   }
 
-  private formatString(str) {
+  static formatString(str) {
     const split = str.split('.');
     if (split.length == 1) {
       return {
@@ -46,14 +46,11 @@ export class ValidationExceptionFilter
         .split(' ')
         .filter((el, key) => key != 0)
         .join(' ');
-      return this.formatObject(key, value);
+      return ValidationExceptionFilter.formatObject(key, value);
     }
   }
 
-  catch(exception: BadRequestException, host: ArgumentsHost): any {
-    const response = this.log(exception, host);
-    let err: any = [exception.message];
-
+  static parseMessage(exception, err): string[] {
     if (typeof exception.getResponse() != 'string') {
       let message = [];
       Object.keys(exception.getResponse()).forEach((el) => {
@@ -61,10 +58,19 @@ export class ValidationExceptionFilter
       });
       if (message.map)
         err = message.map((el) => {
-          return this.formatString(el);
+          return ValidationExceptionFilter.formatString(el);
         });
       else err = message;
     }
+
+    return err;
+  }
+
+  catch(exception: BadRequestException, host: ArgumentsHost): any {
+    const response = this.log(exception, host);
+    let err: any = [exception.message];
+
+    err = ValidationExceptionFilter.parseMessage(exception, err);
 
     this.sendResponse(response, exception.getStatus(), {
       status: exception.getStatus(),

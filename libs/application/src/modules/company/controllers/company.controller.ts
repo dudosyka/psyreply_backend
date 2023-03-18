@@ -20,9 +20,9 @@ import { GroupModel } from '../models/group.model';
 import { GroupCreateDto } from '../dtos/group-create.dto';
 import { GroupUpdateDto } from '../dtos/group-update.dto';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
 import { SuperAdminGuard } from '../../../guards/super.admin.guard';
@@ -41,8 +41,8 @@ export class CompanyController {
   @HttpCode(ResponseStatus.CREATED)
   public async create(
     @Body('company') createDto: CompanyCreateDto,
-  ): Promise<ResponseFilter<CompanyModel>> {
-    return ResponseFilter.response<CompanyModel>(
+  ): Promise<HttpResponseFilter<CompanyModel>> {
+    return HttpResponseFilter.response<CompanyModel>(
       await this.companyProvider.create(createDto, createDto.inputBlocks),
       ResponseStatus.CREATED,
     );
@@ -51,8 +51,8 @@ export class CompanyController {
   @UseGuards(SuperAdminGuard)
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getAll(): Promise<ResponseFilter<CompanyModel[]>> {
-    return ResponseFilter.response<CompanyModel[]>(
+  public async getAll(): Promise<HttpResponseFilter<CompanyModel[]>> {
+    return HttpResponseFilter.response<CompanyModel[]>(
       await this.companyProvider.getAll(),
       ResponseStatus.SUCCESS,
     );
@@ -64,8 +64,8 @@ export class CompanyController {
   public async getGroups(
     @Param('companyId') companyId: number,
     @Req() req,
-  ): Promise<ResponseFilter<GroupModel[]>> {
-    return ResponseFilter.response<GroupModel[]>(
+  ): Promise<HttpResponseFilter<GroupModel[]>> {
+    return HttpResponseFilter.response<GroupModel[]>(
       await this.companyProvider.getGroups(req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -75,8 +75,8 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getOne(
     @Param('companyId') id: number,
-  ): Promise<ResponseFilter<CompanyModel>> {
-    return ResponseFilter.response<CompanyModel>(
+  ): Promise<HttpResponseFilter<CompanyModel>> {
+    return HttpResponseFilter.response<CompanyModel>(
       await this.companyProvider.getOne(id, true),
       ResponseStatus.SUCCESS,
     );
@@ -88,8 +88,8 @@ export class CompanyController {
   public async update(
     @Param('companyId') id: number,
     @Body('company') updateDto: CompanyUpdateDto,
-  ): Promise<ResponseFilter<CompanyModel>> {
-    return ResponseFilter.response<CompanyModel>(
+  ): Promise<HttpResponseFilter<CompanyModel>> {
+    return HttpResponseFilter.response<CompanyModel>(
       await this.companyProvider.update(id, updateDto),
       ResponseStatus.SUCCESS,
     );
@@ -100,9 +100,9 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async delete(
     @Param('companyId') id: number,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.remove(id);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(SuperAdminGuard)
@@ -111,9 +111,9 @@ export class CompanyController {
   public async appendBlocks(
     @Param('companyId') id: number,
     @Body('tests') blocks: number[],
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.appendBlocks(id, blocks);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
@@ -122,9 +122,9 @@ export class CompanyController {
   public async createGroup(
     @Req() req,
     @Body() groupCreateDto: GroupCreateDto,
-  ): Promise<ResponseFilter<GroupModel>> {
+  ): Promise<HttpResponseFilter<GroupModel>> {
     groupCreateDto.company_id = req.user.companyId;
-    return ResponseFilter.response<GroupModel>(
+    return HttpResponseFilter.response<GroupModel>(
       await this.companyProvider.createGroup(groupCreateDto),
       ResponseStatus.SUCCESS,
     );
@@ -135,8 +135,8 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getGroup(
     @Param('groupId') groupId: number,
-  ): Promise<ResponseFilter<GroupModel>> {
-    return ResponseFilter.response<GroupModel>(
+  ): Promise<HttpResponseFilter<GroupModel>> {
+    return HttpResponseFilter.response<GroupModel>(
       await this.companyProvider.getGroup(groupId),
       ResponseStatus.SUCCESS,
     );
@@ -147,9 +147,9 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async removeGroup(
     @Param('groupId') groupId: number,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.removeGroup(groupId);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
@@ -158,10 +158,10 @@ export class CompanyController {
   public async updateGroup(
     @Param('groupId') groupId: number,
     @Body() groupUpdateDto: GroupUpdateDto,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     groupUpdateDto.id = groupId;
     await this.companyProvider.updateGroup(groupUpdateDto);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
@@ -170,9 +170,9 @@ export class CompanyController {
   public async removeUserFromGroup(
     @Param('groupId') groupId: number,
     @Body('users') users: number[],
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.removeUsersFromGroup(users);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(AdminGuard)
@@ -181,9 +181,9 @@ export class CompanyController {
   public async appendUser(
     @Param('groupId') groupId: number,
     @Param('userId') userId: number,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.appendUser(groupId, userId);
-    return ResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(DashboardAdminGuard)
@@ -191,8 +191,8 @@ export class CompanyController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getCurCompany(
     @Req() req,
-  ): Promise<ResponseFilter<CompanyModel>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<CompanyModel>> {
+    return HttpResponseFilter.response(
       await this.companyProvider.getOneSimple(req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -201,8 +201,10 @@ export class CompanyController {
   @UseGuards(DashboardAdminGuard)
   @Get('/stat/groups')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async checkToken(@Req() req): Promise<ResponseFilter<GroupModel[]>> {
-    return ResponseFilter.response<GroupModel[]>(
+  public async checkToken(
+    @Req() req,
+  ): Promise<HttpResponseFilter<GroupModel[]>> {
+    return HttpResponseFilter.response<GroupModel[]>(
       await this.companyProvider.getAvailableGroups(
         req.user.companyId,
         req.user.sharedGroups,
@@ -217,8 +219,8 @@ export class CompanyController {
   public async shareStat(
     @Req() req,
     @Body('groups') groups: number[],
-  ): Promise<ResponseFilter<string>> {
-    return ResponseFilter.response<string>(
+  ): Promise<HttpResponseFilter<string>> {
+    return HttpResponseFilter.response<string>(
       await this.companyProvider.shareStat(
         req.user.companyId,
         groups,
@@ -234,8 +236,8 @@ export class CompanyController {
   public async getStat(
     @Req() req,
     @Param('groupId') groupId: string,
-  ): Promise<ResponseFilter<CompanyStatDto>> {
-    return ResponseFilter.response<CompanyStatDto>(
+  ): Promise<HttpResponseFilter<CompanyStatDto>> {
+    return HttpResponseFilter.response<CompanyStatDto>(
       await this.companyProvider.getStatPart(
         req.user.companyId,
         parseInt(groupId),
@@ -251,8 +253,8 @@ export class CompanyController {
   public async getStatAll(
     @Req() req,
     @Param('groupId') groupId: string,
-  ): Promise<ResponseFilter<CompanyStatDto>> {
-    return ResponseFilter.response<CompanyStatDto>(
+  ): Promise<HttpResponseFilter<CompanyStatDto>> {
+    return HttpResponseFilter.response<CompanyStatDto>(
       await this.companyProvider.getStatAll(
         req.user.companyId,
         parseInt(groupId),
@@ -268,8 +270,8 @@ export class CompanyController {
   public async updateStat(
     @Param('statId') statId: number,
     @Body('update') updateDto: { metric_id: number; value: number }[],
-  ): Promise<ResponseFilter<GroupBlockStatModel>> {
-    return ResponseFilter.response<GroupBlockStatModel>(
+  ): Promise<HttpResponseFilter<GroupBlockStatModel>> {
+    return HttpResponseFilter.response<GroupBlockStatModel>(
       await this.companyProvider.updateStat(statId, updateDto),
       ResponseStatus.SUCCESS,
     );
@@ -280,8 +282,8 @@ export class CompanyController {
   @HttpCode(ResponseStatus.NO_CONTENT)
   public async removeStatRow(
     @Param('statId') statId: number,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.companyProvider.removeStatRow(statId);
-    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 }

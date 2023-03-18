@@ -11,13 +11,13 @@ export enum ResponseStatus {
   SERVER_ERROR = 500,
 }
 
-export class ResponseFilter<ResponseType> {
+export class HttpResponseFilter<ResponseType> {
   constructor(private body, private status: ResponseStatus) {
     this.body = body;
     this.status = status;
   }
 
-  static response<T>(body: T, status: ResponseStatus): ResponseFilter<T> {
-    return new ResponseFilter<T>(body, status);
+  static response<T>(body: T, status: ResponseStatus): HttpResponseFilter<T> {
+    return new HttpResponseFilter<T>(body, status);
   }
 }

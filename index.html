@@ -16,7 +16,7 @@
 
       socket.emit('subscribe_chat', { chatId: "828522413" }, res => {
         console.log(res);
-        socket.emit('sendMessage', { chatId: "828522413", msg: JSON.stringify({ text: "test", attachments: [], type_id: 1 }), botUserId: 9 }, res => {
+        socket.emit('sendMessage', { chatId: "828522413", msg: { text: "test", attachments: [], type_id: 1 }, botUserId: 9 }, res => {
           console.log(res);
         })
       });

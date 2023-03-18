@@ -1,19 +1,35 @@
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { MessageModel } from '@app/application/modules/bot/models/message.model';
-import { Sequelize } from 'sequelize-typescript';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 import { UserMessageModel } from '@app/application/modules/bot/models/user-message.model';
+import { AttachmentDto } from '@app/application/modules/telegram/dto/attachment.dto';
+import { FilesModel } from '@app/application/modules/files/models/files.model';
 
 export class BotMessageProvider {
-  constructor(private sequelize: Sequelize) {}
+  private async processClientAttachments(
+    attachments: number[],
+  ): Promise<AttachmentDto[]> {
+    const files = await FilesModel.findAll({
+      where: {
+        id: attachments,
+      },
+    });
+
+    return files.map((el) => {
+      return {
+        id: null,
+        link: `${el.path}`,
+      };
+    });
+  }
   async saveMessageFromClient(
     userId: number,
     msg: MessageCreateDto,
     botUserId: number,
   ): Promise<MessageModel> {
-    const { type_id, ...content } = msg;
+    const { type_id, attachments, text } = msg;
 
     const userBotModel = await BotUserModel.findOne({
       where: {
@@ -24,7 +40,12 @@ export class BotMessageProvider {
     if (!userBotModel)
       throw new ModelNotFoundException(BotUserModel, botUserId);
 
-    console.log(this.sequelize);
+    const parsedAttachments = await this.processClientAttachments(attachments);
+
+    const content = {
+      text,
+      attachments: parsedAttachments,
+    };
 
     const messageModel = await MessageModel.create(
       {

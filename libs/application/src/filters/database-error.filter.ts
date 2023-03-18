@@ -1,10 +1,10 @@
 import { ArgumentsHost, Catch, ExceptionFilter } from '@nestjs/common';
 import { BaseError } from 'sequelize';
-import { BaseExceptionFilter } from './base-exception.filter';
+import { BaseHttpExceptionFilter } from './base-http-exception.filter';
 
 @Catch(BaseError)
 export class DatabaseErrorFilter
-  extends BaseExceptionFilter
+  extends BaseHttpExceptionFilter
   implements ExceptionFilter
 {
   catch(exception: BaseError, host: ArgumentsHost): any {

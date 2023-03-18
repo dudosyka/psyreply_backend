@@ -19,9 +19,9 @@ import { UserFilterDto } from '../dtos/user-filter.dto';
 import { UserModel } from '../models/user.model';
 import { BlockGuard } from '@app/application/guards/block.guard';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 
 @Controller('user')
 export class UserController {
@@ -42,8 +42,8 @@ export class UserController {
   public async getAll(
     @Req() req,
     @Body() filter: UserFilterDto,
-  ): Promise<ResponseFilter<UserModel[]>> {
-    return ResponseFilter.response<UserModel[]>(
+  ): Promise<HttpResponseFilter<UserModel[]>> {
+    return HttpResponseFilter.response<UserModel[]>(
       await this.userProvider.getAll(filter, req.user.companyId),
       ResponseStatus.SUCCESS,
     );
@@ -54,8 +54,8 @@ export class UserController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async assignUser(
     @Param('jbId') userId: number,
-  ): Promise<ResponseFilter<string>> {
-    return ResponseFilter.response<string>(
+  ): Promise<HttpResponseFilter<string>> {
+    return HttpResponseFilter.response<string>(
       `https://client.psyreply.com/results/${await this.authProvider.assignUser(
         userId,
       )}`,
@@ -68,8 +68,8 @@ export class UserController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async assignUserFromBot(
     @Param('jbId') jetBotId: number,
-  ): Promise<ResponseFilter<{ linkdb: string }>> {
-    return ResponseFilter.response<{ linkdb: string }>(
+  ): Promise<HttpResponseFilter<{ linkdb: string }>> {
+    return HttpResponseFilter.response<{ linkdb: string }>(
       {
         linkdb: `https://client.psyreply.com/results/${await this.authProvider.assignUser(
           jetBotId,
@@ -84,8 +84,8 @@ export class UserController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async assignUserByUserBlockToken(
     @Req() req,
-  ): Promise<ResponseFilter<string>> {
-    return ResponseFilter.response<string>(
+  ): Promise<HttpResponseFilter<string>> {
+    return HttpResponseFilter.response<string>(
       `https://client.psyreply.com/results/${await this.authProvider.assignUserByUserBlock(
         req.user.id,
       )}`,
@@ -99,8 +99,8 @@ export class UserController {
   public async moveToCompany(
     @Param('userId') userId: number,
     @Param('companyId') companyId: number,
-  ): Promise<ResponseFilter<null>> {
+  ): Promise<HttpResponseFilter<null>> {
     await this.userProvider.moveToCompany(userId, companyId);
-    return ResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+    return HttpResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
   }
 }

@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { FilesProvider } from '../providers/files.provider';
 import { AdminGuard } from '../../../guards/admin.guard';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
@@ -29,8 +29,8 @@ export class FilesController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async upload(
     @UploadedFile('file') file: Express.Multer.File,
-  ): Promise<ResponseFilter<void>> {
-    return ResponseFilter.response<void>(
+  ): Promise<HttpResponseFilter<void>> {
+    return HttpResponseFilter.response<void>(
       await this.filesProvider.upload(file),
       ResponseStatus.SUCCESS,
     );

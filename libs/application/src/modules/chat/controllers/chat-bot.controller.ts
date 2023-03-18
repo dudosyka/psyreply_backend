@@ -10,9 +10,9 @@ import {
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
 import { AdminGuard } from '../../../guards/admin.guard';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { UserModel } from '../../user/models/user.model';
 import { ChatProvider } from '../providers/chat.provider';
 import { BotModel } from '../../bot/models/bot.model';
@@ -31,8 +31,8 @@ export class ChatBotController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getBot(
     @Param('companyId') companyId: number,
-  ): Promise<ResponseFilter<BotModel[]>> {
-    return ResponseFilter.response<BotModel[]>(
+  ): Promise<HttpResponseFilter<BotModel[]>> {
+    return HttpResponseFilter.response<BotModel[]>(
       await this.chatProvider.getByCompany(companyId),
       ResponseStatus.SUCCESS,
     );
@@ -41,8 +41,8 @@ export class ChatBotController {
   @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getByToken(@Req() req): Promise<ResponseFilter<BotModel[]>> {
-    return ResponseFilter.response<BotModel[]>(
+  public async getByToken(@Req() req): Promise<HttpResponseFilter<BotModel[]>> {
+    return HttpResponseFilter.response<BotModel[]>(
       await this.chatProvider.getByUser(req.user.id),
       ResponseStatus.SUCCESS,
     );
@@ -53,8 +53,8 @@ export class ChatBotController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getSubscribers(
     @Param('botId') botId: number,
-  ): Promise<ResponseFilter<UserModel[]>> {
-    return ResponseFilter.response<UserModel[]>(
+  ): Promise<HttpResponseFilter<UserModel[]>> {
+    return HttpResponseFilter.response<UserModel[]>(
       await this.chatProvider.getSubscribers(botId),
       ResponseStatus.SUCCESS,
     );
@@ -66,8 +66,8 @@ export class ChatBotController {
   public async getHistory(
     @Param('userId') userId: number,
     @Param('botId') botId: number,
-  ): Promise<ResponseFilter<UserMessageModel[]>> {
-    return ResponseFilter.response<UserMessageModel[]>(
+  ): Promise<HttpResponseFilter<UserMessageModel[]>> {
+    return HttpResponseFilter.response<UserMessageModel[]>(
       await this.chatProvider.getMessages(botId, userId),
       ResponseStatus.SUCCESS,
     );

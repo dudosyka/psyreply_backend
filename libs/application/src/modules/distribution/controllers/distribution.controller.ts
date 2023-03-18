@@ -1,8 +1,8 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { DistributionCreateDto } from '../dtos/distribution-create.dto';
 
 @Controller('distribution')
@@ -11,7 +11,7 @@ export class DistributionController {
   @HttpCode(ResponseStatus.SUCCESS)
   async create(
     @Body() distributionDto: DistributionCreateDto,
-  ): Promise<ResponseFilter<void>> {
+  ): Promise<HttpResponseFilter<void>> {
     return null;
   }
 }

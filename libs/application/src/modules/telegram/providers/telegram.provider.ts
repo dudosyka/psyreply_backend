@@ -2,7 +2,7 @@ import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { BotModel } from '../models/bot.model';
 import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
-
+import got from 'got';
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
   private botModels = [];
@@ -26,39 +26,29 @@ export class TelegramProvider implements OnApplicationBootstrap {
       });
     });
   }
-  //
-  // @Client({
-  //   transport: Transport.TCP,
-  //   options: {
-  //     port: mainConf().microservicePort,
-  //   },
-  // })
-  // client: ClientProxy;
 
   private processMedia(id: string, ctx: TelegrafContext): Promise<string[]> {
     return ctx.telegram.getFileLink(id).then((url) => [url]);
   }
 
   async onMessage(ctx: TelegrafContext) {
-    console.log(ctx.update.message.message_id);
-    console.log(ctx.chat.id);
-    await this.botModels[0].botInstance.telegram.sendMessage(828522413, 'hi', {
-      reply_markup: {
-        inline_keyboard: [
-          /* Inline buttons. 2 side-by-side */
-          [
-            { text: 'Button 1', callback_data: 'btn-1' },
-            { text: 'Button 2', callback_data: 'btn-2' },
-          ],
-
-          /* One button */
-          [{ text: 'Next', callback_data: 'next' }],
-
-          /* Also, we can have URL buttons. */
-          [{ text: 'Open in browser', url: 'telegraf.js.org' }],
-        ],
-      },
-    });
+    // await this.botModels[0].botInstance.telegram.sendMessage(828522413, 'hi', {
+    //   reply_markup: {
+    //     inline_keyboard: [
+    //       /* Inline buttons. 2 side-by-side */
+    //       [
+    //         { text: 'Button 1', callback_data: 'btn-1' },
+    //         { text: 'Button 2', callback_data: 'btn-2' },
+    //       ],
+    //
+    //       /* One button */
+    //       [{ text: 'Next', callback_data: 'next' }],
+    //
+    //       /* Also, we can have URL buttons. */
+    //       [{ text: 'Open in browser', url: 'telegraf.js.org' }],
+    //     ],
+    //   },
+    // });
 
     let message_type = 1;
     let attachments = [];
@@ -78,24 +68,17 @@ export class TelegramProvider implements OnApplicationBootstrap {
       attachments = [{ id, link: await this.processMedia(id, ctx) }];
     }
 
-    // console.log(JSON.stringify(ctx), attachments);
-
-    // await this.botModels[0].botInstance.telegram.sendPhoto(828522413, 'AgACAgIAAxkBAAP1Y9w7i18cTM2DbUxxPw9OvEiFeI4AAj3JMRtsM-FK3wABko-2gKaFAQADAgADcwADLQQ')
-    // await this.botModels[0].botInstance.telegram.sendVideo(828522413, 'BAACAgIAAxkBAAP6Y9w88qiZ30d25-YQEzZZiIhXcuIAAkMnAAJsM-FKMh6phlQmnK0tBA')
-    // await this.botModels[0].botInstance.telegram.sendDocument(828522413, 'BQACAgIAAxkBAAP9Y9w9AAE0OJBwJ790RDGO4aeJriA7AAJEJwACbDPhSoB1FNC-DhCZLQQ')
-
-    // await this.botModels[0].botInstance.telegram.sendPhoto(828522413, 'https://game.psyreply.com/3aE8lz4MtjI.jpg1675383380109.jpg');
-    // await this.botModels[0].botInstance.telegram.sendVideo(828522413, { source: fs.createReadStream(path.join(process.cwd(), '../main.service', 'upload', 'video.mp4')) });
-    // await this.botModels[0].botInstance.telegram.sendDocument(828522413, { filename: 'video.mp4', source: fs.createReadStream(path.join(process.cwd(), '../main.service', 'upload', 'video.mp4')) });
-
     this.botService
       .emit('newMessage', {
-        ctx_: JSON.stringify(ctx),
+        ctx_: JSON.stringify({
+          botInfo: ctx.botInfo,
+          message: ctx.update.message,
+        }),
         message_type,
         attachments,
       })
       .subscribe((r) => {
-        console.log(r);
+        console.log('Result', r);
       });
   }
 
@@ -105,7 +88,6 @@ export class TelegramProvider implements OnApplicationBootstrap {
   }
 
   sendMessage(data: { msg: string; chatId: string }) {
-    console.log('DATA', data);
     this.botModels[0].botInstance.telegram.sendMessage(
       parseInt(data.chatId),
       data.msg,

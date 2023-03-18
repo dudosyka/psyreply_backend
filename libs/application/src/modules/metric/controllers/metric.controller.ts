@@ -15,9 +15,9 @@ import { MetricProvider } from '../providers/metric.provider';
 import { MetricModel } from '../models/metric.model';
 import CreateMetricDto from '../dto/create-metric.dto';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 
 @UseGuards(JwtAuthGuard, AdminGuard)
 @Controller('metric')
@@ -26,8 +26,8 @@ export class MetricController {
 
   @Get()
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getAll(): Promise<ResponseFilter<MetricModel[]>> {
-    return ResponseFilter.response<MetricModel[]>(
+  public async getAll(): Promise<HttpResponseFilter<MetricModel[]>> {
+    return HttpResponseFilter.response<MetricModel[]>(
       await this.metricProvider.getAll(),
       ResponseStatus.SUCCESS,
     );
@@ -35,8 +35,8 @@ export class MetricController {
 
   @Get('/available')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getNotRemove(): Promise<ResponseFilter<MetricModel[]>> {
-    return ResponseFilter.response<MetricModel[]>(
+  public async getNotRemove(): Promise<HttpResponseFilter<MetricModel[]>> {
+    return HttpResponseFilter.response<MetricModel[]>(
       await this.metricProvider.getAll({
         where: {
           deleted: false,
@@ -50,8 +50,8 @@ export class MetricController {
   @HttpCode(ResponseStatus.CREATED)
   public async create(
     @Body() createDto: CreateMetricDto,
-  ): Promise<ResponseFilter<MetricModel>> {
-    return ResponseFilter.response<MetricModel>(
+  ): Promise<HttpResponseFilter<MetricModel>> {
+    return HttpResponseFilter.response<MetricModel>(
       await this.metricProvider.create(createDto),
       ResponseStatus.CREATED,
     );

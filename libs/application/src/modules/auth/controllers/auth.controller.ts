@@ -18,9 +18,9 @@ import { AuthInputDto } from '../dtos/auth-input.dto';
 import mainConf, { ProjectState } from '../../../config/main.conf';
 import { TokenOutputDto } from '../dtos/token-output.dto';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 import { AuthProvider } from '../providers/auth.provider';
 import { SignupInputDto } from '@app/application/modules/auth/dtos/signup-input.dto';
 import { RepassOutputDto } from '@app/application/modules/auth/dtos/repass-output.dto';
@@ -38,17 +38,17 @@ export class AuthController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async firstStep(
     @Body() credentials: AuthInputDto,
-  ): Promise<ResponseFilter<AuthOutputDto | TokenOutputDto>> {
+  ): Promise<HttpResponseFilter<AuthOutputDto | TokenOutputDto>> {
     if (
       credentials.email == 'shut_up_and_let_me_in' &&
       mainConf().isDev != ProjectState.PROD
     ) {
-      return ResponseFilter.response<TokenOutputDto>(
+      return HttpResponseFilter.response<TokenOutputDto>(
         await this.authProvider.superLogin(),
         ResponseStatus.SUCCESS,
       );
     }
-    return ResponseFilter.response<AuthOutputDto>(
+    return HttpResponseFilter.response<AuthOutputDto>(
       await this.authProvider.firstStep(
         credentials.email,
         credentials.password,
@@ -62,8 +62,8 @@ export class AuthController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async secondStep(
     @Request() req,
-  ): Promise<ResponseFilter<TokenOutputDto>> {
-    return ResponseFilter.response<TokenOutputDto>(
+  ): Promise<HttpResponseFilter<TokenOutputDto>> {
+    return HttpResponseFilter.response<TokenOutputDto>(
       await this.authProvider.login(req.user),
       ResponseStatus.SUCCESS,
     );
@@ -73,8 +73,8 @@ export class AuthController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async loginDashboard(
     @Body() credentials: AuthInputDto,
-  ): Promise<ResponseFilter<TokenOutputDto>> {
-    return ResponseFilter.response<TokenOutputDto>(
+  ): Promise<HttpResponseFilter<TokenOutputDto>> {
+    return HttpResponseFilter.response<TokenOutputDto>(
       await this.authProvider.loginDashboard(credentials),
       ResponseStatus.SUCCESS,
     );
@@ -86,8 +86,8 @@ export class AuthController {
   public async signUp(
     @Body() signupData: SignupInputDto,
     @UploadedFile('file') file: Express.Multer.File,
-  ): Promise<ResponseFilter<TokenOutputDto>> {
-    return ResponseFilter.response<TokenOutputDto>(
+  ): Promise<HttpResponseFilter<TokenOutputDto>> {
+    return HttpResponseFilter.response<TokenOutputDto>(
       await this.authProvider.signup(signupData, file),
       ResponseStatus.SUCCESS,
     );
@@ -97,8 +97,8 @@ export class AuthController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async repass(
     @Body('login') login: string,
-  ): Promise<ResponseFilter<RepassOutputDto>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<RepassOutputDto>> {
+    return HttpResponseFilter.response(
       await this.authProvider.repassFirst(login),
       ResponseStatus.SUCCESS,
     );
@@ -109,8 +109,8 @@ export class AuthController {
   public async repassSecond(
     @Body('code') emailCode: string,
     @Body('newPassword') newPassword: string,
-  ): Promise<ResponseFilter<TokenOutputDto>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<TokenOutputDto>> {
+    return HttpResponseFilter.response(
       await this.authProvider.repassSecond(emailCode, newPassword),
       ResponseStatus.SUCCESS,
     );
@@ -121,8 +121,8 @@ export class AuthController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async emailChange(
     @Req() req,
-  ): Promise<ResponseFilter<ChangeEmailOutputDto>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<ChangeEmailOutputDto>> {
+    return HttpResponseFilter.response(
       await this.authProvider.changeEmailFirst(req.user.id),
       ResponseStatus.SUCCESS,
     );
@@ -134,8 +134,8 @@ export class AuthController {
   public async emailChangeSecond(
     @Body('email') email: string,
     @Body('code') code: string,
-  ): Promise<ResponseFilter<ChangeEmailOutputDto>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<ChangeEmailOutputDto>> {
+    return HttpResponseFilter.response(
       await this.authProvider.changeEmailSecond(email, code),
       ResponseStatus.SUCCESS,
     );
@@ -144,9 +144,9 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
   @Get('super/check')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async checkIsSuper(): Promise<ResponseFilter<boolean>> {
+  public async checkIsSuper(): Promise<HttpResponseFilter<boolean>> {
     //It will return true if SuperAdminGuard approve request.
-    return ResponseFilter.response(true, ResponseStatus.SUCCESS);
+    return HttpResponseFilter.response(true, ResponseStatus.SUCCESS);
   }
 
   @UseGuards(JwtAuthGuard, SuperAdminGuard)
@@ -155,8 +155,8 @@ export class AuthController {
   public async superLogin(
     @Req() req,
     @Param('companyId') companyId: string,
-  ): Promise<ResponseFilter<TokenOutputDto>> {
-    return ResponseFilter.response(
+  ): Promise<HttpResponseFilter<TokenOutputDto>> {
+    return HttpResponseFilter.response(
       await this.authProvider.superLogin(req.user.id, parseInt(companyId)),
       ResponseStatus.SUCCESS,
     );

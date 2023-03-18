@@ -1,6 +1,5 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
-import { TelegrafContext } from 'telegraf-ts';
 import { ChatGateway } from '../../chat/providers/chat.gateway';
 import { BotModel } from '../models/bot.model';
 import { MessageModel } from '../models/message.model';
@@ -8,7 +7,8 @@ import { TransactionUtil } from '../../../utils/TransactionUtil';
 import { Sequelize } from 'sequelize-typescript';
 import { UserProvider } from '../../user/providers/user.provider';
 import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-message.provider';
-import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
+import { TelegramNewMessageDto } from '@app/application/modules/telegram/dto/telegram-new-message.dto';
+import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-new-message.dto';
 
 type ContentDto = {
   attachments: string[];
@@ -35,7 +35,9 @@ export class BotProvider {
     if (!TransactionUtil.isSet())
       TransactionUtil.setHost(await this.sequelize.transaction());
 
-    const ctx: TelegrafContext = JSON.parse(data.ctx_);
+    const ctx: TelegramNewMessageDto = JSON.parse(data.ctx_);
+
+    console.log(ctx);
 
     const botModel = await BotModel.findOne({
       where: {
@@ -44,7 +46,7 @@ export class BotProvider {
     });
 
     const userModel = await this.userProvider
-      .genChat(botModel, ctx.update.message.from, ctx.update.message.chat.id)
+      .genChat(botModel, ctx.message.from, ctx.message.chat.id)
       .catch((err) => {
         TransactionUtil.rollback();
         throw err;
@@ -55,14 +57,14 @@ export class BotProvider {
 
     const content: ContentDto = {
       attachments,
-      text: ctx.update.message.text,
+      text: ctx.message.text,
     };
 
     console.log(content);
 
     const messageModel = await MessageModel.create(
       {
-        bot_message_id: ctx.update.message.message_id,
+        bot_message_id: ctx.message.message_id,
         type_id: message_type,
         content: JSON.stringify(content),
       },
@@ -90,15 +92,13 @@ export class BotProvider {
     await TransactionUtil.commit();
 
     this.chatGateway.server
-      .to(ctx.update.message.chat.id.toString())
-      .emit('newMessage', { text: ctx.update.message.text });
+      .to(ctx.message.chat.id.toString())
+      .emit('newMessage', { text: ctx.message.text });
   }
 
   //Get a message from socket than emit it to microservice (tg bot)
   async emitNewMessage(
-    chatId: number,
-    msg: MessageCreateDto,
-    botUserId: number,
+    newMessageDto: ClientNewMessageDto,
     userId: number,
   ): Promise<MessageModel> {
     if (!TransactionUtil.isSet())
@@ -106,16 +106,21 @@ export class BotProvider {
 
     const messageModel = await this.botMessageProvider.saveMessageFromClient(
       userId,
-      msg,
-      botUserId,
+      newMessageDto.msg,
+      newMessageDto.botUserId,
     );
 
-    this.botService.emit('newMessage', { chatId, msg }).subscribe({
-      next: null,
-      error: (error) => {
-        console.log(error);
-      },
-    });
+    this.botService
+      .emit('newMessage', {
+        chatId: newMessageDto.chatId,
+        msg: newMessageDto.msg,
+      })
+      .subscribe({
+        next: null,
+        error: (error) => {
+          console.log(error);
+        },
+      });
 
     return messageModel;
   }

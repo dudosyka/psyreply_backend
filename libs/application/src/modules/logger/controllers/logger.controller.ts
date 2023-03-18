@@ -9,9 +9,9 @@ import {
 import { LoggerProvider } from '../providers/logger.provider';
 import { ErrorOutputDto } from '../dtos/error.output.dto';
 import {
-  ResponseFilter,
+  HttpResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
+} from '../../../filters/http-response.filter';
 
 @Controller('logger')
 export class LoggerController {
@@ -21,9 +21,9 @@ export class LoggerController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getAll(
     @Body('passphrase') passphrase: string,
-  ): Promise<ResponseFilter<ErrorOutputDto[]>> | never {
+  ): Promise<HttpResponseFilter<ErrorOutputDto[]>> | never {
     if (passphrase == 'password')
-      return ResponseFilter.response<ErrorOutputDto[] | any[]>(
+      return HttpResponseFilter.response<ErrorOutputDto[] | any[]>(
         (await this.loggerProvider.getAll()).map((el) => {
           try {
             return {
