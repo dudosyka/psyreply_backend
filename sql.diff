@@ -1,0 +1,3 @@
+ALTER TABLE `BotUserModels` ADD `username` TEXT NULL AFTER `id`;
+ALTER TABLE `UserModels` ADD `avatar` INT NOT NULL AFTER `login`;
+ALTER TABLE `UserModels` ADD FOREIGN KEY (`avatar`) REFERENCES `FilesModels`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;

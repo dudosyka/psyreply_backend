@@ -1,90 +1,58 @@
 import {
+  Body,
   Controller,
+  Delete,
   Get,
   HttpCode,
   Inject,
   Param,
-  Req,
+  Post,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
-import { AdminGuard } from '../../../guards/admin.guard';
+import { JwtAuthGuard } from '@app/application/guards/jwt-auth.guard';
+import { AdminGuard } from '@app/application/guards/admin.guard';
 import {
   ResponseFilter,
   ResponseStatus,
-} from '../../../filters/response.filter';
-import { UserModel } from '../../user/models/user.model';
-import { ChatProvider } from '../providers/chat.provider';
-import { BotModel } from '../../bot/models/bot.model';
-import { UserMessageModel } from '../../bot/models/user-message.model';
-import { ChatGateway } from '../providers/chat.gateway';
+} from '@app/application/filters/response.filter';
+import { BotUserInfoOutputDto } from '@app/application/modules/chat/dto/bot-user-info-output.dto';
+import { ChatProvider } from '@app/application/modules/chat/providers/chat.provider';
+import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
+import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
 
-@Controller('bot')
+@Controller('chat')
+@UseGuards(JwtAuthGuard, AdminGuard)
 export class ChatController {
-  constructor(
-    @Inject(ChatProvider) private botProvider: ChatProvider,
-    @Inject(ChatGateway) private chatGateway: ChatGateway,
-  ) {}
-
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':companyId')
+  constructor(@Inject(ChatProvider) private chatProvider: ChatProvider) {}
+  @Get(':botUserId/info')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getBot(
-    @Param('companyId') companyId: number,
-  ): Promise<ResponseFilter<BotModel[]>> {
-    return ResponseFilter.response<BotModel[]>(
-      await this.botProvider.getByCompany(companyId),
+  public async getBotUserInfo(
+    @Param('botUserId') botUserId: number,
+  ): Promise<ResponseFilter<BotUserInfoOutputDto>> {
+    return ResponseFilter.response<BotUserInfoOutputDto>(
+      await this.chatProvider.getChatInfo(botUserId),
       ResponseStatus.SUCCESS,
     );
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get('')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async getByToken(@Req() req): Promise<ResponseFilter<BotModel[]>> {
-    return ResponseFilter.response<BotModel[]>(
-      await this.botProvider.getByUser(req.user.id),
-      ResponseStatus.SUCCESS,
+  @Post(':botUserId/note')
+  @HttpCode(ResponseStatus.CREATED)
+  public async createNote(
+    @Param('botUserId') botUserId: number,
+    @Body() createDto: UserNoteCreateDto,
+  ): Promise<ResponseFilter<UserNoteModel>> {
+    return ResponseFilter.response<UserNoteModel>(
+      await this.chatProvider.createNote(botUserId, createDto),
+      ResponseStatus.CREATED,
     );
   }
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':botId/subs')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async getSubscribers(
-    @Param('botId') botId: number,
-  ): Promise<ResponseFilter<UserModel[]>> {
-    return ResponseFilter.response<UserModel[]>(
-      await this.botProvider.getSubscribers(botId),
-      ResponseStatus.SUCCESS,
-    );
+  @Delete(':botUserId/note/:noteId')
+  @HttpCode(ResponseStatus.NO_CONTENT)
+  public async removeNot(
+    @Param('botUserId') botUserId: number,
+    @Param('noteId') noteId: number,
+  ) {
+    await this.chatProvider.removeNote(botUserId, noteId);
   }
-
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':botId/chat/:userId')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async getHistory(
-    @Param('userId') userId: number,
-    @Param('botId') botId: number,
-  ): Promise<ResponseFilter<UserMessageModel[]>> {
-    return ResponseFilter.response<UserMessageModel[]>(
-      await this.botProvider.getMessages(botId, userId),
-      ResponseStatus.SUCCESS,
-    );
-  }
-
-  // @Get('/send/:botId/:msg')
-  // public async sendMessage(
-  //   @Param('botId') botId: number,
-  //   @Param('msg') msg: string
-  // ) {
-  //   const bot = await BotModel.findOne({ where: { id: botId } });
-  //   this.service.emit('newMessage', { msg });
-  // }
-  //
-  // @EventPattern('newMessage')
-  // public async tgBotNewMessage(data: any) {
-  //   this.chatGateway.server.to(`chat58`).emit('msg', data.data);
-  //   // console.log(data.data);
-  // }
 }

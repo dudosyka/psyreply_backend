@@ -9,6 +9,9 @@ export class BotUserModel extends BaseModel {
   id: number;
 
   @Column
+  username: string;
+
+  @Column
   bot_id: number;
 
   @Column

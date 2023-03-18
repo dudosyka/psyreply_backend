@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { UserModel } from '../../user/models/user.model';
 import { BaseProvider } from '../../base/base.provider';
 import { BotModel } from '../../bot/models/bot.model';
@@ -8,10 +8,16 @@ import { UserMessageModel } from '../../bot/models/user-message.model';
 import { Op } from 'sequelize';
 import { BotUserModel } from '../../bot/models/bot-user.model';
 import { Socket } from 'socket.io';
+import { BotUserInfoOutputDto } from '@app/application/modules/chat/dto/bot-user-info-output.dto';
+import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
+import { ChatNotesProvider } from '@app/application/modules/chat/providers/chat-notes.provider';
+import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
 
 @Injectable()
 export class ChatProvider extends BaseProvider<BotModel> {
-  constructor() {
+  constructor(
+    @Inject(ChatNotesProvider) private chatNotesProvider: ChatNotesProvider,
+  ) {
     super(BotModel);
   }
 
@@ -82,6 +88,46 @@ export class ChatProvider extends BaseProvider<BotModel> {
       },
       include: [MessageModel],
     });
+  }
+
+  async getUserBotModel(botUserId: number): Promise<BotUserModel> | never {
+    const userBotModel = await BotUserModel.findOne({
+      where: {
+        id: botUserId,
+      },
+    });
+
+    if (!userBotModel)
+      throw new ModelNotFoundException(BotUserModel, botUserId);
+
+    return userBotModel;
+  }
+  async getChatInfo(botUserId: number): Promise<BotUserInfoOutputDto> {
+    const userBotModel = await this.getUserBotModel(botUserId);
+
+    const notes = await this.chatNotesProvider.getAll(userBotModel.id);
+
+    return {
+      notes,
+    };
+  }
+
+  async createNote(
+    botUserId: number,
+    userNoteCreateDto: UserNoteCreateDto,
+  ): Promise<UserNoteModel> {
+    const userBotModel = await this.getUserBotModel(botUserId);
+
+    return await this.chatNotesProvider.create(
+      userBotModel.id,
+      userNoteCreateDto,
+    );
+  }
+
+  async removeNote(botUserId: number, noteId: number) {
+    await this.getUserBotModel(botUserId);
+
+    await this.chatNotesProvider.remove(noteId);
   }
 
   joinRoom(client: Socket, chatId: string) {

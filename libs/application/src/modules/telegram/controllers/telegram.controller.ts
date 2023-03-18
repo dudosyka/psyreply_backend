@@ -15,6 +15,7 @@ export class TelegramController {
 
   @EventPattern('newMessage')
   newMessage(data: any) {
+    console.log('EVENT LISTENER', data);
     this.appProvider.sendMessage(data);
   }
 }

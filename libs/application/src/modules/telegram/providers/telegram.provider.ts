@@ -2,7 +2,6 @@ import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { BotModel } from '../models/bot.model';
 import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
-import mainConf from '@app/application/config/main.conf';
 
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
@@ -10,22 +9,31 @@ export class TelegramProvider implements OnApplicationBootstrap {
   constructor(@Inject('BOT_SERVICE') private botService: ClientProxy) {
     BotModel.findAll().then((bots) => {
       bots.forEach((bot) => {
-        const botInstance = new Telegraf(bot.token, {
-          telegram: {
-            apiRoot: `http://0.0.0.0:${mainConf().telegramServerPort}`,
-          },
-        });
+        const botInstance = new Telegraf(bot.token);
         botInstance.on('message', (ctx) => this.onMessage(ctx));
         botInstance.on('edited_message', (ctx) => this.onMessageEdit(ctx));
         botInstance.on('callback_query', (ctx) => this.btnCallback(ctx));
         console.log(bot.name, 'processing...');
-        return botInstance.launch().then(() => {
-          this.botModels.push({ botInstance, chatId: 828522413 });
-          console.log('Bot is launched');
-        });
+        botInstance
+          .launch()
+          .then(() => {
+            this.botModels.push({ botInstance, chatId: 828522413 });
+            console.log('Bot is launched');
+          })
+          .catch((err) => {
+            console.log('Errr', err);
+          });
       });
     });
   }
+  //
+  // @Client({
+  //   transport: Transport.TCP,
+  //   options: {
+  //     port: mainConf().microservicePort,
+  //   },
+  // })
+  // client: ClientProxy;
 
   private processMedia(id: string, ctx: TelegrafContext): Promise<string[]> {
     return ctx.telegram.getFileLink(id).then((url) => [url]);
@@ -70,6 +78,8 @@ export class TelegramProvider implements OnApplicationBootstrap {
       attachments = [{ id, link: await this.processMedia(id, ctx) }];
     }
 
+    // console.log(JSON.stringify(ctx), attachments);
+
     // await this.botModels[0].botInstance.telegram.sendPhoto(828522413, 'AgACAgIAAxkBAAP1Y9w7i18cTM2DbUxxPw9OvEiFeI4AAj3JMRtsM-FK3wABko-2gKaFAQADAgADcwADLQQ')
     // await this.botModels[0].botInstance.telegram.sendVideo(828522413, 'BAACAgIAAxkBAAP6Y9w88qiZ30d25-YQEzZZiIhXcuIAAkMnAAJsM-FKMh6phlQmnK0tBA')
     // await this.botModels[0].botInstance.telegram.sendDocument(828522413, 'BQACAgIAAxkBAAP9Y9w9AAE0OJBwJ790RDGO4aeJriA7AAJEJwACbDPhSoB1FNC-DhCZLQQ')
@@ -79,7 +89,11 @@ export class TelegramProvider implements OnApplicationBootstrap {
     // await this.botModels[0].botInstance.telegram.sendDocument(828522413, { filename: 'video.mp4', source: fs.createReadStream(path.join(process.cwd(), '../main.service', 'upload', 'video.mp4')) });
 
     this.botService
-      .emit('newMessage', { ctx: ctx, message_type, attachments })
+      .emit('newMessage', {
+        ctx_: JSON.stringify(ctx),
+        message_type,
+        attachments,
+      })
       .subscribe((r) => {
         console.log(r);
       });
@@ -91,6 +105,7 @@ export class TelegramProvider implements OnApplicationBootstrap {
   }
 
   sendMessage(data: { msg: string; chatId: string }) {
+    console.log('DATA', data);
     this.botModels[0].botInstance.telegram.sendMessage(
       parseInt(data.chatId),
       data.msg,
@@ -102,8 +117,13 @@ export class TelegramProvider implements OnApplicationBootstrap {
   }
 
   onApplicationBootstrap(): any {
-    this.botService.connect().then((res) => {
-      console.log(res);
-    });
+    this.botService
+      .connect()
+      .then(() => {
+        console.log('Connected');
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }
 }

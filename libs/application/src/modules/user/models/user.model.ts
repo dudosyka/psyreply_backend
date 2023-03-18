@@ -12,6 +12,7 @@ import { GroupModel } from '../../company/models/group.model';
 import { BaseModel } from '../../base/base.provider';
 import { MessageModel } from '../../bot/models/message.model';
 import { UserMessageModel } from '../../bot/models/user-message.model';
+import { FilesModel } from '@app/application/modules/files/models/files.model';
 
 @Table
 export class UserModel extends BaseModel {
@@ -27,6 +28,12 @@ export class UserModel extends BaseModel {
 
   @Column
   login: string;
+
+  @Column
+  avatar: number;
+
+  @BelongsTo(() => FilesModel, 'avatar')
+  img: FilesModel;
 
   @Column
   hash: string;

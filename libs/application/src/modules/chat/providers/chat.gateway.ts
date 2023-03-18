@@ -39,13 +39,27 @@ export class ChatGateway {
 
   @UseGuards(WsGuard)
   @SubscribeMessage('sendMessage')
-  newMessage(
+  async newMessage(
     @ConnectedSocket() client: Socket,
     @MessageBody('msg') msg: string,
     @MessageBody('chatId') chatId: number,
+    @MessageBody('botUserId') botUserId: number,
   ) {
-    this.botProvider.emitNewMessage(chatId, msg);
-    return 'sent';
+    let msgDto;
+    try {
+      msgDto = JSON.parse(msg);
+    } catch (e) {
+      return JSON.stringify({ status: 'failed', body: 'invalid msg' });
+    }
+    return JSON.stringify({
+      status: 'success',
+      body: await this.botProvider.emitNewMessage(
+        chatId,
+        msgDto,
+        botUserId,
+        client.user.sub,
+      ),
+    });
   }
 
   @SubscribeMessage('identity')
