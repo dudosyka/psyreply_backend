@@ -23,6 +23,17 @@ import { MessageTypeModel } from '../bot/models/message-type.model';
   ],
   providers: [AuthProvider, UserProvider],
   controllers: [UserController],
-  exports: [CompanyModule, AuthProvider, UserProvider],
+  exports: [
+    SequelizeModule.forFeature([
+      UserModel,
+      UserMessageModel,
+      MessageModel,
+      MessageTypeModel,
+    ]),
+    AuthModule,
+    CompanyModule,
+    AuthProvider,
+    UserProvider,
+  ],
 })
 export class UserModule {}

@@ -18,6 +18,7 @@ import { BaseProvider } from '../../base/base.provider';
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
+import { BotModel } from '@app/application/modules/bot/models/bot.model';
 
 @Injectable()
 export class CompanyProvider extends BaseProvider<CompanyModel> {
@@ -579,5 +580,13 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
       throw new ModelNotFoundException(GroupModel, null);
 
     return this.authProvider.createShareDashboardToken(groups, companyId);
+  }
+
+  async getBots(id: number): Promise<BotModel[]> {
+    return await BotModel.findAll({
+      where: {
+        company_id: id,
+      },
+    });
   }
 }

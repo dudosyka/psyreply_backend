@@ -9,6 +9,7 @@ import { UserProvider } from '../../user/providers/user.provider';
 import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-message.provider';
 import { TelegramNewMessageDto } from '@app/application/modules/telegram/dto/telegram-new-message.dto';
 import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-new-message.dto';
+import { BotCreateDto } from '@app/application/modules/bot/dto/bot-create.dto';
 
 type ContentDto = {
   attachments: string[];
@@ -125,10 +126,18 @@ export class BotProvider {
     return messageModel;
   }
 
-  // @EventPattern('editMessage')
-  // editMessage(
-  //   data: { ctx: TelegrafContext }
-  // ) {
-  //
-  // }
+  async getAllByCompany(companyId: number) {
+    return BotModel.findAll({
+      attributes: ['id', 'name', 'telegram_id', 'createdAt', 'updatedAt'],
+      where: {
+        company_id: companyId,
+      },
+    });
+  }
+
+  async create(createDto: BotCreateDto): Promise<BotModel> {
+    return await BotModel.create({
+      ...createDto,
+    });
+  }
 }

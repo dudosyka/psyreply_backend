@@ -4,7 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import dbConf from './confs/db.conf';
 import mainConf from './confs/main.conf';
 import { SequelizeModule } from '@nestjs/sequelize';
-import { BotModel } from '@app/application/modules/telegram/models/bot.model';
 
 @Module({
   imports: [
@@ -18,7 +17,6 @@ import { BotModel } from '@app/application/modules/telegram/models/bot.model';
       dialect: 'mysql',
       autoLoadModels: true,
       synchronize: true,
-      models: [BotModel],
     }),
     TelegramModule,
   ],

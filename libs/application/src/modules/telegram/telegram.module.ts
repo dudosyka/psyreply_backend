@@ -34,6 +34,10 @@ import { FilesProvider } from '@app/application/modules/files/providers/files.pr
     FilesProvider,
     TelegramProvider,
   ],
-  exports: [TelegramProvider],
+  exports: [
+    SequelizeModule.forFeature([BotModel]),
+    TelegramProvider,
+    FilesModule,
+  ],
 })
 export class TelegramModule {}

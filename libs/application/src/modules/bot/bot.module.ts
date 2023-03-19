@@ -26,8 +26,8 @@ import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-m
       UserMessageModel,
       UserNoteModel,
     ]),
-    UserModule,
     LoggerModule,
+    forwardRef(() => UserModule),
     forwardRef(() => ChatModule),
   ],
   providers: [
@@ -54,8 +54,24 @@ import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-m
       MessageModel,
       MessageTypeModel,
       UserMessageModel,
+      UserNoteModel,
     ]),
+    LoggerModule,
+    {
+      provide: 'SERVICE',
+      useFactory: () => {
+        return ClientProxyFactory.create({
+          transport: Transport.TCP,
+          options: {
+            port: mainConf().tgMicroservicePort,
+          },
+        });
+      },
+    },
+    BotMessageProvider,
+    UserProvider,
     BotProvider,
+    ChatModule,
   ],
 })
 export class BotModule {}

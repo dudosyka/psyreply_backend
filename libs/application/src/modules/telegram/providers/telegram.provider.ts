@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { BotModel } from '../models/bot.model';
 import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
+import { BotModel } from '@app/application/modules/telegram/models/bot.model';
 
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
