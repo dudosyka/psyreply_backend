@@ -27,7 +27,7 @@ export class BotProvider {
   ) {}
 
   //Get a message from microservice (tg bot) than emit it to socket
-  async newMessage(data: {
+  async newMessageFromTelegram(data: {
     ctx_: string;
     message_type: number;
     attachments: string[];
@@ -97,7 +97,7 @@ export class BotProvider {
   }
 
   //Get a message from socket than emit it to microservice (tg bot)
-  async emitNewMessage(
+  async newMessageFromClient(
     newMessageDto: ClientNewMessageDto,
     userId: number,
   ): Promise<MessageModel> {

@@ -20,7 +20,7 @@ export class BotMessageProvider {
     return files.map((el) => {
       return {
         id: null,
-        link: `${el.path}`,
+        link: `${el.id}`,
       };
     });
   }

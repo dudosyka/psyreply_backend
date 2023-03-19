@@ -2,11 +2,16 @@ import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
 import { BotModel } from '../models/bot.model';
 import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
-import got from 'got';
+import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
+import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
+
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
   private botModels = [];
-  constructor(@Inject('BOT_SERVICE') private botService: ClientProxy) {
+  constructor(
+    @Inject('BOT_SERVICE') private botService: ClientProxy,
+    @Inject(FilesProvider) private filesProvider: FilesProvider,
+  ) {
     BotModel.findAll().then((bots) => {
       bots.forEach((bot) => {
         const botInstance = new Telegraf(bot.token);
@@ -87,10 +92,49 @@ export class TelegramProvider implements OnApplicationBootstrap {
     ctx.reply('ok');
   }
 
-  sendMessage(data: { msg: string; chatId: string }) {
-    this.botModels[0].botInstance.telegram.sendMessage(
-      parseInt(data.chatId),
-      data.msg,
+  private async processClientMedia(
+    chatId: number,
+    type_id: number,
+    attachments: number[],
+  ): Promise<void> {
+    await Promise.all(
+      attachments.map(async (el) => {
+        const file = await this.filesProvider.getFile(el);
+        switch (type_id) {
+          case 1:
+            return;
+          case 2:
+            await this.botModels[0].botInstance.telegram.sendPhoto(chatId, {
+              source: file.stream,
+            });
+            break;
+          case 3:
+            await this.botModels[0].botInstance.telegram.sendVideo(chatId, {
+              source: file.stream,
+            });
+            break;
+          case 4:
+            await this.botModels[0].botInstance.telegram.sendDocument(chatId, {
+              source: file.stream,
+              filename: file.name,
+            });
+            break;
+          default:
+            return;
+        }
+      }),
+    );
+  }
+
+  async sendMessage(data: { chatId: number; msg: MessageCreateDto }) {
+    await this.processClientMedia(
+      data.chatId,
+      data.msg.type_id,
+      data.msg.attachments,
+    );
+    await this.botModels[0].botInstance.telegram.sendMessage(
+      data.chatId,
+      data.msg.text,
     );
   }
 

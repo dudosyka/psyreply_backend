@@ -15,7 +15,7 @@ import {
   HttpResponseFilter,
   ResponseStatus,
 } from '@app/application/filters/http-response.filter';
-import { BotUserInfoOutputDto } from '@app/application/modules/chat/dto/bot-user-info-output.dto';
+import { ChatUserInfoOutputDto } from '@app/application/modules/chat/dto/chat-user-info-output.dto';
 import { ChatProvider } from '@app/application/modules/chat/providers/chat.provider';
 import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
 import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
@@ -28,8 +28,8 @@ export class ChatController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async getBotUserInfo(
     @Param('botUserId') botUserId: number,
-  ): Promise<HttpResponseFilter<BotUserInfoOutputDto>> {
-    return HttpResponseFilter.response<BotUserInfoOutputDto>(
+  ): Promise<HttpResponseFilter<ChatUserInfoOutputDto>> {
+    return HttpResponseFilter.response<ChatUserInfoOutputDto>(
       await this.chatProvider.getChatInfo(botUserId),
       ResponseStatus.SUCCESS,
     );

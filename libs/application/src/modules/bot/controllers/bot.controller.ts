@@ -16,7 +16,7 @@ export class BotController {
     message_type: number;
     attachments: string[];
   }) {
-    await this.botProvider.newMessage(data).catch((err) => {
+    await this.botProvider.newMessageFromTelegram(data).catch((err) => {
       throw err;
     });
   }

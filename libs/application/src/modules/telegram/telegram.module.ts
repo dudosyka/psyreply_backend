@@ -9,9 +9,15 @@ import {
 } from '@nestjs/microservices';
 import { TelegramController } from './controllers/telegram.controller';
 import { TelegramProvider } from './providers/telegram.provider';
+import { FilesModule } from '@app/application/modules/files/files.module';
+import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
 
 @Module({
-  imports: [SequelizeModule.forFeature([BotModel]), ClientsModule.register([])],
+  imports: [
+    SequelizeModule.forFeature([BotModel]),
+    ClientsModule.register([]),
+    FilesModule,
+  ],
   controllers: [TelegramController],
   providers: [
     {
@@ -25,6 +31,7 @@ import { TelegramProvider } from './providers/telegram.provider';
         });
       },
     },
+    FilesProvider,
     TelegramProvider,
   ],
   exports: [TelegramProvider],

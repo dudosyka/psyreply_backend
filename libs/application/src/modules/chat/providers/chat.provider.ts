@@ -8,7 +8,7 @@ import { UserMessageModel } from '../../bot/models/user-message.model';
 import { Op } from 'sequelize';
 import { BotUserModel } from '../../bot/models/bot-user.model';
 import { Socket } from 'socket.io';
-import { BotUserInfoOutputDto } from '@app/application/modules/chat/dto/bot-user-info-output.dto';
+import { ChatUserInfoOutputDto } from '@app/application/modules/chat/dto/chat-user-info-output.dto';
 import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
 import { ChatNotesProvider } from '@app/application/modules/chat/providers/chat-notes.provider';
 import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
@@ -102,7 +102,7 @@ export class ChatProvider extends BaseProvider<BotModel> {
 
     return userBotModel;
   }
-  async getChatInfo(botUserId: number): Promise<BotUserInfoOutputDto> {
+  async getChatInfo(botUserId: number): Promise<ChatUserInfoOutputDto> {
     const userBotModel = await this.getUserBotModel(botUserId);
 
     const notes = await this.chatNotesProvider.getAll(userBotModel.id);

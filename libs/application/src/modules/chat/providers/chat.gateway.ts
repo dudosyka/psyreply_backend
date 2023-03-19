@@ -59,7 +59,10 @@ export class ChatGateway {
     @MessageBody() newMessageDto: ClientNewMessageDto,
   ) {
     return WsResponseFilter.response<MessageModel>(
-      await this.botProvider.emitNewMessage(newMessageDto, client.user.sub),
+      await this.botProvider.newMessageFromClient(
+        newMessageDto,
+        client.user.sub,
+      ),
       ResponseStatus.CREATED,
     );
   }
