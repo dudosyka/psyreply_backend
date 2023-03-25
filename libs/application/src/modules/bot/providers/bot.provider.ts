@@ -69,7 +69,7 @@ export class BotProvider {
       {
         bot_message_id: ctx.message.message_id,
         type_id: message_type,
-        content: JSON.stringify(content),
+        content: content,
       },
       TransactionUtil.getHost(),
     )
