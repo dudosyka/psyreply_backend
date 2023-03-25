@@ -28,7 +28,7 @@ export class BotMessageProvider {
     userId: number,
     msg: MessageCreateDto,
     botUserId: number,
-  ): Promise<MessageModel> {
+  ): Promise<{ msg: MessageModel; botModelId: number }> {
     const { type_id, attachments, text } = msg;
 
     const userBotModel = await BotUserModel.findOne({
@@ -65,7 +65,7 @@ export class BotMessageProvider {
     await UserMessageModel.create(
       {
         user_id: userId,
-        recipient_id: userBotModel.chat_id,
+        recipient_id: userBotModel.user_id,
         message_id: messageModel.id,
       },
       TransactionUtil.getHost(),
@@ -73,6 +73,6 @@ export class BotMessageProvider {
 
     await TransactionUtil.commit();
 
-    return messageModel;
+    return { msg: messageModel, botModelId: userBotModel.bot_id };
   }
 }

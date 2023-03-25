@@ -24,6 +24,5 @@ async function bootstrap() {
 }
 
 bootstrap().then(() => {
-  console.log(process.env);
-  console.log('Started!');
+  console.log('STARTED!');
 });

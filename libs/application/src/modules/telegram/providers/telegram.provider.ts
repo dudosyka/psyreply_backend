@@ -1,9 +1,9 @@
 import { Inject, Injectable, OnApplicationBootstrap } from '@nestjs/common';
-import { Telegraf, TelegrafContext } from 'telegraf-ts';
+import { TelegrafContext } from 'telegraf-ts';
 import { ClientProxy } from '@nestjs/microservices';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
-import { BotModel } from '@app/application/modules/telegram/models/bot.model';
+import { TelegramBotInstanceProvider } from '@app/application/modules/telegram/providers/telegram-bot-instance.provider';
 
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
@@ -12,24 +12,11 @@ export class TelegramProvider implements OnApplicationBootstrap {
     @Inject('BOT_SERVICE') private botService: ClientProxy,
     @Inject(FilesProvider) private filesProvider: FilesProvider,
   ) {
-    BotModel.findAll().then((bots) => {
-      bots.forEach((bot) => {
-        const botInstance = new Telegraf(bot.token);
-        botInstance.on('message', (ctx) => this.onMessage(ctx));
-        botInstance.on('edited_message', (ctx) => this.onMessageEdit(ctx));
-        botInstance.on('callback_query', (ctx) => this.btnCallback(ctx));
-        console.log(bot.name, 'processing...');
-        botInstance
-          .launch()
-          .then(() => {
-            this.botModels.push({ botInstance, chatId: 828522413 });
-            console.log('Bot is launched');
-          })
-          .catch((err) => {
-            console.log('Errr', err);
-          });
-      });
-    });
+    TelegramBotInstanceProvider.init(
+      (ctx) => this.onMessage(ctx),
+      (ctx) => this.onMessageEdit(ctx),
+      (ctx) => this.btnCallback(ctx),
+    );
   }
 
   private processMedia(id: string, ctx: TelegrafContext): Promise<string[]> {
@@ -37,6 +24,7 @@ export class TelegramProvider implements OnApplicationBootstrap {
   }
 
   async onMessage(ctx: TelegrafContext) {
+    console.log(TelegramBotInstanceProvider.instances.length);
     // await this.botModels[0].botInstance.telegram.sendMessage(828522413, 'hi', {
     //   reply_markup: {
     //     inline_keyboard: [
@@ -126,15 +114,24 @@ export class TelegramProvider implements OnApplicationBootstrap {
     );
   }
 
-  async sendMessage(data: { chatId: number; msg: MessageCreateDto }) {
+  async sendMessage(data: {
+    chatId: number;
+    msg: MessageCreateDto;
+    botModelId: number;
+  }) {
     await this.processClientMedia(
       data.chatId,
       data.msg.type_id,
       data.msg.attachments,
     );
-    await this.botModels[0].botInstance.telegram.sendMessage(
-      data.chatId,
-      data.msg.text,
+    await Promise.all(
+      TelegramBotInstanceProvider.instances.map(async (botInstance) => {
+        if (botInstance.model.id == data.botModelId)
+          await botInstance.bot.telegram.sendMessage(
+            data.chatId,
+            data.msg.text,
+          );
+      }),
     );
   }
 

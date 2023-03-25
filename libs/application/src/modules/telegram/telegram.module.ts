@@ -11,6 +11,7 @@ import { TelegramController } from './controllers/telegram.controller';
 import { TelegramProvider } from './providers/telegram.provider';
 import { FilesModule } from '@app/application/modules/files/files.module';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
+import { TelegramBotInstanceProvider } from '@app/application/modules/telegram/providers/telegram-bot-instance.provider';
 
 @Module({
   imports: [
@@ -31,10 +32,22 @@ import { FilesProvider } from '@app/application/modules/files/providers/files.pr
         });
       },
     },
+    TelegramBotInstanceProvider,
     FilesProvider,
     TelegramProvider,
   ],
   exports: [
+    {
+      provide: 'BOT_SERVICE',
+      useFactory: () => {
+        return ClientProxyFactory.create({
+          transport: Transport.TCP,
+          options: {
+            port: mainConf().microservicePort,
+          },
+        });
+      },
+    },
     SequelizeModule.forFeature([BotModel]),
     TelegramProvider,
     FilesModule,

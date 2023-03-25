@@ -10,6 +10,8 @@ import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-m
 import { TelegramNewMessageDto } from '@app/application/modules/telegram/dto/telegram-new-message.dto';
 import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-new-message.dto';
 import { BotCreateDto } from '@app/application/modules/bot/dto/bot-create.dto';
+import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
+import { ResponseStatus } from '@app/application/filters/http-response.filter';
 
 type ContentDto = {
   attachments: string[];
@@ -94,7 +96,13 @@ export class BotProvider {
 
     this.chatGateway.server
       .to(ctx.message.chat.id.toString())
-      .emit('newMessage', { text: ctx.message.text });
+      .emit(
+        'newMessage',
+        WsResponseFilter.responseObject<MessageModel>(
+          messageModel,
+          ResponseStatus.SUCCESS,
+        ),
+      );
   }
 
   //Get a message from socket than emit it to microservice (tg bot)
@@ -105,16 +113,18 @@ export class BotProvider {
     if (!TransactionUtil.isSet())
       TransactionUtil.setHost(await this.sequelize.transaction());
 
-    const messageModel = await this.botMessageProvider.saveMessageFromClient(
-      userId,
-      newMessageDto.msg,
-      newMessageDto.botUserId,
-    );
+    const { msg, botModelId } =
+      await this.botMessageProvider.saveMessageFromClient(
+        userId,
+        newMessageDto.msg,
+        newMessageDto.botUserId,
+      );
 
     this.botService
       .emit('newMessage', {
         chatId: newMessageDto.chatId,
         msg: newMessageDto.msg,
+        botModelId,
       })
       .subscribe({
         next: null,
@@ -123,7 +133,7 @@ export class BotProvider {
         },
       });
 
-    return messageModel;
+    return msg;
   }
 
   async getAllByCompany(companyId: number) {
@@ -136,8 +146,15 @@ export class BotProvider {
   }
 
   async create(createDto: BotCreateDto): Promise<BotModel> {
-    return await BotModel.create({
+    const bot = await BotModel.create({
       ...createDto,
     });
+
+    console.log('Bot created!');
+
+    this.botService.emit('createBot', {
+      botModelId: bot.id,
+    });
+    return bot;
   }
 }

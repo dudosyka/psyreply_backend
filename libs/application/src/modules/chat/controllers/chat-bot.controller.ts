@@ -72,19 +72,4 @@ export class ChatBotController {
       ResponseStatus.SUCCESS,
     );
   }
-
-  // @Get('/send/:botId/:msg')
-  // public async sendMessage(
-  //   @Param('botId') botId: number,
-  //   @Param('msg') msg: string
-  // ) {
-  //   const bot = await BotModel.findOne({ where: { id: botId } });
-  //   this.service.emit('newMessage', { msg });
-  // }
-  //
-  // @EventPattern('newMessage')
-  // public async tgBotNewMessage(data: any) {
-  //   this.chatGateway.server.to(`chat58`).emit('msg', data.data);
-  //   // console.log(data.data);
-  // }
 }

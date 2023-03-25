@@ -17,7 +17,9 @@ export class BotModel extends Model {
   @Column
   name: string;
 
-  @Column
+  @Column({
+    unique: true,
+  })
   token: string;
 
   @Column({

@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   Inject,
+  Post,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -33,9 +34,10 @@ export class CompanyDistributionController {
     );
   }
 
-  @Get('/bot')
+  @Post('/bot')
   @HttpCode(ResponseStatus.CREATED)
-  public async createBot(@Body() createDto: BotCreateDto) {
+  public async createBot(@Req() req, @Body() createDto: BotCreateDto) {
+    createDto.company_id = req.user.companyId;
     return HttpResponseFilter.response<BotModel>(
       await this.botProvider.create(createDto),
       ResponseStatus.CREATED,
