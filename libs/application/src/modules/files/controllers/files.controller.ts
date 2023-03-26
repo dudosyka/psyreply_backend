@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   Get,
   HttpCode,
@@ -32,6 +33,18 @@ export class FilesController {
   ): Promise<HttpResponseFilter<void>> {
     return HttpResponseFilter.response<void>(
       await this.filesProvider.upload(file),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @Post('/import/link')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async uploadByLink(
+    @Body('file') file: string,
+  ): Promise<HttpResponseFilter<void>> {
+    return HttpResponseFilter.response<void>(
+      await this.filesProvider.uploadByLink(file).then(() => {}),
       ResponseStatus.SUCCESS,
     );
   }

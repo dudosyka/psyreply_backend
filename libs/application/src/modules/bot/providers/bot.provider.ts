@@ -63,8 +63,6 @@ export class BotProvider {
       text: ctx.message.text,
     };
 
-    console.log(content);
-
     const messageModel = await MessageModel.create(
       {
         bot_message_id: ctx.message.message_id,

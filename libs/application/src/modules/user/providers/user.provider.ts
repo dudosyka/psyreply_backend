@@ -65,18 +65,19 @@ export class UserProvider extends BaseProvider<UserModel> {
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-    const model = await UserModel.findOne({
+    let model = await UserModel.findOne({
       where: {
         jetBotId: user.id,
       },
     });
 
     if (!model) {
-      const newUser = await UserModel.create(
+      model = await UserModel.create(
         {
           jetBotId: user.id,
           login: user.username,
           hash: '',
+          avatar: 5,
           isAdmin: 0,
           coins: 0,
           company_id: botModel.company_id,
@@ -92,7 +93,7 @@ export class UserProvider extends BaseProvider<UserModel> {
 
       await BotUserModel.create(
         {
-          user_id: newUser.id,
+          user_id: model.id,
           username: user.username,
           bot_id: botModel.id,
           chat_id: chatId,
