@@ -19,6 +19,7 @@ import {
 import { FilesProvider } from '../providers/files.provider';
 import { AdminGuard } from '../../../guards/admin.guard';
 import { JwtAuthGuard } from '../../../guards/jwt-auth.guard';
+import { FilesModel } from '@app/application/modules/files/models/files.model';
 
 @Controller('files')
 export class FilesController {
@@ -30,8 +31,8 @@ export class FilesController {
   @HttpCode(ResponseStatus.SUCCESS)
   public async upload(
     @UploadedFile('file') file: Express.Multer.File,
-  ): Promise<HttpResponseFilter<void>> {
-    return HttpResponseFilter.response<void>(
+  ): Promise<HttpResponseFilter<FilesModel>> {
+    return HttpResponseFilter.response<FilesModel>(
       await this.filesProvider.upload(file),
       ResponseStatus.SUCCESS,
     );

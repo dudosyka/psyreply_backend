@@ -8,8 +8,8 @@ import * as fs from 'fs';
 
 @Injectable()
 export class FilesProvider extends BaseProvider<FilesModel> {
-  async upload(file: Express.Multer.File): Promise<void> {
-    await FilesModel.create({
+  async upload(file: Express.Multer.File): Promise<FilesModel> {
+    return await FilesModel.create({
       path: file.filename,
     });
   }

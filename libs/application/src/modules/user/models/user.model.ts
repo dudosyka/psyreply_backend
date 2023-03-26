@@ -29,7 +29,9 @@ export class UserModel extends BaseModel {
   @Column
   login: string;
 
-  @Column
+  @Column({
+    type: DataType.BIGINT,
+  })
   avatar: number;
 
   @BelongsTo(() => FilesModel, 'avatar')

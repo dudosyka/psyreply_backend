@@ -4,10 +4,10 @@ import { ClientProxy } from '@nestjs/microservices';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
 import { TelegramBotInstanceProvider } from '@app/application/modules/telegram/providers/telegram-bot-instance.provider';
+import { TelegramBotInstanceDto } from '@app/application/modules/telegram/dto/telegram-bot-instance.dto';
 
 @Injectable()
 export class TelegramProvider implements OnApplicationBootstrap {
-  private botModels = [];
   constructor(
     @Inject('BOT_SERVICE') private botService: ClientProxy,
     @Inject(FilesProvider) private filesProvider: FilesProvider,
@@ -84,6 +84,7 @@ export class TelegramProvider implements OnApplicationBootstrap {
     chatId: number,
     type_id: number,
     attachments: number[],
+    bots: TelegramBotInstanceDto[],
   ): Promise<void> {
     await Promise.all(
       attachments.map(async (el) => {
@@ -92,20 +93,32 @@ export class TelegramProvider implements OnApplicationBootstrap {
           case 1:
             return;
           case 2:
-            await this.botModels[0].botInstance.telegram.sendPhoto(chatId, {
-              source: file.stream,
-            });
+            await Promise.all(
+              bots.map(async (instance) => {
+                await instance.bot.telegram.sendPhoto(chatId, {
+                  source: file.stream,
+                });
+              }),
+            );
             break;
           case 3:
-            await this.botModels[0].botInstance.telegram.sendVideo(chatId, {
-              source: file.stream,
-            });
+            await Promise.all(
+              bots.map(async (instance) => {
+                await instance.bot.telegram.sendVideo(chatId, {
+                  source: file.stream,
+                });
+              }),
+            );
             break;
           case 4:
-            await this.botModels[0].botInstance.telegram.sendDocument(chatId, {
-              source: file.stream,
-              filename: file.name,
-            });
+            await Promise.all(
+              bots.map(async (instance) => {
+                await instance.bot.telegram.sendDocument(chatId, {
+                  source: file.stream,
+                  filename: file.name,
+                });
+              }),
+            );
             break;
           default:
             return;
@@ -119,18 +132,20 @@ export class TelegramProvider implements OnApplicationBootstrap {
     msg: MessageCreateDto;
     botModelId: number;
   }) {
+    const bots = TelegramBotInstanceProvider.instances.filter((botInstance) => {
+      return botInstance.model.id == data.botModelId;
+    });
+
     await this.processClientMedia(
       data.chatId,
       data.msg.type_id,
       data.msg.attachments,
+      bots,
     );
+
     await Promise.all(
-      TelegramBotInstanceProvider.instances.map(async (botInstance) => {
-        if (botInstance.model.id == data.botModelId)
-          await botInstance.bot.telegram.sendMessage(
-            data.chatId,
-            data.msg.text,
-          );
+      bots.map(async (botInstance) => {
+        await botInstance.bot.telegram.sendMessage(data.chatId, data.msg.text);
       }),
     );
   }
