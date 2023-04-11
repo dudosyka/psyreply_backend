@@ -11,11 +11,14 @@ import { User } from 'telegraf-ts';
 import { Sequelize } from 'sequelize-typescript';
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { UserMessageModel } from '../../bot/models/user-message.model';
+import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
+import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 
 @Injectable()
 export class UserProvider extends BaseProvider<UserModel> {
   constructor(
     @Inject(CompanyProvider) private companyProvider: CompanyProvider,
+    @Inject(AuthProvider) private authProvider: AuthProvider,
     private sequelize: Sequelize,
   ) {
     super(UserModel);
@@ -134,5 +137,11 @@ export class UserProvider extends BaseProvider<UserModel> {
         throw err;
       },
     );
+  }
+
+  async getProfileLink(userId: number): Promise<string> {
+    const clientUrl = UrlGeneratorUtil.generateClientEndpoint();
+
+    return `${clientUrl}results/${await this.authProvider.assignUser(userId)}`;
   }
 }

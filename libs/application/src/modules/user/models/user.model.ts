@@ -4,6 +4,8 @@ import {
   BelongsToMany,
   Column,
   DataType,
+  ForeignKey,
+  HasOne,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -13,6 +15,7 @@ import { BaseModel } from '../../base/base.provider';
 import { MessageModel } from '../../bot/models/message.model';
 import { UserMessageModel } from '../../bot/models/user-message.model';
 import { FilesModel } from '@app/application/modules/files/models/files.model';
+import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
 
 @Table
 export class UserModel extends BaseModel {
@@ -29,9 +32,7 @@ export class UserModel extends BaseModel {
   @Column
   login: string;
 
-  @Column({
-    type: DataType.BIGINT,
-  })
+  @Column
   avatar: number;
 
   @BelongsTo(() => FilesModel, 'avatar')
@@ -53,16 +54,21 @@ export class UserModel extends BaseModel {
   coins: number;
 
   @Column
+  @ForeignKey(() => CompanyModel)
   company_id: number;
 
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
   @Column
+  @ForeignKey(() => GroupModel)
   group_id: number;
 
   @BelongsTo(() => GroupModel, 'group_id')
   group: GroupModel;
+
+  @HasOne(() => BotUserModel)
+  botUserModel: BotUserModel;
 
   @BelongsToMany(
     () => MessageModel,

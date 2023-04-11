@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   BelongsTo,
   Column,
+  ForeignKey,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -26,6 +27,7 @@ export class QuestionModel extends BaseModel {
   type: QuestionTypeModel;
 
   @Column
+  @ForeignKey(() => TestModel)
   test_id: number;
 
   @Column

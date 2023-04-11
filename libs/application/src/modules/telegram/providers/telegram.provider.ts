@@ -19,8 +19,12 @@ export class TelegramProvider implements OnApplicationBootstrap {
     );
   }
 
-  private processMedia(id: string, ctx: TelegrafContext): Promise<string[]> {
-    return ctx.telegram.getFileLink(id).then((url) => [url]);
+  private processMedia(id: string, ctx: TelegrafContext): Promise<number[]> {
+    return ctx.telegram.getFileLink(id).then(async (url) => {
+      const split = url.split('//');
+      const model = await this.filesProvider.moveToFiles(`/${split[2]}`);
+      return [model.id];
+    });
   }
 
   async onMessage(ctx: TelegrafContext) {
@@ -88,11 +92,11 @@ export class TelegramProvider implements OnApplicationBootstrap {
   ): Promise<void> {
     await Promise.all(
       attachments.map(async (el) => {
-        const file = await this.filesProvider.getFile(el);
         switch (type_id) {
           case 1:
             return;
           case 2:
+            let file = await this.filesProvider.getFile(el);
             await Promise.all(
               bots.map(async (instance) => {
                 await instance.bot.telegram.sendPhoto(chatId, {
@@ -102,6 +106,8 @@ export class TelegramProvider implements OnApplicationBootstrap {
             );
             break;
           case 3:
+            file = await this.filesProvider.getFile(el);
+            console.log(file);
             await Promise.all(
               bots.map(async (instance) => {
                 await instance.bot.telegram.sendVideo(chatId, {
@@ -111,6 +117,7 @@ export class TelegramProvider implements OnApplicationBootstrap {
             );
             break;
           case 4:
+            file = await this.filesProvider.getFile(el);
             await Promise.all(
               bots.map(async (instance) => {
                 await instance.bot.telegram.sendDocument(chatId, {
@@ -143,11 +150,34 @@ export class TelegramProvider implements OnApplicationBootstrap {
       bots,
     );
 
-    await Promise.all(
-      bots.map(async (botInstance) => {
-        await botInstance.bot.telegram.sendMessage(data.chatId, data.msg.text);
-      }),
-    );
+    //If we get a link
+    if (data.msg.type_id == 5) {
+      await Promise.all(
+        bots.map(async (botInstance) => {
+          await botInstance.bot.telegram.sendMessage(
+            data.chatId,
+            data.msg.text,
+            {
+              reply_markup: {
+                inline_keyboard: [
+                  /* Also, we can have URL buttons. */
+                  [{ text: 'Open in browser', url: data.msg.link }],
+                ],
+              },
+            },
+          );
+        }),
+      );
+    } else {
+      await Promise.all(
+        bots.map(async (botInstance) => {
+          await botInstance.bot.telegram.sendMessage(
+            data.chatId,
+            data.msg.text,
+          );
+        }),
+      );
+    }
   }
 
   onMessageEdit(ctx: TelegrafContext) {

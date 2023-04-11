@@ -4,7 +4,10 @@ import { MessageCreateDto } from '@app/application/modules/chat/dto/message-crea
 import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 import { UserMessageModel } from '@app/application/modules/bot/models/user-message.model';
-import { AttachmentDto } from '@app/application/modules/telegram/dto/attachment.dto';
+import {
+  AttachmentDto,
+  AttachmentType,
+} from '@app/application/modules/telegram/dto/attachment.dto';
 import { FilesModel } from '@app/application/modules/files/models/files.model';
 
 export class BotMessageProvider {
@@ -20,6 +23,7 @@ export class BotMessageProvider {
     return files.map((el) => {
       return {
         id: null,
+        type: AttachmentType.FILE,
         link: `${el.id}`,
       };
     });
@@ -29,7 +33,8 @@ export class BotMessageProvider {
     msg: MessageCreateDto,
     botUserId: number,
   ): Promise<{ msg: MessageModel; botModelId: number }> {
-    const { type_id, attachments, text } = msg;
+    console.log(msg);
+    const { type_id, attachments, text, link, distribution_message_type } = msg;
 
     const userBotModel = await BotUserModel.findOne({
       where: {
@@ -37,15 +42,31 @@ export class BotMessageProvider {
       },
     });
 
-    if (!userBotModel)
+    if (!userBotModel) {
+      await TransactionUtil.rollback();
       throw new ModelNotFoundException(BotUserModel, botUserId);
+    }
 
-    const parsedAttachments = await this.processClientAttachments(attachments);
+    const parsedAttachments: AttachmentDto[] =
+      await this.processClientAttachments(attachments);
 
     const content = {
       text,
       attachments: parsedAttachments,
     };
+
+    if (link) {
+      content.attachments.push({
+        id: null,
+        type:
+          distribution_message_type == 3
+            ? AttachmentType.LINK
+            : AttachmentType.TEST,
+        link: link,
+      });
+    }
+
+    console.log(type_id, content);
 
     const messageModel = await MessageModel.create(
       {
@@ -54,13 +75,18 @@ export class BotMessageProvider {
         content,
       },
       TransactionUtil.getHost(),
-    ).then((res) => {
-      if (!res) {
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('Message creation failed');
+        }
+        return res;
+      })
+      .catch((err) => {
         TransactionUtil.rollback();
-        throw new Error('Group creation failed');
-      }
-      return res;
-    });
+        throw err;
+      });
 
     await UserMessageModel.create(
       {
@@ -69,7 +95,11 @@ export class BotMessageProvider {
         message_id: messageModel.id,
       },
       TransactionUtil.getHost(),
-    );
+    ).catch((err) => {
+      console.log(err);
+      TransactionUtil.rollback();
+      throw err;
+    });
 
     await TransactionUtil.commit();
 

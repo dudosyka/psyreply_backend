@@ -4,6 +4,8 @@ import { Telegraf, TelegrafContext } from 'telegraf-ts';
 import { TelegramBotInstanceDto } from '@app/application/modules/telegram/dto/telegram-bot-instance.dto';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 import { FailedBotLoadingException } from '@app/application/exceptions/telegram/failed-bot-loading.exception';
+import mainConf from '@app/application/config/main.conf';
+import * as https from 'https';
 
 @Injectable()
 export class TelegramBotInstanceProvider {
@@ -34,7 +36,11 @@ export class TelegramBotInstanceProvider {
   private static loadInstance(bot: BotModel) {
     let botInstance: Telegraf<TelegrafContext>;
     try {
-      botInstance = new Telegraf(bot.token);
+      botInstance = new Telegraf(bot.token, {
+        telegram: {
+          apiRoot: `http://0.0.0.0:${mainConf().telegramServerPort}`,
+        },
+      });
       botInstance.catch((err) => {
         console.log('CATCHED!', err);
       });
@@ -46,6 +52,10 @@ export class TelegramBotInstanceProvider {
       botInstance
         .launch()
         .then(() => {
+          if (bot.telegram_id == null) {
+            bot.telegram_id = botInstance.context.botInfo.id;
+            bot.save();
+          }
           TelegramBotInstanceProvider.instances.push({
             model: bot,
             bot: botInstance,

@@ -10,6 +10,9 @@ import { ResultProvider } from './providers/result.provider';
 import { CompanyModule } from '../company/company.module';
 import { CompanyProvider } from '../company/providers/company.provider';
 import { GroupBlockStatModel } from './models/group-block-stat.model';
+import { ChatModule } from '@app/application/modules/chat/chat.module';
+import { BotModule } from '@app/application/modules/bot/bot.module';
+import { UserModule } from '@app/application/modules/user/user.module';
 
 @Module({
   imports: [
@@ -17,6 +20,9 @@ import { GroupBlockStatModel } from './models/group-block-stat.model';
     BlockModule,
     TestModule,
     CompanyModule,
+    UserModule,
+    BotModule,
+    ChatModule,
   ],
   controllers: [ResultController],
   providers: [ResultProvider, BlockProvider, TestProvider, CompanyProvider],

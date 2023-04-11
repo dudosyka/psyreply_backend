@@ -8,7 +8,7 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { DistributionMessageTypeModel } from './distribution-message-type.model';
+import { DistributionMessageTypeModel } from '@app/application/modules/distribution/models/distribution-message-type.model';
 import { DistributionBlockModel } from '@app/application/modules/distribution/models/distribution-block.model';
 
 @Table
@@ -19,17 +19,25 @@ export class DistributionMessageModel extends Model {
   id: number;
 
   @Column
-  type_id: number;
+  relative_id: number;
 
   @Column
-  @ForeignKey(() => DistributionBlockModel)
-  block_id: number;
+  type_id: number;
 
   @BelongsTo(() => DistributionMessageTypeModel, 'type_id')
   type: DistributionMessageTypeModel;
 
   @Column({
-    type: DataType.TEXT,
+    type: DataType.JSON,
   })
-  content: string;
+  attachments: string;
+
+  @Column({
+    allowNull: true,
+  })
+  text: string;
+
+  @Column
+  @ForeignKey(() => DistributionBlockModel)
+  block_id: number;
 }

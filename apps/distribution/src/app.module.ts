@@ -6,12 +6,7 @@ import dbConf from './confs/db.conf';
 import mainConf from './confs/main.conf';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { DistributionModule } from './distribution/distribution.module';
-import { DistributionBlockModel } from './distribution/models/distribution-block.model';
-import { DistributionMessageModel } from './distribution/models/distribution-message.model';
-import { DistributionMessageTypeModel } from './distribution/models/distribution-message-type.model';
-import { DistributionRecipientsModel } from './distribution/models/distribution-recipients.model';
 import { UserModel } from './distribution/models/user.model';
-import { DistributionModel } from './distribution/models/distribution.model';
 
 @Module({
   imports: [
@@ -25,14 +20,7 @@ import { DistributionModel } from './distribution/models/distribution.model';
       dialect: 'mysql',
       autoLoadModels: true,
       synchronize: true,
-      models: [
-        DistributionModel,
-        DistributionBlockModel,
-        DistributionMessageModel,
-        DistributionMessageTypeModel,
-        DistributionRecipientsModel,
-        UserModel,
-      ],
+      models: [UserModel],
     }),
     DistributionModule,
   ],

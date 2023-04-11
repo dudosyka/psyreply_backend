@@ -3,6 +3,7 @@ import {
   BelongsTo,
   BelongsToMany,
   Column,
+  ForeignKey,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -28,6 +29,7 @@ export class BlockModel extends BaseModel {
   week: number;
 
   @Column
+  @ForeignKey(() => CompanyModel)
   company_id: number;
 
   @BelongsTo(() => CompanyModel, 'company_id')

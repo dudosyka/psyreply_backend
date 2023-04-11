@@ -25,6 +25,8 @@ import { ConfigModule } from '@nestjs/config';
 import mailerConf from '@app/application/config/mailer.conf';
 import dbConf from '@app/application/config/db.conf';
 import { FilesModule } from '@app/application/modules/files/files.module';
+import { DistributionModule } from '@app/application/modules/distribution/distribution.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { FilesModule } from '@app/application/modules/files/files.module';
       autoLoadModels: true,
       synchronize: true,
     }),
+    ScheduleModule.forRoot(),
     UserModule,
     TestModule,
     ResultModule,
@@ -53,6 +56,7 @@ import { FilesModule } from '@app/application/modules/files/files.module';
     ChatModule,
     BotModule,
     FilesModule,
+    DistributionModule,
   ],
   controllers: [AppController],
   providers: [

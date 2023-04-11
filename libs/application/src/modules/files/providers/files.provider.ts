@@ -5,6 +5,7 @@ import { BaseProvider } from '../../base/base.provider';
 import { FilesModel } from '../models/files.model';
 import * as https from 'https';
 import * as fs from 'fs';
+import * as http from 'http';
 
 @Injectable()
 export class FilesProvider extends BaseProvider<FilesModel> {
@@ -37,9 +38,9 @@ export class FilesProvider extends BaseProvider<FilesModel> {
     return new StreamableFile((await this.getFile(fileId)).stream);
   }
 
-  async uploadByLink(link: string) {
+  async uploadByLink(link: string): Promise<FilesModel> {
     return new Promise((resolve) =>
-      https.get(link, (res) => {
+      http.get(link, (res) => {
         const fileName = `${Date.now()}${
           link.split('/')[link.split('/').length - 1]
         }`;
@@ -59,5 +60,22 @@ export class FilesProvider extends BaseProvider<FilesModel> {
         });
       }),
     );
+  }
+
+  async moveToFiles(link): Promise<FilesModel> {
+    return new Promise(async (resolve) => {
+      const fileName = `${Date.now()}${
+        link.split('/')[link.split('/').length - 1]
+      }`;
+      const path = join(process.cwd(), 'upload', fileName);
+      fs.copyFile(link, path, (res) => {
+        console.log(res);
+      });
+      resolve(
+        await FilesModel.create({
+          path: fileName,
+        }),
+      );
+    });
   }
 }

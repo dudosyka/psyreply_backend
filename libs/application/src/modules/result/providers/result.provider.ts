@@ -17,6 +17,14 @@ import { GroupModel } from '../../company/models/group.model';
 import { UserModel } from '../../user/models/user.model';
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { BaseProvider } from '../../base/base.provider';
+import { ChatGateway } from '@app/application/modules/chat/providers/chat.gateway';
+import { BotProvider } from '@app/application/modules/bot/providers/bot.provider';
+import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-new-message.dto';
+import { UserProvider } from '@app/application/modules/user/providers/user.provider';
+import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
+import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
+import { MessageModel } from '@app/application/modules/bot/models/message.model';
+import { ResponseStatus } from '@app/application/filters/http-response.filter';
 
 @Injectable()
 export class ResultProvider extends BaseProvider<ResultModel> {
@@ -24,6 +32,9 @@ export class ResultProvider extends BaseProvider<ResultModel> {
     @Inject(TestProvider) private testProvider: TestProvider,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
     @Inject(CompanyProvider) private companyProvider: CompanyProvider,
+    @Inject(ChatGateway) private chatGateway: ChatGateway,
+    @Inject(BotProvider) private botProvider: BotProvider,
+    @Inject(UserProvider) private userProvider: UserProvider,
     private sequelize: Sequelize,
   ) {
     super(ResultModel);
@@ -111,6 +122,35 @@ export class ResultProvider extends BaseProvider<ResultModel> {
       data: JSON.stringify(newData),
       company_id: blockModel ? blockModel.company_id : null,
     };
+
+    const user = await this.userProvider.getOne({
+      where: {
+        id: userId,
+      },
+      include: [BotUserModel],
+    });
+
+    const newMessageDto: ClientNewMessageDto = {
+      msg: {
+        type_id: 1,
+        text: 'Тестирование пройдено!',
+        attachments: [],
+      },
+      chatId: user.botUserModel.chat_id,
+      botUserId: user.botUserModel.id,
+    };
+
+    const msg = await this.botProvider.newMessageInside(newMessageDto, user.id);
+
+    await this.chatGateway.server
+      .to(user.botUserModel.chat_id.toString())
+      .emit(
+        'newMessage',
+        WsResponseFilter.responseObject<MessageModel>(
+          msg,
+          ResponseStatus.SUCCESS,
+        ),
+      );
 
     return await ResultModel.create(resultData, TransactionUtil.getHost())
       .then((res) => {

@@ -50,15 +50,27 @@ export class UserController {
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
+  @Get('/byCompany')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getAllByCompany(
+    @Req() req,
+  ): Promise<HttpResponseFilter<UserModel[]>> {
+    return HttpResponseFilter.response<UserModel[]>(
+      await this.userProvider.getAll({
+        filters: { company_id: req.user.companyId },
+      }),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get(':jbId/assign')
   @HttpCode(ResponseStatus.SUCCESS)
   public async assignUser(
     @Param('jbId') userId: number,
   ): Promise<HttpResponseFilter<string>> {
     return HttpResponseFilter.response<string>(
-      `https://client.psyreply.com/results/${await this.authProvider.assignUser(
-        userId,
-      )}`,
+      await this.userProvider.getProfileLink(userId),
       ResponseStatus.SUCCESS,
     );
   }

@@ -1,7 +1,7 @@
 import {
   AutoIncrement,
-  BelongsToMany,
   Column,
+  HasMany,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -23,12 +23,15 @@ export class CompanyModel extends BaseModel {
   @Column
   logo: string;
 
-  @BelongsToMany(() => BlockModel, () => BlockModel, 'company_id', 'id')
+  // @BelongsToMany(() => BlockModel, () => BlockModel, 'company_id', 'id')
+  @HasMany(() => BlockModel)
   blocks: BlockModel[];
 
-  @BelongsToMany(() => UserModel, () => UserModel, 'company_id', 'id')
+  // @BelongsToMany(() => UserModel, () => UserModel, 'company_id', 'id')
+  @HasMany(() => UserModel)
   users: UserModel[];
 
-  @BelongsToMany(() => GroupModel, () => GroupModel, 'company_id', 'id')
+  // @BelongsToMany(() => GroupModel, () => GroupModel, 'company_id', 'id')
+  @HasMany(() => GroupModel)
   groups: GroupModel[];
 }

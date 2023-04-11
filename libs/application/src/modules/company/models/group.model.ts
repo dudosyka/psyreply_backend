@@ -1,8 +1,9 @@
 import {
   AutoIncrement,
   BelongsTo,
-  BelongsToMany,
   Column,
+  ForeignKey,
+  HasMany,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -21,11 +22,13 @@ export class GroupModel extends BaseModel {
   name: string;
 
   @Column
+  @ForeignKey(() => CompanyModel)
   company_id: number;
 
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  @BelongsToMany(() => UserModel, () => UserModel, 'group_id', 'id')
+  // @BelongsToMany(() => UserModel, () => UserModel, 'group_id', 'id')
+  @HasMany(() => UserModel)
   users: UserModel[];
 }

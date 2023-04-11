@@ -25,8 +25,8 @@ import { BaseProvider } from '../../base/base.provider';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
 import { GroupModel } from '../../company/models/group.model';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
-import { ProjectState } from '../../../config/main.conf';
 import { ConfigService } from '@nestjs/config';
+import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 
 @Injectable()
 export class BlockProvider extends BaseProvider<BlockModel> {
@@ -35,7 +35,6 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     @Inject(TestBlockProvider) private testBlockProvider: TestBlockProvider,
     @Inject(AuthProvider) private authProvider: AuthProvider,
     private sequelize: Sequelize,
-    private configService: ConfigService,
   ) {
     super(BlockModel);
   }
@@ -326,7 +325,7 @@ export class BlockProvider extends BaseProvider<BlockModel> {
       blockId,
       week,
       companyId,
-    }: { blockId: number; week: number; companyId: number },
+    }: { blockId: number; week: number | null; companyId: number },
     jetBotId: number,
   ): Promise<{ link: string; linkdb: string }> {
     const blockModel = await BlockModel.findOne({
@@ -349,6 +348,56 @@ export class BlockProvider extends BaseProvider<BlockModel> {
       throw new ModelNotFoundException(BlockModel, blockId);
     }
 
+    let weekForLink = week;
+
+    if (week == null) {
+      weekForLink = weekForLink
+        ? weekForLink
+        : blockModel.week
+        ? blockModel.week + 1
+        : 1;
+
+      blockModel.week = weekForLink;
+
+      await blockModel.save();
+    }
+
+    const link = await this.authProvider.createUserBlockToken(
+      userModel,
+      weekForLink,
+      blockModel,
+    );
+
+    const linkdb = await this.authProvider.assignUserByUserBlock(userModel.id);
+
+    const clientUrl = UrlGeneratorUtil.generateClientEndpoint();
+
+    return {
+      link: `${clientUrl}test/${link}`,
+      linkdb: `${clientUrl}results/${linkdb}`,
+    };
+  }
+
+  //Sub method which auto-generates week and use UserModel instead of jetBotId
+  async createLinkForDistribution(blockId, userModel) {
+    const blockModel = await BlockModel.findOne({
+      where: {
+        id: blockId,
+      },
+    });
+
+    if (!blockModel) throw new ModelNotFoundException(BlockModel, blockId);
+
+    let week = blockModel.week;
+
+    if (week == null) {
+      week = 1;
+    } else week++;
+
+    blockModel.week = week;
+
+    await blockModel.save();
+
     const link = await this.authProvider.createUserBlockToken(
       userModel,
       week,
@@ -357,12 +406,9 @@ export class BlockProvider extends BaseProvider<BlockModel> {
 
     const linkdb = await this.authProvider.assignUserByUserBlock(userModel.id);
 
-    let clientUrl = 'http://localhost:8080/';
-    if (this.configService.get('main.isDev') == ProjectState.TEST_PROD) {
-      clientUrl = 'https://client.beta.psyreply.com/';
-    } else if (this.configService.get('main.isDev') == ProjectState.PROD) {
-      clientUrl = 'https://client.psyreply.com/';
-    }
+    const clientUrl = UrlGeneratorUtil.generateClientEndpoint();
+
+    console.log(clientUrl);
 
     return {
       link: `${clientUrl}test/${link}`,

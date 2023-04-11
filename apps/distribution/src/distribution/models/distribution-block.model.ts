@@ -1,8 +1,8 @@
 import {
   AutoIncrement,
   BelongsTo,
-  BelongsToMany,
   Column,
+  HasMany,
   Model,
   PrimaryKey,
   Table,
@@ -23,11 +23,12 @@ export class DistributionBlockModel extends Model {
   @BelongsTo(() => DistributionModel, 'distribution_id')
   distribution: DistributionModel;
 
-  @BelongsToMany(
-    () => DistributionMessageModel,
-    () => DistributionMessageModel,
-    'block_id',
-    'id',
-  )
+  // @BelongsToMany(
+  //   () => DistributionMessageModel,
+  //   () => DistributionMessageModel,
+  //   'block_id',
+  //   'id',
+  // )
+  @HasMany(() => DistributionMessageModel)
   messages: DistributionMessageModel[];
 }

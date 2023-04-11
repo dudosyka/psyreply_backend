@@ -1,8 +1,8 @@
 import {
   AutoIncrement,
   BelongsTo,
-  BelongsToMany,
   Column,
+  HasMany,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -44,6 +44,7 @@ export class TestModel extends BaseModel {
   @BelongsTo(() => MetricModel, 'metric_id')
   metric: MetricModel;
 
-  @BelongsToMany(() => QuestionModel, () => QuestionModel, 'test_id', 'id')
+  // @BelongsToMany(() => QuestionModel, () => QuestionModel, 'test_id', 'id')
+  @HasMany(() => QuestionModel)
   questions: QuestionModel[];
 }

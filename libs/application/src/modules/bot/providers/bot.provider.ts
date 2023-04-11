@@ -34,7 +34,7 @@ export class BotProvider {
     ctx_: string;
     message_type: number;
     attachments: string[];
-  }) {
+  }): Promise<void> {
     if (!TransactionUtil.isSet())
       TransactionUtil.setHost(await this.sequelize.transaction());
 
@@ -103,8 +103,8 @@ export class BotProvider {
       );
   }
 
-  //Get a message from socket than emit it to microservice (tg bot)
-  async newMessageFromClient(
+  //Get a message from our system (from socket or from distribution) than emit it to microservice (tg bot)
+  async newMessageInside(
     newMessageDto: ClientNewMessageDto,
     userId: number,
   ): Promise<MessageModel> {

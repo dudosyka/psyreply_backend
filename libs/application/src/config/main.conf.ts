@@ -4,6 +4,7 @@ export enum ProjectState {
   DEV,
   TEST_PROD,
   PROD,
+  SECOND_PROD,
 }
 
 export default registerAs('main', () => {
@@ -11,6 +12,7 @@ export default registerAs('main', () => {
   let isDev = ProjectState.DEV;
   if (envIsDev == '1') isDev = ProjectState.TEST_PROD;
   else if (envIsDev == '2') isDev = ProjectState.PROD;
+  else if (envIsDev == '3') isDev = ProjectState.SECOND_PROD;
 
   return {
     isDev,

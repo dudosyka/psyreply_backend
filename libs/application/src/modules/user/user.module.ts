@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { UserController } from './controllers/user.controller';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModel } from './models/user.model';
@@ -9,6 +9,7 @@ import { UserProvider } from './providers/user.provider';
 import { UserMessageModel } from '../bot/models/user-message.model';
 import { MessageModel } from '../bot/models/message.model';
 import { MessageTypeModel } from '../bot/models/message-type.model';
+import { BotModule } from '@app/application/modules/bot/bot.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { MessageTypeModel } from '../bot/models/message-type.model';
       MessageModel,
       MessageTypeModel,
     ]),
+    forwardRef(() => BotModule),
     AuthModule,
     CompanyModule,
   ],
