@@ -185,12 +185,6 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   block_id: number;
                   file_id: number;
                 } = JSON.parse(msg.attachments);
-                console.log(
-                  msg,
-                  attachments,
-                  typeof attachments,
-                  attachments.file_id,
-                );
                 let newMessageDto: MessageCreateDto;
                 switch (msg.type_id) {
                   case 1: //Text
@@ -237,7 +231,6 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   default:
                     break;
                 }
-                console.log(newMessageDto);
                 const messageModel = await this.botProvider.newMessageInside(
                   {
                     msg: newMessageDto,
@@ -288,7 +281,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
       }-${cur.getDate()} ${el.send_time}`;
       const nextCallDate = new Date(nextCallString);
       el.next_call = nextCallDate.getTime() + el.day_period * 3600 * 24 * 1000;
-      // el.save();
+      el.save();
       this.sendDistribution(el);
     });
   }
