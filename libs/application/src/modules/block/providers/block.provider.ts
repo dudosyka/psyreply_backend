@@ -25,7 +25,6 @@ import { BaseProvider } from '../../base/base.provider';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
 import { GroupModel } from '../../company/models/group.model';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
-import { ConfigService } from '@nestjs/config';
 import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 
 @Injectable()
