@@ -5,7 +5,6 @@ import { TelegramBotInstanceDto } from '@app/application/modules/telegram/dto/te
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 import { FailedBotLoadingException } from '@app/application/exceptions/telegram/failed-bot-loading.exception';
 import mainConf from '@app/application/config/main.conf';
-import * as https from 'https';
 
 @Injectable()
 export class TelegramBotInstanceProvider {
@@ -66,7 +65,6 @@ export class TelegramBotInstanceProvider {
           throw new FailedBotLoadingException(bot.token, bot.id);
         });
     } catch (err) {
-      console.log('Error is here');
       throw new FailedBotLoadingException(bot.token, bot.id);
     }
   }

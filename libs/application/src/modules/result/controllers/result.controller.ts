@@ -2,13 +2,13 @@ import {
   Body,
   Controller,
   Get,
+  HttpCode,
   Inject,
   Param,
   Patch,
   Post,
   Req,
   UseGuards,
-  HttpCode,
 } from '@nestjs/common';
 import { ResultProvider } from '../providers/result.provider';
 import { ResultModel } from '../models/result.model';

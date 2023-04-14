@@ -11,6 +11,7 @@ import { DistributionModel } from '@app/application/modules/distribution/models/
 import { BotModule } from '@app/application/modules/bot/bot.module';
 import { BlockModule } from '@app/application/modules/block/block.module';
 import { ChatModule } from '@app/application/modules/chat/chat.module';
+import { DistributionBlockController } from '@app/application/modules/distribution/controllers/distribution-block.controller';
 
 @Module({
   imports: [
@@ -35,7 +36,7 @@ import { ChatModule } from '@app/application/modules/chat/chat.module';
       DistributionMessageTypeModel,
     ]),
   ],
-  controllers: [DistributionController],
+  controllers: [DistributionController, DistributionBlockController],
   providers: [DistributionProvider],
 })
 export class DistributionModule {}

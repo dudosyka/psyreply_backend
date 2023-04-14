@@ -2,9 +2,9 @@ import {
   Body,
   Controller,
   ForbiddenException,
+  HttpCode,
   Inject,
   Post,
-  HttpCode,
 } from '@nestjs/common';
 import { LoggerProvider } from '../providers/logger.provider';
 import { ErrorOutputDto } from '../dtos/error.output.dto';

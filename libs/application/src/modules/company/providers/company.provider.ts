@@ -25,7 +25,6 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
   constructor(
     @InjectModel(CompanyModel) private companyModel: CompanyModel,
     @Inject(BlockProvider) private blockProvider: BlockProvider,
-
     @Inject(AuthProvider) private authProvider: AuthProvider,
     private sequelize: Sequelize,
   ) {

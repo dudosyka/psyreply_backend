@@ -1,10 +1,9 @@
 import { Injectable, StreamableFile } from '@nestjs/common';
+import * as fs from 'fs';
 import { createReadStream, ReadStream } from 'fs';
 import { join } from 'path';
 import { BaseProvider } from '../../base/base.provider';
 import { FilesModel } from '../models/files.model';
-import * as https from 'https';
-import * as fs from 'fs';
 import * as http from 'http';
 
 @Injectable()

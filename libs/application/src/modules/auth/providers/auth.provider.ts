@@ -23,6 +23,7 @@ import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-
 @Injectable()
 export class AuthProvider {
   user: UserModel;
+
   constructor(
     @InjectModel(UserModel) private userModel: UserModel,
     @Inject(BcryptUtil) private bcrypt: BcryptUtil,

@@ -102,6 +102,7 @@ export class ChatProvider extends BaseProvider<BotModel> {
 
     return userBotModel;
   }
+
   async getChatInfo(botUserId: number): Promise<ChatUserInfoOutputDto> {
     const userBotModel = await this.getUserBotModel(botUserId);
 

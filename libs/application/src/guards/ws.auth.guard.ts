@@ -5,6 +5,7 @@ import { JwtUtil } from '../utils/jwt.util';
 @Injectable()
 export class WsGuard implements CanActivate {
   constructor(@Inject(JwtUtil) private jwtUtil: JwtUtil) {}
+
   canActivate(
     context: any,
   ): boolean | any | Promise<boolean | any> | Observable<boolean | any> {

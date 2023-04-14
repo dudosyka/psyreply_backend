@@ -24,6 +24,7 @@ import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-c
 @UseGuards(JwtAuthGuard, AdminGuard)
 export class ChatController {
   constructor(@Inject(ChatProvider) private chatProvider: ChatProvider) {}
+
   @Get(':botUserId/info')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getBotUserInfo(

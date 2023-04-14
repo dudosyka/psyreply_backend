@@ -3,6 +3,7 @@ export enum AttachmentType {
   LINK,
   TEST,
 }
+
 export class AttachmentDto {
   id?: string;
   type: AttachmentType;
