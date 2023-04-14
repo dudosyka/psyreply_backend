@@ -12,6 +12,7 @@ import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-ne
 import { BotCreateDto } from '@app/application/modules/bot/dto/bot-create.dto';
 import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
 import { ResponseStatus } from '@app/application/filters/http-response.filter';
+import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
 
 type ContentDto = {
   attachments: string[];
@@ -153,6 +154,20 @@ export class BotProvider {
     this.botService.emit('createBot', {
       botModelId: bot.id,
     });
+    return bot;
+  }
+
+  async update(updateDto: BotCreateDto, id: number) {
+    const bot = await BotModel.findOne({
+      where: {
+        id,
+      },
+    });
+
+    if (!bot) throw new ModelNotFoundException(BotModel, id);
+
+    await bot.update({ ...updateDto });
+
     return bot;
   }
 }

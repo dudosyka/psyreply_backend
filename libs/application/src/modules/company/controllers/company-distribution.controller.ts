@@ -4,6 +4,8 @@ import {
   Get,
   HttpCode,
   Inject,
+  Param,
+  Patch,
   Post,
   Req,
   UseGuards,
@@ -40,6 +42,20 @@ export class CompanyDistributionController {
     createDto.company_id = req.user.companyId;
     return HttpResponseFilter.response<BotModel>(
       await this.botProvider.create(createDto),
+      ResponseStatus.CREATED,
+    );
+  }
+
+  @Patch('/bot/:botId')
+  @HttpCode(ResponseStatus.CREATED)
+  public async updateBot(
+    @Req() req,
+    @Param('botId') botId: number,
+    @Body() updateDto: BotCreateDto,
+  ) {
+    updateDto.company_id = req.user.companyId;
+    return HttpResponseFilter.response<BotModel>(
+      await this.botProvider.update(updateDto, botId),
       ResponseStatus.CREATED,
     );
   }

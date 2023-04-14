@@ -34,7 +34,14 @@ export class ChatProvider extends BaseProvider<BotModel> {
 
   async getByCompany(companyId: number): Promise<BotModel[]> {
     return await this.getAll({
-      attributes: ['id', 'name', 'telegram_id', 'createdAt', 'updatedAt'],
+      attributes: [
+        'id',
+        'name',
+        'token',
+        'telegram_id',
+        'createdAt',
+        'updatedAt',
+      ],
       where: {
         company_id: companyId,
       },
