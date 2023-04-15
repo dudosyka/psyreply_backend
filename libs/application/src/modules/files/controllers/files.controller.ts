@@ -50,6 +50,22 @@ export class FilesController {
     );
   }
 
+  @Get('/model/:fileId')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getModel(
+    @Param('fileId') id: number,
+  ): Promise<HttpResponseFilter<FilesModel>> {
+    return HttpResponseFilter.response<FilesModel>(
+      await this.filesProvider.getOne({
+        where: {
+          id,
+        },
+      }),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
   @Get('/stream/:fileId')
   @HttpCode(ResponseStatus.SUCCESS)
   public async stream(
