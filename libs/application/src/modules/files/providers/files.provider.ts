@@ -77,4 +77,8 @@ export class FilesProvider extends BaseProvider<FilesModel> {
       );
     });
   }
+
+  async findOne(param: { where: { id: number } }) {
+    return await FilesModel.findOne(param);
+  }
 }

@@ -57,7 +57,7 @@ export class FilesController {
     @Param('fileId') id: number,
   ): Promise<HttpResponseFilter<FilesModel>> {
     return HttpResponseFilter.response<FilesModel>(
-      await this.filesProvider.getOne({
+      await this.filesProvider.findOne({
         where: {
           id,
         },
