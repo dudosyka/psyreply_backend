@@ -68,13 +68,6 @@ export class UserProvider extends BaseProvider<UserModel> {
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-    const botUserModel = await BotUserModel.findOne({
-      where: {
-        user_id: user.id,
-        bot_id: botModel.id,
-      },
-    });
-
     let model = await UserModel.findOne({
       where: {
         jetBotId: user.id,
@@ -101,6 +94,13 @@ export class UserProvider extends BaseProvider<UserModel> {
         return res;
       });
     }
+
+    const botUserModel = await BotUserModel.findOne({
+      where: {
+        user_id: model.id,
+        bot_id: botModel.id,
+      },
+    });
 
     if (!botUserModel) {
       await BotUserModel.create(
