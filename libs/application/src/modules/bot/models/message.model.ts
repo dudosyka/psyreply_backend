@@ -38,6 +38,9 @@ export class MessageModel extends BaseModel {
   )
   author: UserModel;
 
+  @Column
+  bot_id: number;
+
   @Column({
     type: DataType.JSON,
   })

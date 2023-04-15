@@ -67,6 +67,7 @@ export class BotProvider {
     const messageModel = await MessageModel.create(
       {
         bot_message_id: ctx.message.message_id,
+        bot_id: botModel.id,
         type_id: message_type,
         content: content,
       },

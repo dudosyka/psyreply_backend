@@ -83,6 +83,7 @@ export class ChatProvider extends BaseProvider<BotModel> {
 
     return await UserMessageModel.findAll({
       where: {
+        bot_id: userBotModel.bot_id,
         [Op.or]: [
           {
             recipient_id: userId,

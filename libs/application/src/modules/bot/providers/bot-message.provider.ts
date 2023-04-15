@@ -67,11 +67,10 @@ export class BotMessageProvider {
       });
     }
 
-    console.log(type_id, content);
-
     const messageModel = await MessageModel.create(
       {
         bot_message_id: null,
+        bot_id: userBotModel.bot_id,
         type_id,
         content,
       },
