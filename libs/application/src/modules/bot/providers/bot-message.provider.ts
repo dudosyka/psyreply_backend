@@ -91,6 +91,7 @@ export class BotMessageProvider {
     await UserMessageModel.create(
       {
         user_id: userId,
+        bot_id: messageModel.bot_id,
         recipient_id: userBotModel.user_id,
         message_id: messageModel.id,
       },

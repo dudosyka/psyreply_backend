@@ -25,5 +25,8 @@ export class UserMessageModel extends BaseModel {
   message: MessageModel;
 
   @Column
+  bot_id: number;
+
+  @Column
   recipient_id: number;
 }

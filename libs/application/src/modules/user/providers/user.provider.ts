@@ -136,6 +136,7 @@ export class UserProvider extends BaseProvider<UserModel> {
 
     const onCreate: any = {
       user_id,
+      bot_id: messageModel.bot_id,
       message_id: messageModel.id,
     };
     if (isAdmin) onCreate.recipient_id = isAdmin;
