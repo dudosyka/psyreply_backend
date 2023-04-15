@@ -68,6 +68,13 @@ export class UserProvider extends BaseProvider<UserModel> {
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
+    const botUserModel = await BotUserModel.findOne({
+      where: {
+        user_id: user.id,
+        bot_id: botModel.id,
+      },
+    });
+
     let model = await UserModel.findOne({
       where: {
         jetBotId: user.id,
@@ -93,7 +100,9 @@ export class UserProvider extends BaseProvider<UserModel> {
         }
         return res;
       });
+    }
 
+    if (!botUserModel) {
       await BotUserModel.create(
         {
           user_id: model.id,
@@ -107,9 +116,9 @@ export class UserProvider extends BaseProvider<UserModel> {
         console.log(err);
         throw err;
       });
-
-      if (!isPropagate) await TransactionUtil.commit();
     }
+
+    if (!isPropagate) await TransactionUtil.commit();
 
     return model;
   }
