@@ -7,20 +7,20 @@ import {
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
-import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 
 @Table
-export class UserNoteModel extends Model {
+export class ChatNoteModel extends Model {
   @AutoIncrement
   @PrimaryKey
   @Column
   id: number;
 
   @Column
-  bot_user_model_id: number;
+  chat_id: number;
 
-  @BelongsTo(() => BotUserModel, 'bot_user_model_id')
-  bot_user_model: BotUserModel;
+  @BelongsTo(() => ChatModel, 'chat_id')
+  chatBotModel: ChatModel;
 
   @Column({
     type: DataType.TEXT,

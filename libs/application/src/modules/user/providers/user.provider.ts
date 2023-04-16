@@ -5,17 +5,19 @@ import { UserFilterDto } from '../dtos/user-filter.dto';
 import { Op } from 'sequelize';
 import { BaseProvider } from '../../base/base.provider';
 import { BotModel } from '../../bot/models/bot.model';
-import { BotUserModel } from '../../bot/models/bot-user.model';
 import { MessageModel } from '../../bot/models/message.model';
 import { User } from 'telegraf-ts';
 import { Sequelize } from 'sequelize-typescript';
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
-import { UserMessageModel } from '../../bot/models/user-message.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
 import { GroupModel } from '@app/application/modules/company/models/group.model';
 import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
+import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
+import { ChatMessageModel } from '@app/application/modules/bot/models/chat-message.model';
+import { ChatDirection } from '@app/application/modules/chat/dto/chat-direction.enum';
 
 @Injectable()
 export class UserProvider extends BaseProvider<UserModel> {
@@ -86,21 +88,22 @@ export class UserProvider extends BaseProvider<UserModel> {
     botModel: BotModel,
     user: User,
     chatId: number,
-  ): Promise<UserModel> {
+  ): Promise<ChatBotModel> {
     let isPropagate = true;
     if (!TransactionUtil.isSet()) {
       isPropagate = false;
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
-    let model = await UserModel.findOne({
+    let chatBotModel = await ChatBotModel.findOne({
       where: {
-        jetBotId: user.id,
+        telegram_chat_id: chatId,
       },
+      include: [ChatModel],
     });
 
-    if (!model) {
-      model = await UserModel.create(
+    if (!chatBotModel) {
+      const model = await UserModel.create(
         {
           jetBotId: user.id,
           login: user.username,
@@ -118,60 +121,82 @@ export class UserProvider extends BaseProvider<UserModel> {
         }
         return res;
       });
-    }
 
-    const botUserModel = await BotUserModel.findOne({
-      where: {
-        user_id: model.id,
-        bot_id: botModel.id,
-      },
-    });
-
-    if (!botUserModel) {
-      await BotUserModel.create(
+      const chatModel = await ChatModel.create(
         {
+          user_id: model.id,
+          company_id: botModel.company_id,
+        },
+        TransactionUtil.getHost(),
+      )
+        .then((res) => {
+          if (!res) {
+            if (!isPropagate) TransactionUtil.rollback();
+            throw new Error('Chat creation failed');
+          }
+          return res;
+        })
+        .catch((err) => {
+          TransactionUtil.rollback();
+          throw err;
+        });
+
+      chatBotModel = await ChatBotModel.create(
+        {
+          chat_id: chatModel.id,
           user_id: model.id,
           username: user.username,
           bot_id: botModel.id,
-          chat_id: chatId,
+          telegram_chat_id: chatId,
         },
         TransactionUtil.getHost(),
-      ).catch((err) => {
-        if (!isPropagate) TransactionUtil.rollback();
-        console.log(err);
-        throw err;
-      });
+      )
+        .then((res) => {
+          if (!res) {
+            if (!isPropagate) TransactionUtil.rollback();
+            throw new Error('Chat creation failed');
+          }
+          return res;
+        })
+        .catch((err) => {
+          TransactionUtil.rollback();
+          throw err;
+        });
     }
 
     if (!isPropagate) await TransactionUtil.commit();
 
-    return model;
+    return chatBotModel;
   }
 
   async appendMessage(
     messageModel: MessageModel,
-    user_id: number,
+    chat_id: number,
     isAdmin: number | null = null,
-  ) {
-    let isPropagate = true;
+  ): Promise<ChatMessageModel> {
     if (!TransactionUtil.isSet()) {
-      isPropagate = false;
       TransactionUtil.setHost(await this.sequelize.transaction());
     }
 
     const onCreate: any = {
-      user_id,
-      bot_id: messageModel.bot_id,
+      chat_id,
       message_id: messageModel.id,
+      direction: ChatDirection.USER_TO_COMPANY,
     };
-    if (isAdmin) onCreate.recipient_id = isAdmin;
+    if (isAdmin) onCreate.direction = ChatDirection.COMPANY_TO_USER;
 
-    await UserMessageModel.create(onCreate, TransactionUtil.getHost()).catch(
-      (err) => {
-        if (!isPropagate) TransactionUtil.rollback();
+    return await ChatMessageModel.create(onCreate, TransactionUtil.getHost())
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('ChatMessage creation failed');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
         throw err;
-      },
-    );
+      });
   }
 
   async getProfileLink(userId: number): Promise<string> {

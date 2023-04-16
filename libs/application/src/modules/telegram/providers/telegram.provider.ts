@@ -19,11 +19,16 @@ export class TelegramProvider implements OnApplicationBootstrap {
     );
   }
 
-  private processMedia(id: string, ctx: TelegrafContext): Promise<number[]> {
+  private processMedia(
+    id: string,
+    ctx: TelegrafContext,
+  ): Promise<number[] | string[]> {
     return ctx.telegram.getFileLink(id).then(async (url) => {
       const split = url.split('//');
-      const model = await this.filesProvider.moveToFiles(`/${split[2]}`);
-      return [model.id];
+      console.log(url);
+      if (split[2])
+        return [(await this.filesProvider.moveToFiles(`/${split[2]}`)).id];
+      else return [];
     });
   }
 

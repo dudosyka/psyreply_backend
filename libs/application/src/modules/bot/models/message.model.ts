@@ -8,9 +8,9 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { MessageTypeModel } from './message-type.model';
-import { UserModel } from '../../user/models/user.model';
-import { UserMessageModel } from './user-message.model';
 import { BaseModel } from '../../base/base.provider';
+import { ChatMessageModel } from '@app/application/modules/bot/models/chat-message.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 
 @Table
 export class MessageModel extends BaseModel {
@@ -19,11 +19,6 @@ export class MessageModel extends BaseModel {
   @Column
   id: number;
 
-  @Column({
-    type: DataType.BIGINT,
-  })
-  bot_message_id: number;
-
   @Column
   type_id: number;
 
@@ -31,15 +26,12 @@ export class MessageModel extends BaseModel {
   type: MessageTypeModel;
 
   @BelongsToMany(
-    () => UserModel,
-    () => UserMessageModel,
+    () => ChatModel,
+    () => ChatMessageModel,
     'message_id',
-    'user_id',
+    'chat_id',
   )
-  author: UserModel;
-
-  @Column
-  bot_id: number;
+  chats: ChatModel;
 
   @Column({
     type: DataType.JSON,

@@ -4,14 +4,15 @@ import { BaseProvider } from '../../base/base.provider';
 import { BotModel } from '../../bot/models/bot.model';
 import { ModelNotFoundException } from '../../../exceptions/model-not-found.exception';
 import { MessageModel } from '../../bot/models/message.model';
-import { UserMessageModel } from '../../bot/models/user-message.model';
-import { Op } from 'sequelize';
-import { BotUserModel } from '../../bot/models/bot-user.model';
 import { Socket } from 'socket.io';
 import { ChatUserInfoOutputDto } from '@app/application/modules/chat/dto/chat-user-info-output.dto';
-import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
+import { ChatNoteModel } from '@app/application/modules/bot/models/chat-note.model';
 import { ChatNotesProvider } from '@app/application/modules/chat/providers/chat-notes.provider';
 import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
+import { ChatMessageModel } from '@app/application/modules/bot/models/chat-message.model';
+import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
+import { MessageClientOutputDto } from '@app/application/modules/chat/dto/message-client-output.dto';
 
 @Injectable()
 export class ChatProvider extends BaseProvider<BotModel> {
@@ -21,15 +22,13 @@ export class ChatProvider extends BaseProvider<BotModel> {
     super(BotModel);
   }
 
-  async getSubscribers(botId: number): Promise<UserModel[]> {
-    const bot = await this.getOne({
+  async getSubscribers(companyId: number): Promise<ChatModel[]> {
+    return await ChatModel.findAll({
       where: {
-        id: botId,
+        company_id: companyId,
       },
-      include: [UserModel],
+      include: [UserModel, ChatBotModel],
     });
-
-    return bot.subscribers;
   }
 
   async getByCompany(companyId: number): Promise<BotModel[]> {
@@ -60,61 +59,43 @@ export class ChatProvider extends BaseProvider<BotModel> {
     return await this.getByCompany(userModel.company_id);
   }
 
-  async getMessages(
-    botId: number,
-    userId: number,
-  ): Promise<UserMessageModel[]> {
-    const userModel = await UserModel.findOne({
-      where: {
-        id: userId,
-      },
-    });
-
-    if (!userModel) throw new ModelNotFoundException(UserModel, userId);
-
-    const userBotModel = await BotUserModel.findOne({
-      where: {
-        bot_id: botId,
-        user_id: userId,
-      },
-    });
-
-    if (!userBotModel) throw new ModelNotFoundException(BotUserModel, null);
-
-    return await UserMessageModel.findAll({
-      where: {
-        bot_id: userBotModel.bot_id,
-        [Op.or]: [
-          {
-            recipient_id: userId,
-          },
-          {
-            recipient_id: null,
-            user_id: userId,
-          },
-        ],
-      },
-      include: [MessageModel],
+  async getMessages(chatId: number): Promise<MessageClientOutputDto[]> {
+    return (
+      await ChatMessageModel.findAll({
+        where: {
+          chat_id: chatId,
+        },
+        include: [MessageModel],
+      })
+    ).map((el) => {
+      return {
+        id: el.message.id,
+        chat_id: el.chat_id,
+        direction: el.direction,
+        type_id: el.message.type_id,
+        content: el.message.content,
+        createdAt: el.message.createdAt,
+        updatedAt: el.message.updatedAt,
+      };
     });
   }
 
-  async getUserBotModel(botUserId: number): Promise<BotUserModel> | never {
-    const userBotModel = await BotUserModel.findOne({
+  async getChatModel(chatId: number): Promise<ChatModel> | never {
+    const chatModel = await ChatModel.findOne({
       where: {
-        id: botUserId,
+        id: chatId,
       },
     });
 
-    if (!userBotModel)
-      throw new ModelNotFoundException(BotUserModel, botUserId);
+    if (!chatModel) throw new ModelNotFoundException(ChatModel, chatId);
 
-    return userBotModel;
+    return chatModel;
   }
 
-  async getChatInfo(botUserId: number): Promise<ChatUserInfoOutputDto> {
-    const userBotModel = await this.getUserBotModel(botUserId);
+  async getChatInfo(chatId: number): Promise<ChatUserInfoOutputDto> {
+    const chatModel = await this.getChatModel(chatId);
 
-    const notes = await this.chatNotesProvider.getAll(userBotModel.id);
+    const notes = await this.chatNotesProvider.getAll(chatModel.id);
 
     return {
       notes,
@@ -122,24 +103,23 @@ export class ChatProvider extends BaseProvider<BotModel> {
   }
 
   async createNote(
-    botUserId: number,
+    chatId: number,
     userNoteCreateDto: UserNoteCreateDto,
-  ): Promise<UserNoteModel> {
-    const userBotModel = await this.getUserBotModel(botUserId);
+  ): Promise<ChatNoteModel> {
+    const chatModel = await this.getChatModel(chatId);
 
-    return await this.chatNotesProvider.create(
-      userBotModel.id,
-      userNoteCreateDto,
-    );
+    return await this.chatNotesProvider.create(chatModel.id, userNoteCreateDto);
   }
 
-  async removeNote(botUserId: number, noteId: number) {
-    await this.getUserBotModel(botUserId);
+  async removeNote(chatId: number, noteId: number) {
+    //Check that chat exists
+    await this.getChatModel(chatId);
 
     await this.chatNotesProvider.remove(noteId);
   }
 
   joinRoom(client: Socket, chatId: string) {
+    console.log(chatId, typeof chatId);
     // WebSocketUtil.emitter
     client.join(chatId);
   }

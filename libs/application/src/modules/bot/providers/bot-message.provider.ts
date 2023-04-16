@@ -1,14 +1,16 @@
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { MessageModel } from '@app/application/modules/bot/models/message.model';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
-import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
-import { UserMessageModel } from '@app/application/modules/bot/models/user-message.model';
 import {
   AttachmentDto,
   AttachmentType,
 } from '@app/application/modules/telegram/dto/attachment.dto';
 import { FilesModel } from '@app/application/modules/files/models/files.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
+import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
+import { ChatMessageModel } from '@app/application/modules/bot/models/chat-message.model';
+import { ChatDirection } from '@app/application/modules/chat/dto/chat-direction.enum';
 
 export class BotMessageProvider {
   private async processClientAttachments(
@@ -30,22 +32,26 @@ export class BotMessageProvider {
   }
 
   async saveMessageFromClient(
-    userId: number,
+    chatId: number,
     msg: MessageCreateDto,
-    botUserId: number,
-  ): Promise<{ msg: MessageModel; botModelId: number }> {
+  ): Promise<{
+    msg: MessageModel;
+    botModelId: number;
+    chatMessageModel: ChatMessageModel;
+  }> {
     console.log(msg);
     const { type_id, attachments, text, link, distribution_message_type } = msg;
 
-    const userBotModel = await BotUserModel.findOne({
+    const chatModel = await ChatModel.findOne({
       where: {
-        id: botUserId,
+        id: chatId,
       },
+      include: [ChatBotModel],
     });
 
-    if (!userBotModel) {
+    if (!chatModel) {
       await TransactionUtil.rollback();
-      throw new ModelNotFoundException(BotUserModel, botUserId);
+      throw new ModelNotFoundException(ChatModel, chatId);
     }
 
     const parsedAttachments: AttachmentDto[] =
@@ -69,8 +75,6 @@ export class BotMessageProvider {
 
     const messageModel = await MessageModel.create(
       {
-        bot_message_id: null,
-        bot_id: userBotModel.bot_id,
         type_id,
         content,
       },
@@ -88,22 +92,33 @@ export class BotMessageProvider {
         throw err;
       });
 
-    await UserMessageModel.create(
+    const chatMessageModel = await ChatMessageModel.create(
       {
-        user_id: userId,
-        bot_id: messageModel.bot_id,
-        recipient_id: userBotModel.user_id,
         message_id: messageModel.id,
+        chat_id: chatModel.id,
+        direction: ChatDirection.COMPANY_TO_USER,
+        message: messageModel,
       },
       TransactionUtil.getHost(),
-    ).catch((err) => {
-      console.log(err);
-      TransactionUtil.rollback();
-      throw err;
-    });
+    )
+      .then((res) => {
+        if (!res) {
+          TransactionUtil.rollback();
+          throw new Error('Message creation failed');
+        }
+        return res;
+      })
+      .catch((err) => {
+        TransactionUtil.rollback();
+        throw err;
+      });
 
     await TransactionUtil.commit();
 
-    return { msg: messageModel, botModelId: userBotModel.bot_id };
+    return {
+      msg: messageModel,
+      botModelId: chatModel.bot_chat.bot_id,
+      chatMessageModel,
+    };
   }
 }

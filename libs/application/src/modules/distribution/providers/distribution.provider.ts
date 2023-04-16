@@ -15,11 +15,9 @@ import { Inject } from '@nestjs/common';
 import { BotProvider } from '@app/application/modules/bot/providers/bot.provider';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { BlockProvider } from '@app/application/modules/block/providers/block.provider';
-import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
-import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
-import { MessageModel } from '@app/application/modules/bot/models/message.model';
-import { ResponseStatus } from '@app/application/filters/http-response.filter';
 import { ChatGateway } from '@app/application/modules/chat/providers/chat.gateway';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
+import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
 
 export class DistributionProvider extends BaseProvider<DistributionModel> {
   constructor(
@@ -231,24 +229,17 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   default:
                     break;
                 }
-                const messageModel = await this.botProvider.newMessageInside(
-                  {
+                const messageOutputDto =
+                  await this.botProvider.newMessageInside({
                     msg: newMessageDto,
-                    botUserId: user.botUserModel.id,
-                    chatId: user.botUserModel.chat_id,
-                  },
-                  user.id,
-                );
+                    chatModelId: user.chatModel.id,
+                    chatId: user.chatModel.bot_chat.telegram_chat_id,
+                  });
 
-                this.chatGateway.server
-                  .to(user.botUserModel.chat_id.toString())
-                  .emit(
-                    'newMessage',
-                    WsResponseFilter.responseObject<MessageModel>(
-                      messageModel,
-                      ResponseStatus.SUCCESS,
-                    ),
-                  );
+                this.chatGateway.sendTo(
+                  user.chatModel.bot_chat.telegram_chat_id.toString(),
+                  messageOutputDto,
+                );
               }),
             ).catch((err) => {
               console.log(err);
@@ -270,7 +261,10 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
         },
       },
       include: [
-        { model: UserModel, include: [BotUserModel] },
+        {
+          model: UserModel,
+          include: [{ model: ChatModel, include: [ChatBotModel] }],
+        },
         { model: DistributionBlockModel, include: [DistributionMessageModel] },
       ],
     });

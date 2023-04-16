@@ -1,27 +1,27 @@
-import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
+import { ChatNoteModel } from '@app/application/modules/bot/models/chat-note.model';
 import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
 
 export class ChatNotesProvider {
-  async getAll(userBotModelId: number): Promise<UserNoteModel[]> {
-    return await UserNoteModel.findAll({
+  async getAll(chat_id: number): Promise<ChatNoteModel[]> {
+    return await ChatNoteModel.findAll({
       where: {
-        bot_user_model_id: userBotModelId,
+        chat_id,
       },
     });
   }
 
   async create(
-    userBotModelId: number,
+    chatId: number,
     userNoteCreateDto: UserNoteCreateDto,
-  ): Promise<UserNoteModel> {
-    return await UserNoteModel.create({
-      bot_user_model_id: userBotModelId,
+  ): Promise<ChatNoteModel> {
+    return await ChatNoteModel.create({
+      chat_id: chatId,
       ...userNoteCreateDto,
     });
   }
 
   async remove(noteId: number) {
-    await UserNoteModel.destroy({
+    await ChatNoteModel.destroy({
       where: {
         id: noteId,
       },

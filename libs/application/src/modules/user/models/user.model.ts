@@ -12,11 +12,9 @@ import {
 import { CompanyModel } from '../../company/models/company.model';
 import { GroupModel } from '../../company/models/group.model';
 import { BaseModel } from '../../base/base.provider';
-import { MessageModel } from '../../bot/models/message.model';
-import { UserMessageModel } from '../../bot/models/user-message.model';
 import { FilesModel } from '@app/application/modules/files/models/files.model';
-import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
 import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 
 @Table
 export class UserModel extends BaseModel {
@@ -67,14 +65,6 @@ export class UserModel extends BaseModel {
   @BelongsToMany(() => GroupModel, () => UserGroupModel, 'user_id', 'group_id')
   groups: GroupModel[];
 
-  @HasOne(() => BotUserModel)
-  botUserModel: BotUserModel;
-
-  @BelongsToMany(
-    () => MessageModel,
-    () => UserMessageModel,
-    'user_id',
-    'message_id',
-  )
-  messages: MessageModel[];
+  @HasOne(() => ChatModel)
+  chatModel: ChatModel;
 }

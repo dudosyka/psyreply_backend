@@ -17,7 +17,7 @@ import {
 } from '@app/application/filters/http-response.filter';
 import { ChatUserInfoOutputDto } from '@app/application/modules/chat/dto/chat-user-info-output.dto';
 import { ChatProvider } from '@app/application/modules/chat/providers/chat.provider';
-import { UserNoteModel } from '@app/application/modules/bot/models/user-note.model';
+import { ChatNoteModel } from '@app/application/modules/bot/models/chat-note.model';
 import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-create.dto';
 
 @Controller('chat')
@@ -25,35 +25,35 @@ import { UserNoteCreateDto } from '@app/application/modules/chat/dto/user-note-c
 export class ChatController {
   constructor(@Inject(ChatProvider) private chatProvider: ChatProvider) {}
 
-  @Get(':botUserId/info')
+  @Get(':chatId')
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getBotUserInfo(
-    @Param('botUserId') botUserId: number,
+  public async getChatInfo(
+    @Param('chatId') chatId: number,
   ): Promise<HttpResponseFilter<ChatUserInfoOutputDto>> {
     return HttpResponseFilter.response<ChatUserInfoOutputDto>(
-      await this.chatProvider.getChatInfo(botUserId),
+      await this.chatProvider.getChatInfo(chatId),
       ResponseStatus.SUCCESS,
     );
   }
 
-  @Post(':botUserId/note')
+  @Post(':chatId/note')
   @HttpCode(ResponseStatus.CREATED)
   public async createNote(
-    @Param('botUserId') botUserId: number,
+    @Param('chatId') chatId: number,
     @Body() createDto: UserNoteCreateDto,
-  ): Promise<HttpResponseFilter<UserNoteModel>> {
-    return HttpResponseFilter.response<UserNoteModel>(
-      await this.chatProvider.createNote(botUserId, createDto),
+  ): Promise<HttpResponseFilter<ChatNoteModel>> {
+    return HttpResponseFilter.response<ChatNoteModel>(
+      await this.chatProvider.createNote(chatId, createDto),
       ResponseStatus.CREATED,
     );
   }
 
-  @Delete(':botUserId/note/:noteId')
+  @Delete(':chatId/note/:noteId')
   @HttpCode(ResponseStatus.NO_CONTENT)
   public async removeNot(
-    @Param('botUserId') botUserId: number,
+    @Param('botUserId') chatId: number,
     @Param('noteId') noteId: number,
   ) {
-    await this.chatProvider.removeNote(botUserId, noteId);
+    await this.chatProvider.removeNote(chatId, noteId);
   }
 }

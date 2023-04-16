@@ -9,8 +9,8 @@ import {
   Table,
 } from 'sequelize-typescript';
 import { CompanyModel } from '../../company/models/company.model';
-import { UserModel } from '../../user/models/user.model';
-import { BotUserModel } from './bot-user.model';
+import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 
 @Table
 export class BotModel extends BaseModel {
@@ -33,8 +33,8 @@ export class BotModel extends BaseModel {
   @Column
   company_id: number;
 
-  @BelongsToMany(() => UserModel, () => BotUserModel, 'bot_id', 'user_id')
-  subscribers: UserModel[];
+  @BelongsToMany(() => ChatModel, () => ChatBotModel, 'bot_id', 'chat_id')
+  subscribers: ChatModel[];
 
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;

@@ -11,5 +11,5 @@ export class ClientNewMessageDto {
   chatId: number;
 
   @IsNumber()
-  botUserId: number;
+  chatModelId: number;
 }

@@ -10,9 +10,8 @@ import { BotMessageProvider } from '@app/application/modules/bot/providers/bot-m
 import { TelegramNewMessageDto } from '@app/application/modules/telegram/dto/telegram-new-message.dto';
 import { ClientNewMessageDto } from '@app/application/modules/chat/dto/client-new-message.dto';
 import { BotCreateDto } from '@app/application/modules/bot/dto/bot-create.dto';
-import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
-import { ResponseStatus } from '@app/application/filters/http-response.filter';
 import { ModelNotFoundException } from '@app/application/exceptions/model-not-found.exception';
+import { MessageOutputDto } from '@app/application/modules/chat/dto/message-output.dto';
 
 type ContentDto = {
   attachments: string[];
@@ -49,7 +48,7 @@ export class BotProvider {
       },
     });
 
-    const userModel = await this.userProvider
+    const chatBotModel = await this.userProvider
       .genChat(botModel, ctx.message.from, ctx.message.chat.id)
       .catch((err) => {
         TransactionUtil.rollback();
@@ -67,7 +66,7 @@ export class BotProvider {
     const messageModel = await MessageModel.create(
       {
         bot_message_id: ctx.message.message_id,
-        bot_id: botModel.id,
+        chat_id: botModel.id,
         type_id: message_type,
         content: content,
       },
@@ -85,8 +84,8 @@ export class BotProvider {
         throw err;
       });
 
-    await this.userProvider
-      .appendMessage(messageModel, userModel.id)
+    const chatMessageModel = await this.userProvider
+      .appendMessage(messageModel, chatBotModel.chat_id)
       .catch((err) => {
         TransactionUtil.rollback();
         throw err;
@@ -94,30 +93,23 @@ export class BotProvider {
 
     await TransactionUtil.commit();
 
-    this.chatGateway.server
-      .to(ctx.message.chat.id.toString())
-      .emit(
-        'newMessage',
-        WsResponseFilter.responseObject<MessageModel>(
-          messageModel,
-          ResponseStatus.SUCCESS,
-        ),
-      );
+    this.chatGateway.sendTo(ctx.message.chat.id.toString(), {
+      chatMessageModel,
+      messageModel,
+    });
   }
 
   //Get a message from our system (from socket or from distribution) than emit it to microservice (tg bot)
   async newMessageInside(
     newMessageDto: ClientNewMessageDto,
-    userId: number,
-  ): Promise<MessageModel> {
+  ): Promise<MessageOutputDto> {
     if (!TransactionUtil.isSet())
       TransactionUtil.setHost(await this.sequelize.transaction());
 
-    const { msg, botModelId } =
+    const { chatMessageModel, botModelId, msg } =
       await this.botMessageProvider.saveMessageFromClient(
-        userId,
+        newMessageDto.chatModelId,
         newMessageDto.msg,
-        newMessageDto.botUserId,
       );
 
     this.botService
@@ -133,7 +125,7 @@ export class BotProvider {
         },
       });
 
-    return msg;
+    return { chatMessageModel, messageModel: msg };
   }
 
   async getAllByCompany(companyId: number) {

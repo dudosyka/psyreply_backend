@@ -13,11 +13,11 @@ import {
   HttpResponseFilter,
   ResponseStatus,
 } from '../../../filters/http-response.filter';
-import { UserModel } from '../../user/models/user.model';
 import { ChatProvider } from '../providers/chat.provider';
 import { BotModel } from '../../bot/models/bot.model';
-import { UserMessageModel } from '../../bot/models/user-message.model';
 import { ChatGateway } from '../providers/chat.gateway';
+import { ChatModel } from '@app/application/modules/chat/models/chat.model';
+import { MessageClientOutputDto } from '@app/application/modules/chat/dto/message-client-output.dto';
 
 @Controller('bot')
 export class ChatBotController {
@@ -26,49 +26,36 @@ export class ChatBotController {
     @Inject(ChatGateway) private chatGateway: ChatGateway,
   ) {}
 
-  @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':companyId')
-  @HttpCode(ResponseStatus.SUCCESS)
-  public async getBot(
-    @Param('companyId') companyId: number,
-  ): Promise<HttpResponseFilter<BotModel[]>> {
-    return HttpResponseFilter.response<BotModel[]>(
-      await this.chatProvider.getByCompany(companyId),
-      ResponseStatus.SUCCESS,
-    );
-  }
-
-  @UseGuards(JwtAuthGuard, AdminGuard)
   @Get('')
+  @UseGuards(JwtAuthGuard, AdminGuard)
   @HttpCode(ResponseStatus.SUCCESS)
-  public async getByToken(@Req() req): Promise<HttpResponseFilter<BotModel[]>> {
+  public async getBot(@Req() req): Promise<HttpResponseFilter<BotModel[]>> {
     return HttpResponseFilter.response<BotModel[]>(
-      await this.chatProvider.getByUser(req.user.id),
+      await this.chatProvider.getByCompany(req.user.companyId),
       ResponseStatus.SUCCESS,
     );
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':botId/subs')
+  @Get('subs')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getSubscribers(
-    @Param('botId') botId: number,
-  ): Promise<HttpResponseFilter<UserModel[]>> {
-    return HttpResponseFilter.response<UserModel[]>(
-      await this.chatProvider.getSubscribers(botId),
+    @Req() req,
+  ): Promise<HttpResponseFilter<ChatModel[]>> {
+    return HttpResponseFilter.response<ChatModel[]>(
+      await this.chatProvider.getSubscribers(req.user.companyId),
       ResponseStatus.SUCCESS,
     );
   }
 
   @UseGuards(JwtAuthGuard, AdminGuard)
-  @Get(':botId/chat/:userId')
+  @Get(':chatId/history')
   @HttpCode(ResponseStatus.SUCCESS)
   public async getHistory(
-    @Param('userId') userId: number,
-    @Param('botId') botId: number,
-  ): Promise<HttpResponseFilter<UserMessageModel[]>> {
-    return HttpResponseFilter.response<UserMessageModel[]>(
-      await this.chatProvider.getMessages(botId, userId),
+    @Param('chatId') chatId: number,
+  ): Promise<HttpResponseFilter<MessageClientOutputDto[]>> {
+    return HttpResponseFilter.response<MessageClientOutputDto[]>(
+      await this.chatProvider.getMessages(chatId),
       ResponseStatus.SUCCESS,
     );
   }
