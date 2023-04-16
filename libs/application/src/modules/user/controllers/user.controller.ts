@@ -22,6 +22,8 @@ import {
   HttpResponseFilter,
   ResponseStatus,
 } from '../../../filters/http-response.filter';
+import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
+import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -114,5 +116,15 @@ export class UserController {
   ): Promise<HttpResponseFilter<null>> {
     await this.userProvider.moveToCompany(userId, companyId);
     return HttpResponseFilter.response<null>(null, ResponseStatus.NO_CONTENT);
+  }
+
+  @UseGuards(JwtAuthGuard, SuperAdminGuard)
+  @Post('/super/user/create')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async createUser(@Body() userDto: AuthCreateUserDto) {
+    return HttpResponseFilter.response<UserModel>(
+      await this.userProvider.createOne(userDto),
+      ResponseStatus.CREATED,
+    );
   }
 }

@@ -13,6 +13,7 @@ import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { UserMessageModel } from '../../bot/models/user-message.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
+import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
 
 @Injectable()
 export class UserProvider extends BaseProvider<UserModel> {
@@ -153,5 +154,11 @@ export class UserProvider extends BaseProvider<UserModel> {
     const clientUrl = UrlGeneratorUtil.generateClientEndpoint();
 
     return `${clientUrl}results/${await this.authProvider.assignUser(userId)}`;
+  }
+
+  async createOne(userDto: AuthCreateUserDto) {
+    return await UserModel.create({
+      ...userDto,
+    });
   }
 }
