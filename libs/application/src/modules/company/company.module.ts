@@ -10,10 +10,11 @@ import { AuthProvider } from '@app/application/modules/auth/providers/auth.provi
 import { BotModule } from '@app/application/modules/bot/bot.module';
 import { BotProvider } from '@app/application/modules/bot/providers/bot.provider';
 import { CompanyDistributionController } from '@app/application/modules/company/controllers/company-distribution.controller';
+import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 
 @Module({
   imports: [
-    SequelizeModule.forFeature([GroupModel, CompanyModel]),
+    SequelizeModule.forFeature([GroupModel, CompanyModel, UserGroupModel]),
     forwardRef(() => BotModule),
     BlockModule,
     AuthModule,

@@ -16,6 +16,7 @@ import { MessageModel } from '../../bot/models/message.model';
 import { UserMessageModel } from '../../bot/models/user-message.model';
 import { FilesModel } from '@app/application/modules/files/models/files.model';
 import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model';
+import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 
 @Table
 export class UserModel extends BaseModel {
@@ -60,12 +61,11 @@ export class UserModel extends BaseModel {
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  @Column
-  @ForeignKey(() => GroupModel)
-  group_id: number;
-
-  @BelongsTo(() => GroupModel, 'group_id')
+  // @BelongsTo(() => GroupModel, 'group_id')
   group: GroupModel;
+
+  @BelongsToMany(() => GroupModel, () => UserGroupModel, 'user_id', 'group_id')
+  groups: GroupModel[];
 
   @HasOne(() => BotUserModel)
   botUserModel: BotUserModel;

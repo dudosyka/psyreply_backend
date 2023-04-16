@@ -14,6 +14,8 @@ import { UserMessageModel } from '../../bot/models/user-message.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
+import { GroupModel } from '@app/application/modules/company/models/group.model';
+import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 
 @Injectable()
 export class UserProvider extends BaseProvider<UserModel> {
@@ -37,25 +39,47 @@ export class UserProvider extends BaseProvider<UserModel> {
     companyId: number = null,
   ): Promise<UserModel[]> {
     const { byCompany, except_group_id, ...filter } = filters;
-    let where: any = {
-      ...filter,
-    };
-    if (filters.except_group_id) {
-      where = {
-        group_id: {
-          [Op.or]: [{ [Op.not]: filters.except_group_id }, { [Op.is]: null }],
-        },
+
+    if (byCompany) filter.company_id = companyId;
+
+    if (except_group_id || filter.group_id) {
+      return (
+        await UserGroupModel.findAll({
+          include: [
+            {
+              model: UserModel,
+              required: true,
+              where: {
+                ...filter,
+              },
+              include: [
+                {
+                  model: GroupModel,
+                  required: true,
+                  where: {
+                    ...(filter.group_id ? { id: filter.group_id } : {}),
+                    ...(except_group_id
+                      ? {
+                          id: {
+                            [Op.or]: [
+                              { [Op.not]: except_group_id },
+                              { [Op.is]: null },
+                            ],
+                          },
+                        }
+                      : {}),
+                  },
+                },
+              ],
+            },
+          ],
+        })
+      ).map((el) => el.user);
+    } else {
+      return super.getAll({
         ...filter,
-      };
+      });
     }
-
-    if (filters.byCompany) {
-      where['company_id'] = companyId;
-    }
-
-    return super.getAll({
-      where,
-    });
   }
 
   async genChat(

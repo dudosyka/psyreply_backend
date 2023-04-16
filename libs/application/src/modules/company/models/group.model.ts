@@ -1,15 +1,16 @@
 import {
   AutoIncrement,
   BelongsTo,
+  BelongsToMany,
   Column,
   ForeignKey,
-  HasMany,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
 import { CompanyModel } from './company.model';
 import { UserModel } from '../../user/models/user.model';
 import { BaseModel } from '../../base/base.provider';
+import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 
 @Table
 export class GroupModel extends BaseModel {
@@ -28,7 +29,6 @@ export class GroupModel extends BaseModel {
   @BelongsTo(() => CompanyModel, 'company_id')
   company: CompanyModel;
 
-  // @BelongsToMany(() => UserModel, () => UserModel, 'group_id', 'id')
-  @HasMany(() => UserModel)
+  @BelongsToMany(() => UserModel, () => UserGroupModel, 'group_id', 'user_id')
   users: UserModel[];
 }

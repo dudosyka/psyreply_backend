@@ -475,16 +475,19 @@ export class BlockProvider extends BaseProvider<BlockModel> {
     }, Object.create(null));
 
     const userIdsByGroup = (
-      await UserModel.findAll({
+      await GroupModel.findAll({
         where: {
-          group_id: groups.map((el) => el.id),
+          id: groups.map((el) => el.id),
         },
+        include: [UserModel],
       })
-    ).reduce((r, a) => {
-      r[a.group_id] = r[a.group_id] || [];
-      r[a.group_id].push(a.id);
-      return r;
-    }, Object.create(null));
+    )
+      .filter((el) => el.users.length)
+      .reduce((r, a) => {
+        r[a.id] = r[a.id] || [];
+        r[a.id] = a.users.map((el) => el.id);
+        return r;
+      }, Object.create(null));
 
     const resultQuery: {
       block_id: number;

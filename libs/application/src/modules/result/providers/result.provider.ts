@@ -193,8 +193,13 @@ export class ResultProvider extends BaseProvider<ResultModel> {
         CompanyModel,
         {
           model: UserModel,
-          include: [GroupModel],
-          ...(group_id ? { where: { group_id: group_id } } : {}),
+          required: true,
+          include: [
+            {
+              model: GroupModel,
+              ...(group_id ? { where: { id: group_id } } : {}),
+            },
+          ],
         },
       ],
     });

@@ -13,12 +13,12 @@ import { ResultModel } from '../../result/models/result.model';
 import { GroupModel } from '../models/group.model';
 import { GroupCreateDto } from '../dtos/group-create.dto';
 import { GroupUpdateDto } from '../dtos/group-update.dto';
-import { Op } from 'sequelize';
 import { BaseProvider } from '../../base/base.provider';
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
 import { BotModel } from '@app/application/modules/bot/models/bot.model';
+import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 
 @Injectable()
 export class CompanyProvider extends BaseProvider<CompanyModel> {
@@ -335,18 +335,11 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
   }
 
   async removeUsersFromGroup(users: number[]): Promise<boolean> {
-    await UserModel.update(
-      {
-        group_id: null,
+    await UserGroupModel.destroy({
+      where: {
+        user_id: users,
       },
-      {
-        where: {
-          id: {
-            [Op.in]: users,
-          },
-        },
-      },
-    );
+    });
 
     return true;
   }
@@ -380,11 +373,18 @@ export class CompanyProvider extends BaseProvider<CompanyModel> {
 
     if (!groupModel) throw new ModelNotFoundException(GroupModel, groupId);
 
+    await UserGroupModel.create(
+      {
+        user_id: userModel.id,
+        group_id: groupModel.id,
+      },
+      TransactionUtil.getHost(),
+    );
+
     await userModel
       .update(
         {
           company_id: groupModel.company_id,
-          group_id: groupModel.id,
         },
         TransactionUtil.getHost(),
       )
