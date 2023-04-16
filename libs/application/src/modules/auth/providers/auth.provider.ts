@@ -19,6 +19,7 @@ import { CompanyModel } from '@app/application/modules/company/models/company.mo
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { Sequelize } from 'sequelize-typescript';
 import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-email-output.dto';
+import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
 
 @Injectable()
 export class AuthProvider {
@@ -29,6 +30,7 @@ export class AuthProvider {
     @Inject(BcryptUtil) private bcrypt: BcryptUtil,
     @Inject(MailerUtil) private mailer: MailerUtil,
     @Inject(JwtUtil) private jwt: JwtUtil,
+    @Inject(FilesProvider) private filesProvider: FilesProvider,
     private sequelize: Sequelize,
   ) {}
 
@@ -205,10 +207,12 @@ export class AuthProvider {
 
     if (checkUnique) throw new DoubleRecordException(UserModel);
 
+    const fileModel = await this.filesProvider.upload(file);
+
     const company = await CompanyModel.create(
       {
         name: signupData.companyName,
-        logo: file.filename,
+        logo: fileModel.id,
       },
       TransactionUtil.getHost(),
     )

@@ -281,6 +281,7 @@ export class BlockProvider extends BaseProvider<BlockModel> {
         return await this.createModel({
           name: block.name,
           company_id: companyId,
+          description: block.description,
           time: block.time,
           tests: await this.testBlockProvider.getTests(blockId),
         })

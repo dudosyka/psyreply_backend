@@ -13,8 +13,8 @@ import { JwtModule } from '@nestjs/jwt';
 import { JwtOptionsModule } from '@app/application/modules/auth/providers/jwt.options.module';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerOptionsModule } from '@app/application/modules/auth/providers/mailer.options.module';
-import { MulterModule } from '@nestjs/platform-express';
-import { MulterConfigModule } from '@app/application/config/multer-config.module';
+import { FilesModule } from '@app/application/modules/files/files.module';
+import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
 
 @Module({
   imports: [
@@ -26,9 +26,10 @@ import { MulterConfigModule } from '@app/application/config/multer-config.module
     MailerModule.forRootAsync({
       useClass: MailerOptionsModule,
     }),
-    MulterModule.registerAsync({
-      useClass: MulterConfigModule,
-    }),
+    // MulterModule.registerAsync({
+    //   useClass: MulterConfigModule,
+    // }),
+    FilesModule,
   ],
   providers: [
     AuthProvider,
@@ -37,6 +38,7 @@ import { MulterConfigModule } from '@app/application/config/multer-config.module
     BcryptUtil,
     MailerUtil,
     JwtUtil,
+    FilesProvider,
   ],
   controllers: [AuthController],
   exports: [
@@ -54,6 +56,7 @@ import { MulterConfigModule } from '@app/application/config/multer-config.module
     BcryptUtil,
     MailerUtil,
     JwtUtil,
+    FilesModule,
   ],
 })
 export class AuthModule {}

@@ -15,5 +15,12 @@ import { FilesModel } from './models/files.model';
   ],
   controllers: [FilesController],
   providers: [FilesProvider],
+  exports: [
+    SequelizeModule.forFeature([FilesModel]),
+    MulterModule.registerAsync({
+      useClass: MulterConfigModule,
+    }),
+    FilesProvider,
+  ],
 })
 export class FilesModule {}

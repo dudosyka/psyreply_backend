@@ -25,6 +25,7 @@ import { BotUserModel } from '@app/application/modules/bot/models/bot-user.model
 import { WsResponseFilter } from '@app/application/filters/ws-response.filter';
 import { MessageModel } from '@app/application/modules/bot/models/message.model';
 import { ResponseStatus } from '@app/application/filters/http-response.filter';
+import { BotModel } from '@app/application/modules/bot/models/bot.model';
 
 @Injectable()
 export class ResultProvider extends BaseProvider<ResultModel> {
@@ -123,34 +124,45 @@ export class ResultProvider extends BaseProvider<ResultModel> {
       company_id: blockModel ? blockModel.company_id : null,
     };
 
-    const user = await this.userProvider.getOne({
+    const botModel = await BotModel.findOne({
       where: {
-        id: userId,
+        company_id: blockModel.company_id,
       },
-      include: [BotUserModel],
     });
 
-    const newMessageDto: ClientNewMessageDto = {
-      msg: {
-        type_id: 1,
-        text: 'Тестирование пройдено!',
-        attachments: [],
-      },
-      chatId: user.botUserModel.chat_id,
-      botUserId: user.botUserModel.id,
-    };
+    if (botModel) {
+      const botUserModel = await BotUserModel.findOne({
+        where: {
+          bot_id: botModel.id,
+          user_id: userId,
+        },
+      });
 
-    const msg = await this.botProvider.newMessageInside(newMessageDto, user.id);
+      const newMessageDto: ClientNewMessageDto = {
+        msg: {
+          type_id: 1,
+          text: 'Тестирование пройдено!',
+          attachments: [],
+        },
+        chatId: botUserModel.chat_id,
+        botUserId: botUserModel.id,
+      };
 
-    await this.chatGateway.server
-      .to(user.botUserModel.chat_id.toString())
-      .emit(
-        'newMessage',
-        WsResponseFilter.responseObject<MessageModel>(
-          msg,
-          ResponseStatus.SUCCESS,
-        ),
+      const msg = await this.botProvider.newMessageInside(
+        newMessageDto,
+        userId,
       );
+
+      await this.chatGateway.server
+        .to(botUserModel.chat_id.toString())
+        .emit(
+          'newMessage',
+          WsResponseFilter.responseObject<MessageModel>(
+            msg,
+            ResponseStatus.SUCCESS,
+          ),
+        );
+    }
 
     return await ResultModel.create(resultData, TransactionUtil.getHost())
       .then((res) => {
