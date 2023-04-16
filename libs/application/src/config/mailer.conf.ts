@@ -12,7 +12,7 @@ export default registerAs('mailer', () => {
       },
     },
     sendOptions: {
-      from: 'Psyreply | PsyReply<yan@psyreply.com>',
+      from: 'Reply | Reply <yan@psyreply.com>',
     },
   };
 });
