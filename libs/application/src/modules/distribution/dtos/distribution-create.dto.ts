@@ -6,11 +6,13 @@ import {
   Max,
   Min,
   ValidateNested,
+  MaxLength,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class DistributionCreateDto {
   @IsString()
+  @MaxLength(255)
   name: string;
 
   @IsNumber({}, { each: true })

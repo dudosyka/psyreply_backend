@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   BelongsTo,
   Column,
+  DataType,
   HasMany,
   PrimaryKey,
   Table,
@@ -38,7 +39,9 @@ export class TestModel extends BaseModel {
   @BelongsTo(() => QuestionTypeModel, 'type_id')
   type: QuestionTypeModel;
 
-  @Column
+  @Column({
+    type: DataType.TEXT,
+  })
   formula: string;
 
   @BelongsTo(() => MetricModel, 'metric_id')

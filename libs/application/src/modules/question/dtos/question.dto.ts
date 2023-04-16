@@ -2,6 +2,7 @@ import { QuestionAnswerDto } from './question-answer.dto';
 import {
   IsNumber,
   IsString,
+  MaxLength,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
@@ -33,6 +34,7 @@ export class QuestionDto {
   @IsString({
     message: 'title must be STRING',
   })
+  @MaxLength(255)
   title: string;
 
   @IsString({

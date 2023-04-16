@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   BelongsTo,
   Column,
+  DataType,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -29,7 +30,9 @@ export class ResultModel extends BaseModel {
   @Column
   company_title: string;
 
-  @Column
+  @Column({
+    type: DataType.TEXT,
+  })
   data: string;
 
   @Column

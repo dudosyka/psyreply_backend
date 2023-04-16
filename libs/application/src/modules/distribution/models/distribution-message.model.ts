@@ -34,6 +34,7 @@ export class DistributionMessageModel extends Model {
 
   @Column({
     allowNull: true,
+    type: DataType.TEXT,
   })
   text: string;
 

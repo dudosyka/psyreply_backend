@@ -9,7 +9,7 @@ export class MailerUtil {
   async sendUserConfirmation(user: UserModel) {
     await this.mailerService.sendMail({
       to: user.email,
-      subject: `New authorization ${user.emailCode}`,
+      subject: `Поытка авторизации ${user.emailCode}`,
       html: `<!DOCTYPE html>
             <html lang="en">
 <head>

@@ -3,6 +3,7 @@ import {
   BelongsTo,
   BelongsToMany,
   Column,
+  DataType,
   ForeignKey,
   PrimaryKey,
   Table,
@@ -21,6 +22,11 @@ export class BlockModel extends BaseModel {
 
   @Column
   name: string;
+
+  @Column({
+    type: DataType.TEXT,
+  })
+  description: string;
 
   @Column
   time: number;

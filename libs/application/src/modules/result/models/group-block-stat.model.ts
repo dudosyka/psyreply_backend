@@ -2,6 +2,7 @@ import {
   AutoIncrement,
   BelongsTo,
   Column,
+  DataType,
   PrimaryKey,
   Table,
 } from 'sequelize-typescript';
@@ -17,7 +18,9 @@ export class GroupBlockStatModel extends BaseModel {
   @Column
   id: number;
 
-  @Column
+  @Column({
+    type: DataType.TEXT,
+  })
   data: string;
 
   @Column

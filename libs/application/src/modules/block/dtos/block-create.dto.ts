@@ -1,10 +1,17 @@
-import { IsNumber, IsString, ValidateIf } from 'class-validator';
+import { IsNumber, IsString, MaxLength, ValidateIf } from 'class-validator';
 
 export class BlockCreateDto {
   @IsString({
     message: 'name must be string',
   })
+  @MaxLength(255)
   name: string;
+
+  @IsString({
+    message: 'description must be string',
+  })
+  @MaxLength(255)
+  description: string;
 
   @IsNumber(
     {},

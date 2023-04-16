@@ -5,6 +5,7 @@ import {
   IsNumber,
   IsString,
   Matches,
+  MaxLength,
   ValidateIf,
   ValidateNested,
 } from 'class-validator';
@@ -23,6 +24,7 @@ export class TestCreateDto {
   @IsString({
     message: 'title must be STRING',
   })
+  @MaxLength(255)
   title: string;
 
   @IsNumber(

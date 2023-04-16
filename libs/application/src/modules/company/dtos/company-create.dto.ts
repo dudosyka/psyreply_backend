@@ -1,9 +1,10 @@
-import { IsNumber, IsString, ValidateIf } from 'class-validator';
+import { IsNumber, IsString, MaxLength, ValidateIf } from 'class-validator';
 
 export class CompanyCreateDto {
   @IsString({
     message: 'name must be STRING',
   })
+  @MaxLength(255)
   name: string;
 
   @IsNumber(

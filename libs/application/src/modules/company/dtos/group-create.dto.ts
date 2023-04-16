@@ -1,4 +1,4 @@
-import { IsNumber, IsString } from 'class-validator';
+import { IsNumber, IsString, MaxLength } from 'class-validator';
 
 export class GroupCreateDto {
   company_id: number;
@@ -6,6 +6,7 @@ export class GroupCreateDto {
   @IsString({
     message: 'name must be STRING',
   })
+  @MaxLength(255)
   name: string;
 
   @IsNumber(
