@@ -10,6 +10,9 @@ async function bootstrap() {
       port: mainConf().tgMicroservicePort,
     },
   };
+
+  console.log(mainConf().tgMicroservicePort);
+
   const app = await NestFactory.createMicroservice(
     AppModule,
     microserviceOptions,

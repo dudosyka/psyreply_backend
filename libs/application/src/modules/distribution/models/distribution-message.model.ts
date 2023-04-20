@@ -30,7 +30,7 @@ export class DistributionMessageModel extends Model {
   @Column({
     type: DataType.JSON,
   })
-  attachments: string;
+  attachments: any;
 
   @Column({
     allowNull: true,

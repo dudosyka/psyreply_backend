@@ -177,12 +177,12 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
         await Promise.all(
           blocks.map(async (block) => {
             await Promise.all(
-              block.messages.map(async (msg) => {
+              block.messages.map(async (msg: DistributionMessageModel) => {
                 const attachments: {
                   link: string;
                   block_id: number;
                   file_id: number;
-                } = JSON.parse(msg.attachments);
+                } = msg.attachments;
                 let newMessageDto: MessageCreateDto;
                 switch (msg.type_id) {
                   case 1: //Text

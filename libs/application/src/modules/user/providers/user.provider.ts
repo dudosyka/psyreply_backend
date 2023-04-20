@@ -13,7 +13,6 @@ import { AuthProvider } from '@app/application/modules/auth/providers/auth.provi
 import { UrlGeneratorUtil } from '@app/application/utils/url-generator.util';
 import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
 import { GroupModel } from '@app/application/modules/company/models/group.model';
-import { UserGroupModel } from '@app/application/modules/company/models/user-group.model';
 import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
 import { ChatMessageModel } from '@app/application/modules/bot/models/chat-message.model';
@@ -44,44 +43,68 @@ export class UserProvider extends BaseProvider<UserModel> {
 
     if (byCompany) filter.company_id = companyId;
 
-    if (except_group_id || filter.group_id) {
-      return (
-        await UserGroupModel.findAll({
-          include: [
-            {
-              model: UserModel,
-              required: true,
-              where: {
-                ...filter,
-              },
-              include: [
-                {
-                  model: GroupModel,
-                  required: true,
-                  where: {
-                    ...(filter.group_id ? { id: filter.group_id } : {}),
-                    ...(except_group_id
-                      ? {
-                          id: {
-                            [Op.or]: [
-                              { [Op.not]: except_group_id },
-                              { [Op.is]: null },
-                            ],
-                          },
-                        }
-                      : {}),
-                  },
-                },
-              ],
+    // await UserGroupModel.findAll({
+    //   include: [
+    //     {
+    //       model: UserModel,
+    //       required: true,
+    //       where: {
+    //         ...filter,
+    //       },
+    //       include: [
+    //         {
+    //           model: GroupModel,
+    //           required: true,
+    //           where: {
+    //             ...(filter.group_id ? { id: filter.group_id } : {}),
+    //             ...(except_group_id
+    //               ? {
+    //                   id: {
+    //                     [Op.or]: [
+    //                       { [Op.not]: except_group_id },
+    //                       { [Op.is]: null },
+    //                     ],
+    //                   },
+    //                 }
+    //               : {}),
+    //           },
+    //         },
+    //       ],
+    //     },
+    //   ],
+    // });
+
+    const where = {
+      ...(filter.group_id ? { id: filter.group_id } : {}),
+      ...(except_group_id
+        ? {
+            id: {
+              [Op.or]: [{ [Op.not]: except_group_id }, { [Op.is]: null }],
             },
-          ],
-        })
-      ).map((el) => el.user);
-    } else {
-      return super.getAll({
-        ...filter,
+          }
+        : {}),
+    };
+
+    if (Object.keys(where).length)
+      return await UserModel.findAll({
+        where: {
+          ...filter,
+        },
+        include: [
+          {
+            model: GroupModel,
+            required: false,
+            where,
+          },
+        ],
       });
-    }
+    else
+      return await UserModel.findAll({
+        where: {
+          ...filter,
+        },
+        include: [GroupModel],
+      });
   }
 
   async genChat(
