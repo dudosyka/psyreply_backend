@@ -1,33 +1,31 @@
 ## Installation
 
 ```bash
-$ npm install
+$ npm i
+$ npm i -g @nestjs/cli
 ```
 
 ## Running the app
 
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
-```
-
-## Test
+Firstly you need to create .env from .env.example fulfilled with your options
 
 ```bash
-# unit tests
-$ npm run test
+# Development
 
-# e2e tests
-$ npm run test:e2e
+# Run main app
+$ nest start --watch
 
-# test coverage
-$ npm run test:cov
+# Run tg service
+$ nest start tgbot --watch
+
+
+# Build for production
+
+# Build main app
+$ nest build
+
+# Build tg service
+$ nest build tgbot
 ```
 
 ## Stay in touch
