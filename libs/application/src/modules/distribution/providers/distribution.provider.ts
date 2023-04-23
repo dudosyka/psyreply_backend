@@ -131,7 +131,6 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
 
         blockModel.messages = await DistributionMessageModel.bulkCreate(
           block.messages.map((msg) => {
-            console.log(msg.attachments, typeof msg.attachments);
             return {
               text: msg.text,
               type_id: msg.type_id,
@@ -183,7 +182,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   link: string;
                   block_id: number;
                   file_id: number;
-                } = msg.attachments;
+                } = JSON.parse(msg.attachments);
                 let newMessageDto: MessageCreateDto;
                 switch (msg.type_id) {
                   case 1: //Text
@@ -212,12 +211,6 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                     };
                     break;
                   case 4: //Test
-                    console.log(
-                      'ATTACHMENTS: ',
-                      attachments,
-                      typeof attachments,
-                      attachments.block_id,
-                    );
                     const links =
                       await this.blockProvider.createLinkForDistribution(
                         attachments.block_id,
