@@ -211,6 +211,12 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                     };
                     break;
                   case 4: //Test
+                    console.log(
+                      'ATTACHMENTS: ',
+                      attachments,
+                      typeof attachments,
+                      attachments.block_id,
+                    );
                     const links =
                       await this.blockProvider.createLinkForDistribution(
                         attachments.block_id,
