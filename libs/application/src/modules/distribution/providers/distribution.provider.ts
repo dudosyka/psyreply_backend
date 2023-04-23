@@ -131,6 +131,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
 
         blockModel.messages = await DistributionMessageModel.bulkCreate(
           block.messages.map((msg) => {
+            console.log(msg.attachments, typeof msg.attachments);
             return {
               text: msg.text,
               type_id: msg.type_id,
