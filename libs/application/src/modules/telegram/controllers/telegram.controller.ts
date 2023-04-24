@@ -1,8 +1,9 @@
 import { Controller, Get, Inject } from '@nestjs/common';
 import { TelegramProvider } from '../providers/telegram.provider';
-import { EventPattern } from '@nestjs/microservices';
+import { EventPattern, MessagePattern } from '@nestjs/microservices';
 import { MessageCreateDto } from '@app/application/modules/chat/dto/message-create.dto';
 import { TelegramBotInstanceProvider } from '@app/application/modules/telegram/providers/telegram-bot-instance.provider';
+import { Chat } from 'telegraf-ts';
 
 @Controller()
 export class TelegramController {
@@ -27,5 +28,10 @@ export class TelegramController {
   @EventPattern('createBot')
   async createBot(data: { botModelId: number }) {
     await TelegramBotInstanceProvider.pushById(data.botModelId);
+  }
+
+  @MessagePattern('getChat')
+  async getChatInfo({ chatId, botId }): Promise<Chat> {
+    return await this.telegramProvider.getChat(chatId, botId);
   }
 }

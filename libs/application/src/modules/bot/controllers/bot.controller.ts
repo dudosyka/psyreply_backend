@@ -1,4 +1,4 @@
-import { Controller, Inject, UseFilters } from '@nestjs/common';
+import { Controller, Get, Inject, Param, UseFilters } from '@nestjs/common';
 import { EventPattern } from '@nestjs/microservices';
 import { BotProvider } from '../providers/bot.provider';
 import { AllExceptionFilter } from '../../../filters/all-exception.filter';
@@ -19,5 +19,13 @@ export class BotController {
     await this.botProvider.newMessageFromTelegram(data).catch((err) => {
       throw err;
     });
+  }
+
+  @Get('getChatInfo/:botId/:chatId')
+  async getChatInfo(
+    @Param('botId') botId: string,
+    @Param('chatId') chatId: string,
+  ) {
+    return this.botProvider.getChatInfo(parseInt(botId), parseInt(chatId));
   }
 }

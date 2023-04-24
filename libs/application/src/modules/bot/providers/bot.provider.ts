@@ -163,4 +163,18 @@ export class BotProvider {
 
     return bot;
   }
+
+  getChatInfo(botId: number, chatId: number) {
+    return new Promise((resolve) => {
+      this.botService
+        .send('getChat', {
+          chatId,
+          botId,
+        })
+        .subscribe((val) => {
+          if (val) resolve(val);
+          else resolve(null);
+        });
+    });
+  }
 }

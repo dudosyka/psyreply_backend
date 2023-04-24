@@ -199,4 +199,19 @@ export class TelegramProvider implements OnApplicationBootstrap {
         console.log(err);
       });
   }
+
+  async getChat(chat_id: number, bot_id: number) {
+    const botInstance = TelegramBotInstanceProvider.instances.find(
+      (instance) => instance.model.id === bot_id,
+    );
+
+    return await botInstance.bot.telegram
+      .getChat(chat_id)
+      .then((res) => {
+        return res;
+      })
+      .catch(() => {
+        return null;
+      });
+  }
 }
