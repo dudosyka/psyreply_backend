@@ -129,7 +129,7 @@ export class UserProvider extends BaseProvider<UserModel> {
       const model = await UserModel.create(
         {
           jetBotId: user.id,
-          login: user.username,
+          login: user.username ? user.username : user.first_name,
           hash: '',
           avatar: 5,
           isAdmin: 0,
