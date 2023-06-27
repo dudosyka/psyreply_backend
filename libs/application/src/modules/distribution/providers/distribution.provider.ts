@@ -182,12 +182,14 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   link: string;
                   block_id: number;
                   file_id: number;
+                  title: string;
                 } = JSON.parse(msg.attachments);
                 let newMessageDto: MessageCreateDto;
                 switch (msg.type_id) {
                   case 1: //Text
                     newMessageDto = {
                       type_id: 1,
+                      title: msg.text ?? '',
                       text: msg.text,
                       attachments: [],
                       link: '',
@@ -196,6 +198,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   case 2: //Media
                     newMessageDto = {
                       type_id: 2, //Hard coded photo type,
+                      title: msg.text ?? '',
                       text: msg.text ? msg.text : '',
                       attachments: [attachments.file_id],
                       link: '',
@@ -204,6 +207,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   case 3: //Link
                     newMessageDto = {
                       type_id: 5,
+                      title: attachments.title ?? '',
                       text: msg.text ? msg.text : '',
                       attachments: [],
                       link: attachments.link,
@@ -220,6 +224,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                     newMessageDto = {
                       type_id: 5,
                       text: msg.text ? msg.text : '',
+                      title: attachments.title ?? '',
                       attachments: [],
                       link: links.link,
                       distribution_message_type: 4,

@@ -40,7 +40,14 @@ export class BotMessageProvider {
     chatMessageModel: ChatMessageModel;
   }> {
     console.log(msg);
-    const { type_id, attachments, text, link, distribution_message_type } = msg;
+    const {
+      type_id,
+      attachments,
+      text,
+      title,
+      link,
+      distribution_message_type,
+    } = msg;
 
     const chatModel = await ChatModel.findOne({
       where: {
@@ -59,6 +66,7 @@ export class BotMessageProvider {
 
     const content = {
       text,
+      title,
       attachments: parsedAttachments,
     };
 

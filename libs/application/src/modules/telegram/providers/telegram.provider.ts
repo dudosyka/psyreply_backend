@@ -166,7 +166,12 @@ export class TelegramProvider implements OnApplicationBootstrap {
               reply_markup: {
                 inline_keyboard: [
                   /* Also, we can have URL buttons. */
-                  [{ text: 'Open in browser', url: data.msg.link }],
+                  [
+                    {
+                      text: data.msg.title ?? 'Open in browser',
+                      url: data.msg.link,
+                    },
+                  ],
                 ],
               },
             },

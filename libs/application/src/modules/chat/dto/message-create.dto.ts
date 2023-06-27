@@ -8,6 +8,10 @@ export class MessageCreateDto {
   @IsString()
   text: string;
 
+  //For links
+  @IsString()
+  title: string | null;
+
   @IsNumber({}, { each: true })
   attachments: number[];
 

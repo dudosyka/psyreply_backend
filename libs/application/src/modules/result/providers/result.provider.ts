@@ -131,6 +131,7 @@ export class ResultProvider extends BaseProvider<ResultModel> {
     if (chatModel) {
       const newMessageDto: ClientNewMessageDto = {
         msg: {
+          title: null,
           type_id: 1,
           text: 'Тестирование пройдено!',
           attachments: [],

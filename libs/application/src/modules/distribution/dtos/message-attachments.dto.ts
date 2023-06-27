@@ -12,4 +12,8 @@ export class MessageAttachmentsDto {
   @IsString()
   @ValidateIf((object, value) => value !== undefined)
   link?: string | null;
+
+  @IsString()
+  @ValidateIf((object, value) => value !== undefined)
+  title?: string | null;
 }
