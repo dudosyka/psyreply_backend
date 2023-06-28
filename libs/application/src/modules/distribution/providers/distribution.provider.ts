@@ -279,7 +279,12 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
         cur.getMonth() + 1
       }-${cur.getDate()} ${el.send_time}`;
       const nextCallDate = new Date(nextCallString);
-      el.next_call = nextCallDate.getTime() + el.day_period * 3600 * 24 * 1000;
+      //If it for one time we set nextCall on 9999 days
+      if (el.onetime)
+        el.next_call = nextCallDate.getTime() + 9999 * 3600 * 24 * 1000;
+      else
+        el.next_call =
+          nextCallDate.getTime() + el.day_period * 3600 * 24 * 1000;
       el.save();
       this.sendDistribution(el);
     });
