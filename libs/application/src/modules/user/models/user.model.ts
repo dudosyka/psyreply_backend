@@ -29,6 +29,9 @@ export class UserModel extends BaseModel {
   jetBotId: number;
 
   @Column
+  fullname: string;
+
+  @Column
   login: string;
 
   @Column
@@ -45,6 +48,9 @@ export class UserModel extends BaseModel {
 
   @Column
   email: string;
+
+  @Column
+  phone: string;
 
   @Column
   isAdmin: boolean;

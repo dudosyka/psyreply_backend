@@ -20,6 +20,8 @@ import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { Sequelize } from 'sequelize-typescript';
 import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-email-output.dto';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
+import { DistributionModel } from '@app/application/modules/distribution/models/distribution.model';
+import { ClientSignupInputDto } from '@app/application/modules/auth/dtos/client-signup-input.dto';
 
 @Injectable()
 export class AuthProvider {
@@ -51,6 +53,12 @@ export class AuthProvider {
   async login(user: UserModel): Promise<TokenOutputDto> {
     return {
       token: this.jwt.signAdmin(user),
+    };
+  }
+
+  async loginClient(user: UserModel): Promise<TokenOutputDto> {
+    return {
+      token: this.jwt.signUser(user),
     };
   }
 
@@ -251,6 +259,22 @@ export class AuthProvider {
         throw err;
       });
 
+    await DistributionModel.create(
+      {
+        name: `${company.name}_greetings`,
+        company_id: company.id,
+        next_call: 0,
+        onetime: 0,
+        day_period: 0,
+        send_time: 0,
+        greetings: true,
+      },
+      TransactionUtil.getHost(),
+    ).catch(() => {
+      TransactionUtil.rollback();
+      throw new Error('Company creation failed');
+    });
+
     await TransactionUtil.commit();
 
     return await this.login(user);
@@ -333,5 +357,56 @@ export class AuthProvider {
   async checkIsSuper(user): Promise<boolean> {
     console.log(user);
     return false;
+  }
+
+  async signupClient(
+    signupData: ClientSignupInputDto,
+    file: Express.Multer.File,
+    chatId: number,
+  ): Promise<TokenOutputDto> {
+    const userModel = await UserModel.findOne({
+      where: {
+        jetBotId: chatId,
+      },
+    });
+
+    const checkUnique = await UserModel.findOne({
+      where: {
+        [Op.or]: [{ email: signupData.email }, { phone: signupData.phone }],
+      },
+    });
+
+    if (checkUnique) throw new DoubleRecordException(UserModel);
+
+    const fileModel = await this.filesProvider.upload(file);
+
+    await userModel.update({
+      email: signupData.email,
+      phone: signupData.phone,
+      fullname: signupData.fullname,
+      hash: await this.bcrypt.hash(signupData.password),
+      avatar: fileModel.id,
+    });
+
+    return await this.loginClient(userModel);
+  }
+
+  async authClient(credentials: AuthInputDto) {
+    const user = await UserModel.findOne({
+      where: {
+        [Op.or]: [{ email: credentials.email }, { login: credentials.email }],
+      },
+    });
+
+    if (!user) throw new FailedAuthorizationException(false, true);
+
+    const passwordCompare = await this.bcrypt
+      .compare(credentials.password, user.hash)
+      .then((el) => el)
+      .catch(() => false);
+
+    if (!passwordCompare) throw new FailedAuthorizationException(true, false);
+
+    return this.loginClient(user);
   }
 }

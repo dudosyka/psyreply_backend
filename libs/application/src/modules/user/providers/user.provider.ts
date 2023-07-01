@@ -6,7 +6,6 @@ import { Op } from 'sequelize';
 import { BaseProvider } from '../../base/base.provider';
 import { BotModel } from '../../bot/models/bot.model';
 import { MessageModel } from '../../bot/models/message.model';
-import { User } from 'telegraf-ts';
 import { Sequelize } from 'sequelize-typescript';
 import { TransactionUtil } from '@app/application/utils/TransactionUtil';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
@@ -109,7 +108,7 @@ export class UserProvider extends BaseProvider<UserModel> {
 
   async genChat(
     botModel: BotModel,
-    user: User,
+    userName: string,
     chatId: number,
   ): Promise<ChatBotModel> {
     let isPropagate = true;
@@ -128,8 +127,8 @@ export class UserProvider extends BaseProvider<UserModel> {
     if (!chatBotModel) {
       const model = await UserModel.create(
         {
-          jetBotId: user.id,
-          login: user.username ? user.username : user.first_name,
+          jetBotId: chatId,
+          login: userName,
           hash: '',
           avatar: 5,
           isAdmin: 0,
@@ -168,7 +167,7 @@ export class UserProvider extends BaseProvider<UserModel> {
         {
           chat_id: chatModel.id,
           user_id: model.id,
-          username: user.username,
+          username: userName,
           bot_id: botModel.id,
           telegram_chat_id: chatId,
         },
@@ -231,6 +230,15 @@ export class UserProvider extends BaseProvider<UserModel> {
   async createOne(userDto: AuthCreateUserDto) {
     return await UserModel.create({
       ...userDto,
+    });
+  }
+
+  async getProfile(id: number) {
+    return UserModel.findOne({
+      attributes: ['id', 'fullname', 'email', 'phone', 'avatar'],
+      where: {
+        id,
+      },
     });
   }
 }

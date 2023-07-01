@@ -18,6 +18,9 @@ import { BlockProvider } from '@app/application/modules/block/providers/block.pr
 import { ChatGateway } from '@app/application/modules/chat/providers/chat.gateway';
 import { ChatModel } from '@app/application/modules/chat/models/chat.model';
 import { ChatBotModel } from '@app/application/modules/bot/models/chat-bot.model';
+import { DistributionGreetingsUpdateDto } from '@app/application/modules/distribution/dtos/distribution-greetings-update.dto';
+import { DistributionBlockCreateDto } from '@app/application/modules/distribution/dtos/distribution-block-create.dto';
+import { BotModel } from '@app/application/modules/bot/models/bot.model';
 
 export class DistributionProvider extends BaseProvider<DistributionModel> {
   constructor(
@@ -40,6 +43,67 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
     } else {
       return nextCallDate.getTime();
     }
+  }
+
+  private async createBlocks(
+    distributionModel: DistributionModel,
+    blocks: DistributionBlockCreateDto[],
+  ) {
+    await Promise.all(
+      blocks.map(async (block) => {
+        const data = {
+          name: block.name,
+          relative_id: block.relative_id,
+          distribution_id: distributionModel.id,
+        };
+        const blockModel = await DistributionBlockModel.create(
+          data,
+          TransactionUtil.getHost(),
+        )
+          .then((res) => {
+            if (!res) {
+              throw new ModelCreationFailedException<DistributionBlockModel>(
+                data,
+                new DistributionBlockModel(),
+              );
+            }
+            return res;
+          })
+          .catch((err) => {
+            throw err;
+          });
+
+        blockModel.messages = await DistributionMessageModel.bulkCreate(
+          block.messages.map((msg) => {
+            return {
+              text: msg.text,
+              type_id: msg.type_id,
+              relative_id: msg.relative_id,
+              attachments: msg.attachments,
+              block_id: blockModel.id,
+            };
+          }),
+          TransactionUtil.getHost(),
+        )
+          .then((res) => {
+            if (!res) {
+              throw new ModelCreationFailedException<DistributionMessageModel>(
+                data,
+                new DistributionMessageModel(),
+              );
+            }
+            return res;
+          })
+          .catch((err) => {
+            throw err;
+          });
+
+        return blockModel;
+      }),
+    ).catch((err) => {
+      TransactionUtil.rollback();
+      throw err;
+    });
   }
 
   async create(
@@ -105,58 +169,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
       throw err;
     });
 
-    model.blocks = await Promise.all(
-      blocks.map(async (block) => {
-        const data = {
-          name: block.name,
-          relative_id: block.relative_id,
-          distribution_id: model.id,
-        };
-        const blockModel = await DistributionBlockModel.create(
-          data,
-          TransactionUtil.getHost(),
-        )
-          .then((res) => {
-            if (!res) {
-              throw new ModelCreationFailedException<DistributionBlockModel>(
-                data,
-                new DistributionBlockModel(),
-              );
-            }
-            return res;
-          })
-          .catch((err) => {
-            throw err;
-          });
-
-        blockModel.messages = await DistributionMessageModel.bulkCreate(
-          block.messages.map((msg) => {
-            return {
-              text: msg.text,
-              type_id: msg.type_id,
-              relative_id: msg.relative_id,
-              attachments: msg.attachments,
-              block_id: blockModel.id,
-            };
-          }),
-          TransactionUtil.getHost(),
-        )
-          .then((res) => {
-            if (!res) {
-              throw new ModelCreationFailedException<DistributionMessageModel>(
-                data,
-                new DistributionMessageModel(),
-              );
-            }
-            return res;
-          })
-          .catch((err) => {
-            throw err;
-          });
-
-        return blockModel;
-      }),
-    ).catch((err) => {
+    this.createBlocks(model, model.blocks).catch((err) => {
       TransactionUtil.rollback();
       throw err;
     });
@@ -166,14 +179,21 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
     return model;
   }
 
-  private async sendDistribution(distributionModel: DistributionModel) {
+  private async sendDistribution(
+    distributionModel: DistributionModel,
+    distributionContacts: UserModel[] = [],
+  ) {
     //We reverse because tg send reversed ^_^
     const blocks = distributionModel.blocks.sort((f, s) => {
       return s.relative_id - f.relative_id;
     });
+    const contacts =
+      distributionContacts.length > 0
+        ? distributionContacts
+        : distributionModel.contacts;
     TransactionUtil.setHost(await this.sequelize.transaction());
     await Promise.all(
-      distributionModel.contacts.map(async (user) => {
+      contacts.map(async (user) => {
         await Promise.all(
           blocks.map(async (block) => {
             await Promise.all(
@@ -238,11 +258,11 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
                   await this.botProvider.newMessageInside({
                     msg: newMessageDto,
                     chatModelId: user.chatModel.id,
-                    chatId: user.chatModel.bot_chat.telegram_chat_id,
+                    chatId: user.jetBotId,
                   });
 
                 this.chatGateway.sendTo(
-                  user.chatModel.bot_chat.telegram_chat_id.toString(),
+                  user.jetBotId.toString(),
                   messageOutputDto,
                 );
               }),
@@ -264,6 +284,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
         next_call: {
           [Op.lte]: Date.now(),
         },
+        greetings: false,
       },
       include: [
         {
@@ -333,5 +354,65 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
         id,
       },
     });
+  }
+
+  async getGreetings(company_id: number) {
+    return await DistributionModel.findOne({
+      where: {
+        company_id,
+        greetings: true,
+      },
+      include: [
+        UserModel,
+        { model: DistributionBlockModel, include: [DistributionMessageModel] },
+      ],
+    });
+  }
+
+  async updateGreetings(
+    distributionId: number,
+    data: DistributionGreetingsUpdateDto,
+  ) {
+    const distributionModel = await this.getOne(distributionId);
+    distributionModel.blocks.forEach((el) => el.destroy());
+    await this.createBlocks(distributionModel, [data.block]);
+  }
+
+  async sendGreetings(botId: number, chatId: number) {
+    const botModel = await BotModel.findOne({
+      where: {
+        id: botId,
+      },
+    });
+
+    const chatBotModel = await ChatBotModel.findOne({
+      where: {
+        telegram_chat_id: chatId,
+      },
+      include: [
+        {
+          model: ChatModel,
+          include: [{ model: UserModel, include: [ChatModel] }],
+        },
+      ],
+    });
+    const greetingsDistribution = await DistributionModel.findOne({
+      where: {
+        greetings: true,
+        company_id: botModel.company_id,
+      },
+      include: [
+        {
+          model: UserModel,
+          include: [{ model: ChatModel, include: [ChatBotModel] }],
+        },
+        { model: DistributionBlockModel, include: [DistributionMessageModel] },
+      ],
+    });
+    console.log(chatBotModel.chat.user);
+    console.log(greetingsDistribution);
+    await this.sendDistribution(greetingsDistribution, [
+      chatBotModel.chat.user,
+    ]);
   }
 }

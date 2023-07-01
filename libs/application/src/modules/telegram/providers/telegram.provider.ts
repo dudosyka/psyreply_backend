@@ -34,6 +34,22 @@ export class TelegramProvider implements OnApplicationBootstrap {
 
   async onMessage(ctx: TelegrafContext) {
     console.log(TelegramBotInstanceProvider.instances.length);
+    if (ctx.update.message.text == '/start') {
+      const botId = ctx.botInfo.id;
+      const chatId = ctx.chat.id;
+      const botModel = await TelegramBotInstanceProvider.findModel(botId);
+      await this.sendMessage({
+        chatId,
+        msg: {
+          type_id: 5,
+          text: 'Здравствуйте! Для продолжения нажмите на кнопку: ',
+          title: 'Продолжить',
+          attachments: [],
+          link: `https://client.psyreply.com/signup/${chatId}/${botModel.id}`,
+        },
+        botModelId: botModel.id,
+      });
+    }
     // await this.botModels[0].botInstance.telegram.sendMessage(828522413, 'hi', {
     //   reply_markup: {
     //     inline_keyboard: [

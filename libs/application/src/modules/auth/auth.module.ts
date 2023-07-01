@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { UserModel } from '@app/application/modules/user/models/user.model';
 import { AuthProvider } from '@app/application/modules/auth/providers/auth.provider';
@@ -15,6 +14,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { MailerOptionsModule } from '@app/application/modules/auth/providers/mailer.options.module';
 import { FilesModule } from '@app/application/modules/files/files.module';
 import { FilesProvider } from '@app/application/modules/files/providers/files.provider';
+import { Module } from '@nestjs/common';
 
 @Module({
   imports: [
@@ -26,9 +26,6 @@ import { FilesProvider } from '@app/application/modules/files/providers/files.pr
     MailerModule.forRootAsync({
       useClass: MailerOptionsModule,
     }),
-    // MulterModule.registerAsync({
-    //   useClass: MulterConfigModule,
-    // }),
     FilesModule,
   ],
   providers: [

@@ -49,7 +49,7 @@ export class BotProvider {
     });
 
     const chatBotModel = await this.userProvider
-      .genChat(botModel, ctx.message.from, ctx.message.chat.id)
+      .genChat(botModel, ctx.message.from.username, ctx.message.chat.id)
       .catch((err) => {
         TransactionUtil.rollback();
         throw err;

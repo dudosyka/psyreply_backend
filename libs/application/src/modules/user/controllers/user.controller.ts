@@ -22,7 +22,7 @@ import {
   HttpResponseFilter,
   ResponseStatus,
 } from '../../../filters/http-response.filter';
-import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
+import { SuperAdminGuard } from '@app/application/guards/super-admin.guard';
 import { AuthCreateUserDto } from '@app/application/modules/user/dtos/auth/auth-create-user.dto';
 
 @Controller('user')
@@ -73,6 +73,16 @@ export class UserController {
   ): Promise<HttpResponseFilter<string>> {
     return HttpResponseFilter.response<string>(
       await this.userProvider.getProfileLink(userId),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('/client/profile')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async getProfile(@Req() req) {
+    return HttpResponseFilter.response(
+      await this.userProvider.getProfile(req.user.id),
       ResponseStatus.SUCCESS,
     );
   }

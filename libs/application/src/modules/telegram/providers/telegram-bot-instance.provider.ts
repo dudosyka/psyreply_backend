@@ -75,6 +75,14 @@ export class TelegramBotInstanceProvider {
     });
   }
 
+  public static async findModel(telegramBotId: number) {
+    return await BotModel.findOne({
+      where: {
+        telegram_id: telegramBotId,
+      },
+    });
+  }
+
   private static findInstance(model: BotModel) {
     const filtered = TelegramBotInstanceProvider.instances.find((el) => {
       return el.model.id == model.id;

@@ -12,6 +12,7 @@ import { BotModule } from '@app/application/modules/bot/bot.module';
 import { BlockModule } from '@app/application/modules/block/block.module';
 import { ChatModule } from '@app/application/modules/chat/chat.module';
 import { DistributionBlockController } from '@app/application/modules/distribution/controllers/distribution-block.controller';
+import { DistributionGreetingsController } from '@app/application/modules/distribution/controllers/distribution-greetings.controller';
 
 @Module({
   imports: [
@@ -36,7 +37,11 @@ import { DistributionBlockController } from '@app/application/modules/distributi
       DistributionMessageTypeModel,
     ]),
   ],
-  controllers: [DistributionController, DistributionBlockController],
+  controllers: [
+    DistributionController,
+    DistributionBlockController,
+    DistributionGreetingsController,
+  ],
   providers: [DistributionProvider],
 })
 export class DistributionModule {}

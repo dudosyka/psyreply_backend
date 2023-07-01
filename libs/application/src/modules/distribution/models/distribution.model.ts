@@ -47,12 +47,9 @@ export class DistributionModel extends Model {
   @Column
   send_time: string;
 
-  // @BelongsToMany(
-  //   () => DistributionBlockModel,
-  //   () => DistributionBlockModel,
-  //   'distribution_id',
-  //   'id',
-  // )
+  @Column
+  greetings: boolean;
+
   @HasMany(() => DistributionBlockModel, {
     onDelete: 'cascade',
     onUpdate: 'cascade',

@@ -27,7 +27,7 @@ import {
   ResponseStatus,
 } from '../../../filters/http-response.filter';
 import { BlockGroupStatOutputDto } from '../../result/dto/block-stat-output.dto';
-import { SuperAdminGuard } from '../../../guards/super.admin.guard';
+import { SuperAdminGuard } from '../../../guards/super-admin.guard';
 import { GroupBlockStatModel } from '@app/application/modules/result/models/group-block-stat.model';
 
 @UseGuards(JwtAuthGuard)

@@ -28,7 +28,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { JwtAuthGuard } from '@app/application/guards/jwt-auth.guard';
 import { AdminGuard } from '@app/application/guards/admin.guard';
 import { ChangeEmailOutputDto } from '@app/application/modules/auth/dtos/change-email-output.dto';
-import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
+import { SuperAdminGuard } from '@app/application/guards/super-admin.guard';
+import { ClientSignupInputDto } from '@app/application/modules/auth/dtos/client-signup-input.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -53,6 +54,15 @@ export class AuthController {
         credentials.email,
         credentials.password,
       ),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @Post('/client')
+  @HttpCode(ResponseStatus.SUCCESS)
+  public async loginClient(@Body() credentials: AuthInputDto) {
+    return HttpResponseFilter.response<TokenOutputDto>(
+      await this.authProvider.authClient(credentials),
       ResponseStatus.SUCCESS,
     );
   }
@@ -89,6 +99,20 @@ export class AuthController {
   ): Promise<HttpResponseFilter<TokenOutputDto>> {
     return HttpResponseFilter.response<TokenOutputDto>(
       await this.authProvider.signup(signupData, file),
+      ResponseStatus.SUCCESS,
+    );
+  }
+
+  @Post('client/signup/:chatId')
+  @HttpCode(ResponseStatus.SUCCESS)
+  @UseInterceptors(FileInterceptor('file'))
+  public async signUpClient(
+    @Body() signupData: ClientSignupInputDto,
+    @UploadedFile('file') file: Express.Multer.File,
+    @Param('chatId') chatId: string,
+  ) {
+    return HttpResponseFilter.response<TokenOutputDto>(
+      await this.authProvider.signupClient(signupData, file, parseInt(chatId)),
       ResponseStatus.SUCCESS,
     );
   }

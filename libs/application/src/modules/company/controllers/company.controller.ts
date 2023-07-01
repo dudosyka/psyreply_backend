@@ -25,7 +25,7 @@ import {
 } from '../../../filters/http-response.filter';
 import { CompanyStatDto } from '../dtos/company-stat.dto';
 import { GroupBlockStatModel } from '../../result/models/group-block-stat.model';
-import { SuperAdminGuard } from '../../../guards/super.admin.guard';
+import { SuperAdminGuard } from '../../../guards/super-admin.guard';
 import { AdminGuard } from '@app/application/guards/admin.guard';
 import { DashboardAdminGuard } from '@app/application/guards/dashboard-admin.guard';
 

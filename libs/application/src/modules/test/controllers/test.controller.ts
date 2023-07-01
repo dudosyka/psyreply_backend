@@ -25,7 +25,7 @@ import {
   HttpResponseFilter,
   ResponseStatus,
 } from '../../../filters/http-response.filter';
-import { SuperAdminGuard } from '@app/application/guards/super.admin.guard';
+import { SuperAdminGuard } from '@app/application/guards/super-admin.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 @UseGuards(JwtAuthGuard, AdminGuard)
