@@ -169,7 +169,7 @@ export class DistributionProvider extends BaseProvider<DistributionModel> {
       throw err;
     });
 
-    this.createBlocks(model, model.blocks).catch((err) => {
+    this.createBlocks(model, distributionDto.blocks).catch((err) => {
       TransactionUtil.rollback();
       throw err;
     });
